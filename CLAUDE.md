@@ -88,3 +88,7 @@ corresponding test updates in the same change — not as a follow-up.
 - `tdd` — fits calc/voice-pipeline work given the testing requirement above (red-green-refactor).
 - `run` — launch the dev server and drive the app in-browser to confirm a UI change actually works.
 - `prototype` — for sanity-checking a state-model or UI idea before committing to it.
+- `contract-workflow` — formal plan-approve-fix pipeline (planning → numbered issue contracts →
+  parallel context gathering → parallel scoped fixes, each gated on your approval). Use for
+  non-trivial features or bugs where you want a written audit trail and explicit checkpoints instead
+  of an ad-hoc change.
