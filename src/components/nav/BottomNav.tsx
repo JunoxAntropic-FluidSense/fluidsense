@@ -38,6 +38,7 @@ export function BottomNav() {
                   )}
                   <item.icon
                     size={20}
+                    weight={isActive ? "fill" : "regular"}
                     className="relative"
                     aria-hidden="true"
                   />

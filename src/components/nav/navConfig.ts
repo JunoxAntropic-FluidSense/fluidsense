@@ -1,9 +1,9 @@
 import type { Icon } from "@phosphor-icons/react";
 import {
-  House,
-  Plus,
+  HouseLine,
+  PlusCircle,
   Microphone,
-  ClipboardText,
+  ClockCounterClockwise,
   ChartBar,
   UserCircle,
 } from "@phosphor-icons/react";
@@ -15,10 +15,10 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Today", icon: House },
-  { to: "/add", label: "Add", icon: Plus },
+  { to: "/", label: "Today", icon: HouseLine },
+  { to: "/add", label: "Add", icon: PlusCircle },
   { to: "/voice", label: "Voice", icon: Microphone },
-  { to: "/history", label: "History", icon: ClipboardText },
+  { to: "/history", label: "History", icon: ClockCounterClockwise },
   { to: "/summary", label: "Summary", icon: ChartBar },
   { to: "/profile", label: "Profile", icon: UserCircle },
 ];
