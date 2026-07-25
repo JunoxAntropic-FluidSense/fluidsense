@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "push": "bash scripts/push.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",
