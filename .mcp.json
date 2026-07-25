@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "aceternityui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["aceternityui-mcp"],
+      "env": {}
+    }
+  }
+}
