@@ -15,6 +15,10 @@
     "push": "bash scripts/push.sh"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-tabs": "^1.1.21",
     "@supabase/supabase-js": "^2.110.8",

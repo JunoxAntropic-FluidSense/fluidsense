@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FluidSense</string>
+    <string name="title_activity_main">FluidSense</string>
+    <string name="package_name">com.fluidsense.app</string>
+    <string name="custom_url_scheme">com.fluidsense.app</string>
+</resources>
