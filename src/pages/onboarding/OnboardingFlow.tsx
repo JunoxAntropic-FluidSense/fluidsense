@@ -80,6 +80,8 @@ export function OnboardingFlow() {
   const onboardingCompleted = useStore(
     (s) => s.currentUser.onboardingCompleted
   );
+  const currentMode = useStore((s) => s.mode);
+  const hasAnyPatient = useStore((s) => s.patients.length > 0);
   const completeOnboarding = useStore((s) => s.completeOnboarding);
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
@@ -135,7 +137,14 @@ export function OnboardingFlow() {
     };
   }, [accountMode, authUser, role]);
 
-  if (onboardingCompleted) return <Navigate to="/" replace />;
+  // Patient/carer accounts always get a profile from completeOnboarding —
+  // onboardingCompleted true with zero patients means a previous
+  // account's stale local state (same browser, different login), not a
+  // real "done" state. Let this run again rather than bouncing to "/"
+  // and back here forever (TodayPage redirects here on the same check).
+  if (onboardingCompleted && (currentMode === "healthcare" || hasAnyPatient)) {
+    return <Navigate to="/" replace />;
+  }
   if (authStatus === "loading") return null;
   if (authStatus !== "signed-in") return <Navigate to="/welcome" replace />;
 

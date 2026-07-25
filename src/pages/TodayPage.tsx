@@ -16,8 +16,18 @@ export function TodayPage() {
 
   // Healthcare accounts start with no patients — send them to the dashboard's
   // "add patient" flow instead of rendering a blank single-patient view.
+  // Patient/carer accounts always get a profile created by
+  // completeOnboarding, so reaching here with none (e.g. stale
+  // onboardingCompleted from a different account tested in the same
+  // browser) means setup never actually finished — re-run onboarding
+  // instead of a blank page with no way out.
   if (!patient) {
-    return mode === "healthcare" ? <Navigate to="/dashboard" replace /> : null;
+    return (
+      <Navigate
+        to={mode === "healthcare" ? "/dashboard" : "/onboarding"}
+        replace
+      />
+    );
   }
 
   const hasAnyEvents = allEvents.some(
