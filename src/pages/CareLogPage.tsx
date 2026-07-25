@@ -6,6 +6,7 @@ import { useActivePatient } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { DIALYSIS_MODALITY_LABEL } from "../types";
 import type { DialysisModality } from "../types";
 
@@ -263,6 +264,12 @@ const MODALITY_OPTIONS: DialysisModality[] = [
   "other",
 ];
 
+const MODALITY_TAB_OPTIONS: { value: DialysisModality; label: string }[] =
+  MODALITY_OPTIONS.map((m) => ({
+    value: m,
+    label: DIALYSIS_MODALITY_LABEL[m],
+  }));
+
 function DialysisForm({
   onCancel,
   onSave,
@@ -284,20 +291,15 @@ function DialysisForm({
 
   return (
     <div className="space-y-3 rounded-2xl border border-navy-900/10 p-3">
-      <label className="block text-sm font-semibold text-navy-700">
-        Type
-        <select
+      <div>
+        <p className="text-sm font-semibold text-navy-700 mb-1.5">Type</p>
+        <SegmentedTabs
+          label="Dialysis type"
           value={modality}
-          onChange={(e) => setModality(e.target.value as DialysisModality)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal bg-white"
-        >
-          {MODALITY_OPTIONS.map((m) => (
-            <option key={m} value={m}>
-              {DIALYSIS_MODALITY_LABEL[m]}
-            </option>
-          ))}
-        </select>
-      </label>
+          onChange={setModality}
+          options={MODALITY_TAB_OPTIONS}
+        />
+      </div>
       <label className="block text-sm font-semibold text-navy-700">
         Scheduled date &amp; time
         <input

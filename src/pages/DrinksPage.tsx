@@ -5,12 +5,20 @@ import { useActivePatient } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import {
   CATEGORY_ICON,
   CATEGORY_LABEL,
   INTAKE_CATEGORIES,
 } from "../lib/eventMeta";
 import type { FluidCategory } from "../types";
+
+const SERVING_FRACTION_OPTIONS: { value: string; label: string }[] = [
+  { value: "0.25", label: "Quarter" },
+  { value: "0.5", label: "Half" },
+  { value: "0.75", label: "Three quarters" },
+  { value: "1", label: "Full" },
+];
 
 export function DrinksPage() {
   const patient = useActivePatient();
@@ -325,19 +333,17 @@ function NewDrinkModal({
             />
           </label>
         )}
-        <label className="block text-sm font-semibold text-navy-700">
-          Usual serving
-          <select
+        <div>
+          <p className="text-sm font-semibold text-navy-700 mb-1.5">
+            Usual serving
+          </p>
+          <SegmentedTabs
+            label="Usual serving"
             value={fraction}
-            onChange={(e) => setFraction(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-          >
-            <option value="0.25">Quarter</option>
-            <option value="0.5">Half</option>
-            <option value="0.75">Three quarters</option>
-            <option value="1">Full</option>
-          </select>
-        </label>
+            onChange={setFraction}
+            options={SERVING_FRACTION_OPTIONS}
+          />
+        </div>
         <label className="block text-sm font-semibold text-navy-700">
           Water-content estimate % (optional)
           <input

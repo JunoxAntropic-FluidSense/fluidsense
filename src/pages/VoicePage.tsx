@@ -9,6 +9,7 @@ import { useActivePatient } from "../hooks/useFluidData";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { PhotoCaptureField } from "../components/photo/PhotoCaptureField";
 import {
   CATEGORY_LABEL,
@@ -25,6 +26,21 @@ import { format } from "date-fns";
 
 type Phase = "idle" | "review" | "summary_prompt" | "not_understood";
 type DuplicateResolution = "keep" | "save_both" | "replace";
+
+const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
+  { value: "intake", label: "Intake" },
+  { value: "output", label: "Output" },
+];
+
+const MEASUREMENT_STATUS_OPTIONS: {
+  value: MeasurementStatus;
+  label: string;
+}[] = [
+  { value: "measured", label: "Measured" },
+  { value: "container_estimated", label: "Container estimate" },
+  { value: "approximate", label: "Approximate" },
+  { value: "unmeasured", label: "Unmeasured" },
+];
 
 export function VoicePage() {
   const navigate = useNavigate();
@@ -604,19 +620,17 @@ function EditCandidate({
     candidate.direction === "output" ? OUTPUT_CATEGORIES : INTAKE_CATEGORIES;
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-navy-700">
-        Direction
-        <select
+      <div>
+        <p className="text-sm font-semibold text-navy-700 mb-1.5">Direction</p>
+        <SegmentedTabs
+          label="Direction"
           value={
             candidate.direction === "unknown" ? "intake" : candidate.direction
           }
-          onChange={(e) => onChange({ direction: e.target.value as Direction })}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 font-normal"
-        >
-          <option value="intake">Intake</option>
-          <option value="output">Output</option>
-        </select>
-      </label>
+          onChange={(direction: Direction) => onChange({ direction })}
+          options={DIRECTION_OPTIONS}
+        />
+      </div>
       <label className="block text-sm font-semibold text-navy-700">
         Type
         <select
@@ -649,21 +663,17 @@ function EditCandidate({
           className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 font-normal"
         />
       </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Status
-        <select
+      <div>
+        <p className="text-sm font-semibold text-navy-700 mb-1.5">Status</p>
+        <SegmentedTabs
+          label="Measurement status"
           value={candidate.measurementStatus}
-          onChange={(e) =>
-            onChange({ measurementStatus: e.target.value as MeasurementStatus })
+          onChange={(measurementStatus: MeasurementStatus) =>
+            onChange({ measurementStatus })
           }
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 font-normal"
-        >
-          <option value="measured">Measured</option>
-          <option value="container_estimated">Container estimate</option>
-          <option value="approximate">Approximate</option>
-          <option value="unmeasured">Unmeasured</option>
-        </select>
-      </label>
+          options={MEASUREMENT_STATUS_OPTIONS}
+        />
+      </div>
       <Button size="md" onClick={onDone}>
         Done editing
       </Button>

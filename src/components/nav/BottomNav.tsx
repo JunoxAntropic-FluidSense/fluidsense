@@ -1,7 +1,11 @@
 import { NavLink } from "react-router-dom";
+import { motion } from "motion/react";
 import { NAV_ITEMS } from "./navConfig";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 export function BottomNav() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <nav
       aria-label="Primary"
@@ -9,22 +13,33 @@ export function BottomNav() {
     >
       <ul className="grid grid-cols-6">
         {NAV_ITEMS.map((item) => (
-          <li key={item.to}>
+          <li key={item.to} className="relative">
             <NavLink
               to={item.to}
               end={item.to === "/"}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 text-[11px] font-semibold ${
+                `relative flex flex-col items-center justify-center gap-0.5 py-2 min-h-14 text-[11px] font-semibold ${
                   isActive ? "text-intake-600" : "text-fog-500"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className="text-lg" aria-hidden="true">
+                  {isActive && (
+                    <motion.div
+                      layoutId="bottom-nav-active-indicator"
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: "spring", bounce: 0.2, duration: 0.4 }
+                      }
+                      className="absolute inset-x-2 top-1 bottom-1 rounded-xl bg-intake-50"
+                    />
+                  )}
+                  <span className="relative text-lg" aria-hidden="true">
                     {item.icon}
                   </span>
-                  <span>{item.label}</span>
+                  <span className="relative">{item.label}</span>
                   {isActive && <span className="sr-only">(current page)</span>}
                 </>
               )}

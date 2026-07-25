@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { SignOutButton } from "../components/auth";
 import type { Role, Units } from "../types";
 import { format } from "date-fns";
@@ -17,6 +18,11 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "nurse", label: "Nurse" },
   { value: "healthcare_assistant", label: "Healthcare assistant" },
   { value: "clinician", label: "Clinician" },
+];
+
+const UNITS_OPTIONS: { value: Units; label: string }[] = [
+  { value: "mL", label: "mL" },
+  { value: "L", label: "Litres" },
 ];
 
 const REMINDER_LABELS: Record<string, string> = {
@@ -235,19 +241,17 @@ export function ProfilePage() {
             className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
           />
         </label>
-        <label className="block text-sm font-semibold text-navy-700 mt-3">
-          Preferred units
-          <select
-            defaultValue={patient.units}
-            onChange={(e) =>
-              updatePatient(patient.id, { units: e.target.value as Units })
-            }
-            className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-          >
-            <option value="mL">mL</option>
-            <option value="L">Litres</option>
-          </select>
-        </label>
+        <div className="mt-3">
+          <p className="text-sm font-semibold text-navy-700 mb-1.5">
+            Preferred units
+          </p>
+          <SegmentedTabs
+            label="Preferred units"
+            value={patient.units}
+            onChange={(units: Units) => updatePatient(patient.id, { units })}
+            options={UNITS_OPTIONS}
+          />
+        </div>
         <label className="flex items-center gap-2 mt-3 text-sm font-semibold text-navy-700">
           <input
             type="checkbox"
