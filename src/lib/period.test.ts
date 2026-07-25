@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getPeriodRange } from "./period";
+import { getPeriodRange, needsMidnightRollover } from "./period";
 import type { PatientProfile, MonitoringPeriod } from "../types";
 
 const basePatient: PatientProfile = {
@@ -148,5 +148,25 @@ describe("getPeriodRange", () => {
       sinceMidnight.start.getTime()
     );
     expect(monitoringDay.start.getTime()).not.toBe(rolling24h.start.getTime());
+  });
+});
+
+describe("needsMidnightRollover", () => {
+  it("is false when the period started earlier today", () => {
+    const now = new Date("2026-07-24T23:50:00");
+    const startedToday = new Date("2026-07-24T00:05:00").toISOString();
+    expect(needsMidnightRollover(startedToday, now)).toBe(false);
+  });
+
+  it("is true once at least one midnight has passed since the period started", () => {
+    const now = new Date("2026-07-25T00:05:00");
+    const startedYesterday = new Date("2026-07-24T09:00:00").toISOString();
+    expect(needsMidnightRollover(startedYesterday, now)).toBe(true);
+  });
+
+  it("is true across a multi-day gap, not just a single day boundary", () => {
+    const now = new Date("2026-07-28T10:00:00");
+    const startedDaysAgo = new Date("2026-07-24T09:00:00").toISOString();
+    expect(needsMidnightRollover(startedDaysAgo, now)).toBe(true);
   });
 });

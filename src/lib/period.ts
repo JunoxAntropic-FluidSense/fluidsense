@@ -61,6 +61,18 @@ function monitoringDayStart(
   return { start: naturalStart, label };
 }
 
+// Used to auto-close and reopen a patient's MonitoringPeriod record at
+// midnight for patients on "midnight" mode, so the formal period record
+// stays in sync with the displayed "Current monitoring day" boundary
+// (getPeriodRange already computes that boundary fresh each render) without
+// requiring a manual "Start new day" tap.
+export function needsMidnightRollover(
+  periodStartTime: string,
+  now: Date
+): boolean {
+  return !isSameDay(new Date(periodStartTime), now);
+}
+
 export function getPeriodRange(
   period: SummaryPeriod,
   now: Date,

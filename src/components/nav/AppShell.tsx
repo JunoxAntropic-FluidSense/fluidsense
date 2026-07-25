@@ -7,6 +7,9 @@ import { ModeSwitcher } from "./ModeSwitcher";
 import { PatientSwitcher } from "./PatientSwitcher";
 import { useStore } from "../../store/useStore";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import { needsMidnightRollover } from "../../lib/period";
+
+const ROLLOVER_CHECK_INTERVAL_MS = 60_000;
 
 export function AppShell() {
   const navigate = useNavigate();
@@ -30,6 +33,36 @@ export function AppShell() {
       accessibility.reduceMotion
     );
   }, [accessibility]);
+
+  // Patients on "midnight" mode (the default) get their MonitoringPeriod
+  // record closed and reopened automatically as each calendar day turns
+  // over, so the formal record stays in sync with the "Current monitoring
+  // day" boundary already shown on Today/Summary — no manual "Start new
+  // day" tap required. Runs once on mount (covers the app being reopened
+  // after the app was closed overnight) and on an interval (covers the app
+  // being left open through midnight).
+  useEffect(() => {
+    const checkRollover = () => {
+      const state = useStore.getState();
+      const now = new Date();
+      for (const patient of state.patients) {
+        if ((patient.monitoringDayStartMode ?? "midnight") !== "midnight")
+          continue;
+        const activePeriod = state.monitoringPeriods.find(
+          (mp) => mp.profileId === patient.id && mp.status === "active"
+        );
+        if (
+          activePeriod &&
+          needsMidnightRollover(activePeriod.startTime, now)
+        ) {
+          state.startNewDay(patient.id);
+        }
+      }
+    };
+    checkRollover();
+    const interval = setInterval(checkRollover, ROLLOVER_CHECK_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-dvh flex flex-col bg-fog-50">
