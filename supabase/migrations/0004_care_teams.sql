@@ -123,8 +123,8 @@ declare
   v_role text;
 begin
   select role into v_role from public.users where id = auth.uid();
-  if v_role is null or v_role not in ('nurse', 'healthcare_assistant', 'clinician') then
-    raise exception 'Only healthcare accounts can create a workspace.';
+  if v_role is null or v_role not in ('clinician') then
+    raise exception 'Only clinicians and team leads can create a workspace.';
   end if;
 
   insert into public.organisations (name, created_by)

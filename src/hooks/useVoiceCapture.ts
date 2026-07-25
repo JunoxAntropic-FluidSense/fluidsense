@@ -146,9 +146,12 @@ export function useVoiceCapture() {
       recognition.lang = "en-GB";
       recognition.onresult = (event) => {
         let text = "";
-        for (let i = 0; i < event.results.length; i++)
+        for (let i = 0; i < event.results.length; i++) {
           text += event.results[i][0].transcript;
+        }
         browserTranscriptRef.current = text;
+        setTranscript(text);
+        setTranscriptSource("browser");
       };
       recognition.onerror = () => {
         /* fallback source simply stays empty */

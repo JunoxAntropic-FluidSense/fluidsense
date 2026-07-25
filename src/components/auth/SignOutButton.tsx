@@ -8,11 +8,13 @@ import { signOut } from "../../lib/supabase/auth";
 import { Button } from "../ui/Button";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "output" | "danger";
+type ButtonSize = "md" | "lg" | "xl";
 
 export interface SignOutButtonProps {
   /** Called after a successful sign-out. */
   onSignOut?: () => void;
   variant?: ButtonVariant;
+  size?: ButtonSize;
   className?: string;
   children?: ReactNode;
 }
@@ -20,6 +22,7 @@ export interface SignOutButtonProps {
 export function SignOutButton({
   onSignOut,
   variant = "secondary",
+  size = "md",
   className = "",
   children = "Sign out",
 }: SignOutButtonProps) {
@@ -46,6 +49,7 @@ export function SignOutButton({
       <Button
         type="button"
         variant={variant}
+        size={size}
         disabled={submitting}
         onClick={handleClick}
       >

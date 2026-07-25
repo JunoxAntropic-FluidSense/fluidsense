@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { Gauge, Flask, UserCircle } from "@phosphor-icons/react";
 import { NAV_ITEMS } from "./navConfig";
 import { useStore } from "../../store/useStore";
+import { BrandLogo } from "../ui/BrandLogo";
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -51,18 +52,8 @@ export function Sidebar() {
       aria-label="Primary"
       className="hidden md:flex w-64 shrink-0 flex-col border-r border-navy-900/10 bg-white py-5"
     >
-      <div className="px-6 pb-5 flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-900 text-white font-extrabold text-sm">
-          F
-        </span>
-        <div>
-          <p className="text-base font-extrabold text-navy-900 tracking-tight leading-tight">
-            FluidSense
-          </p>
-          <p className="text-xs text-fog-500 leading-tight">
-            {organisationName || "Healthcare team"}
-          </p>
-        </div>
+      <div className="px-6 pb-5">
+        <BrandLogo size="md" subtitle={organisationName || "Healthcare team"} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-3">

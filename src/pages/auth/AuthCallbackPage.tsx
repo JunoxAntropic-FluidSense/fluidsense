@@ -11,23 +11,24 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { completeAuthFromUrl } from "../../lib/supabase";
+import { pullUserRow } from "../../lib/supabase/accountSync";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStore } from "../../store/useStore";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
 
 export function AuthCallbackPage() {
   const setSession = useAuthStore((s) => s.setSession);
-  const onboardingCompleted = useStore(
-    (s) => s.currentUser.onboardingCompleted
-  );
   const [ready, setReady] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    completeAuthFromUrl(window.location.href).then(({ session }) => {
+    completeAuthFromUrl(window.location.href).then(async ({ session }) => {
       if (cancelled) return;
       setSession(session);
+      if (session?.user) {
+        await pullUserRow(session.user.id);
+      }
       setSignedIn(session !== null);
       setReady(true);
     });
@@ -52,7 +53,13 @@ export function AuthCallbackPage() {
   // sign-in screen again and look like nothing happened. Failure: back to
   // /welcome so they can retry.
   if (signedIn) {
-    return <Navigate to={onboardingCompleted ? "/" : "/onboarding"} replace />;
+    const state = useStore.getState();
+    const target = state.currentUser.onboardingCompleted
+      ? state.mode === "healthcare"
+        ? "/dashboard"
+        : "/"
+      : "/onboarding";
+    return <Navigate to={target} replace />;
   }
   return <Navigate to="/welcome" replace />;
 }

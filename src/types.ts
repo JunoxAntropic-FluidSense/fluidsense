@@ -413,6 +413,7 @@ export interface OnboardingInput {
   wantsAllowanceTracking?: boolean;
   allowanceMl?: number;
   organisationName?: string;
+  organisationId?: string;
   isTestWorkspace?: boolean;
   careSetting?: string;
   sex?: Sex;

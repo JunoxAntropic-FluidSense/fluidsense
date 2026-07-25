@@ -24,6 +24,10 @@ import type {
   VerificationStatus,
 } from "../types";
 import { generateDemoData } from "../lib/demoData";
+import {
+  STANDARD_PRESET_CONTAINERS,
+  STANDARD_PRESET_FLUIDS,
+} from "../lib/standardPresets";
 
 // Persistence is intentionally routed only through this store (never direct
 // localStorage access from components) so a real backend such as Supabase can
@@ -134,6 +138,7 @@ interface StoreState {
     patientId: string,
     container: Omit<SavedContainer, "id">
   ) => SavedContainer;
+  loadStandardPresets: (patientId: string) => void;
 
   // --- patient profile ------------------------------------------------------------
   addPatient: (displayName: string, careSetting: string) => PatientProfile;
@@ -342,6 +347,7 @@ export const useStore = create<StoreState>()(
             quickButtons: newQuickButtons(input.sex),
             dailyWeightEnabled: input.dailyWeightEnabled ?? false,
             careTeamShareConsent: input.careTeamShareConsent ?? false,
+            organisationId: input.organisationId,
             reminders: [
               {
                 id: uuid(),
@@ -416,6 +422,7 @@ export const useStore = create<StoreState>()(
           ...emptyLiveSnapshot,
           viewContext: "live",
           _liveCache: null,
+          authUserId: null,
         }),
 
       deleteAllFluidData: () =>
@@ -665,14 +672,42 @@ export const useStore = create<StoreState>()(
         return c;
       },
 
+      loadStandardPresets: (patientId) => {
+        const newContainers: SavedContainer[] = STANDARD_PRESET_CONTAINERS.map(
+          (c) => ({ ...c, id: uuid() })
+        );
+        const newProfiles: FluidProfile[] = STANDARD_PRESET_FLUIDS.map((f) => ({
+          ...f,
+          id: uuid(),
+        }));
+        const newProfileIds = newProfiles.map((fp) => fp.id);
+
+        set((s) => ({
+          fluidProfiles: [...s.fluidProfiles, ...newProfiles],
+          patients: s.patients.map((p) =>
+            p.id === patientId
+              ? {
+                  ...p,
+                  containers: [...p.containers, ...newContainers],
+                  favouriteFluidIds: Array.from(
+                    new Set([...p.favouriteFluidIds, ...newProfileIds])
+                  ),
+                }
+              : p
+          ),
+        }));
+      },
+
       addPatient: (displayName, careSetting) => {
         const now = new Date().toISOString();
         const profileId = uuid();
         const periodId = uuid();
+        const organisationId = get().currentUser.organisationId;
         const profile: PatientProfile = {
           id: profileId,
           displayName,
           careSetting,
+          organisationId: organisationId || undefined,
           monitoringDayStartMode: "midnight",
           units:
             get().currentUser.mode === "healthcare"

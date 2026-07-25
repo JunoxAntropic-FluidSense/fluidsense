@@ -73,12 +73,15 @@ function SectionHeading({ children }: { children: string }) {
   );
 }
 
+import { redeemOrganisationInvite } from "../../lib/supabase/organisations";
+
 export function OnboardingFlow() {
   const navigate = useNavigate();
   const onboardingCompleted = useStore(
     (s) => s.currentUser.onboardingCompleted
   );
   const completeOnboarding = useStore((s) => s.completeOnboarding);
+  const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
   const authUser = useAuthStore((s) => s.user);
   const setCheckInNotificationsEnabled = useStore(
@@ -92,6 +95,12 @@ export function OnboardingFlow() {
   );
   const [step, setStep] = useState(1);
   const [accountMode, setAccountMode] = useState<Mode | null>(null);
+  const [patientPathway, setPatientPathway] = useState<
+    "choose" | "join_clinic" | null
+  >(null);
+  const [patientClinicCode, setPatientClinicCode] = useState("");
+  const [joiningClinic, setJoiningClinic] = useState(false);
+  const [clinicJoinError, setClinicJoinError] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>("patient");
@@ -114,14 +123,6 @@ export function OnboardingFlow() {
   const [roleSynced, setRoleSynced] = useState(false);
   const [finishing, setFinishing] = useState(false);
 
-  // WorkspaceSetup's create_organisation RPC checks the caller's
-  // public.users.role server-side (0004_care_teams.sql) — but that row only
-  // gets the role written to it once completeOnboarding() runs, at the very
-  // end of this flow. Without this, clicking "Create workspace" here (before
-  // completeOnboarding) always fails with "Only healthcare accounts can
-  // create a workspace," because the server still sees whatever role (or no
-  // row at all) existed before onboarding started. Push role/mode directly
-  // and wait for confirmation before rendering WorkspaceSetup at all.
   useEffect(() => {
     if (accountMode !== "healthcare" || !authUser) return;
     let cancelled = false;
@@ -135,18 +136,30 @@ export function OnboardingFlow() {
   }, [accountMode, authUser, role]);
 
   if (onboardingCompleted) return <Navigate to="/" replace />;
-  // Onboarding assumes an authenticated user throughout (account creation
-  // now happens on WelcomePage, before ever reaching here) — guard against
-  // landing on this URL directly (stale tab, bookmark, manual navigation)
-  // without a session, which would otherwise lose everything typed in here
-  // the moment `finish()` tries to enter the app and gets bounced by
-  // RequireOnboarding.
   if (authStatus === "loading") return null;
   if (authStatus !== "signed-in") return <Navigate to="/welcome" replace />;
 
   const tzOptions = timezoneOptions(detectedTz);
   const isPatient = accountMode === "patient";
   const isHealthcare = accountMode === "healthcare";
+
+  const handleJoinClinicSubmit = async () => {
+    setClinicJoinError(null);
+    setJoiningClinic(true);
+    const result = await redeemOrganisationInvite(patientClinicCode.trim());
+    setJoiningClinic(false);
+    if (result.error || !result.organisationId) {
+      setClinicJoinError(
+        result.error?.message ??
+          "Couldn't verify clinic code. Please check and try again."
+      );
+      return;
+    }
+    setJoinedOrgId(result.organisationId);
+    setAccountMode("patient");
+    setRole("patient");
+    setStep(2);
+  };
 
   const finish = async () => {
     setFinishing(true);
@@ -163,6 +176,7 @@ export function OnboardingFlow() {
       wantsAllowanceTracking: isPatient ? wantsAllowance : undefined,
       allowanceMl: allowanceMl ? parseFloat(allowanceMl) : undefined,
       organisationName: joinedOrgName || undefined,
+      organisationId: joinedOrgId || undefined,
       isTestWorkspace,
       careSetting: isPatient ? careSetting : undefined,
       sex: isPatient ? sex : undefined,
@@ -172,10 +186,7 @@ export function OnboardingFlow() {
       careTeamShareConsent: isPatient ? careTeamShareConsent : undefined,
     });
 
-    // completeOnboarding replaces currentUser wholesale, so organisationId
-    // must be set after it runs, not before — setting it first would be
-    // silently wiped out by that replacement.
-    if (isHealthcare && joinedOrgId) {
+    if (joinedOrgId) {
       setOrganisation(joinedOrgId, joinedOrgName ?? undefined);
     }
 
@@ -186,8 +197,6 @@ export function OnboardingFlow() {
         setCheckInNotificationsEnabled(result.ok);
       }
     }
-    // Healthcare accounts start with no patients yet — land on the
-    // dashboard's "add patient" flow rather than a blank single-patient view.
     navigate(isHealthcare ? "/dashboard" : "/");
   };
 
@@ -203,37 +212,143 @@ export function OnboardingFlow() {
         </h1>
 
         {step === 1 && (
-          <div className="space-y-3">
-            <button
-              onClick={() => {
-                setAccountMode("patient");
-                setRole("patient");
-                setStep(2);
-              }}
-              className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-5 hover:border-intake-500 hover:bg-intake-50"
-            >
-              <div className="font-bold text-navy-900 text-lg">
-                A patient or carer
+          <div className="space-y-4">
+            {!patientPathway && (
+              <>
+                <button
+                  onClick={() => {
+                    setPatientPathway("choose");
+                  }}
+                  className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-5 hover:border-intake-500 hover:bg-intake-50"
+                >
+                  <div className="font-bold text-navy-900 text-lg">
+                    A patient or carer
+                  </div>
+                  <div className="text-sm text-fog-600 mt-1">
+                    Recording your own fluids, or a family member's
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setAccountMode("healthcare");
+                    setRole("nurse");
+                    setStep(2);
+                  }}
+                  className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-5 hover:border-output-500 hover:bg-output-50"
+                >
+                  <div className="font-bold text-navy-900 text-lg">
+                    A healthcare professional
+                  </div>
+                  <div className="text-sm text-fog-600 mt-1">
+                    Nurse, healthcare assistant or clinician
+                  </div>
+                </button>
+              </>
+            )}
+
+            {patientPathway === "choose" && (
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-navy-800 mb-2">
+                  Select your monitoring option:
+                </p>
+                <button
+                  onClick={() => {
+                    enterDemoMode();
+                    navigate("/");
+                  }}
+                  className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-4 hover:border-intake-500 hover:bg-intake-50"
+                >
+                  <div className="font-bold text-navy-900 text-base">
+                    1. Try Demo First
+                  </div>
+                  <div className="text-xs text-fog-600 mt-0.5">
+                    Explore sample patients and fictional data without setting
+                    up an account
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setPatientPathway("join_clinic");
+                  }}
+                  className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-4 hover:border-intake-500 hover:bg-intake-50"
+                >
+                  <div className="font-bold text-navy-900 text-base">
+                    2. Join a Clinic
+                  </div>
+                  <div className="text-xs text-fog-600 mt-0.5">
+                    Link your records directly to your healthcare team using a
+                    clinic invite code
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAccountMode("patient");
+                    setRole("patient");
+                    setStep(2);
+                  }}
+                  className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-4 hover:border-intake-500 hover:bg-intake-50"
+                >
+                  <div className="font-bold text-navy-900 text-base">
+                    3. Independent Monitoring
+                  </div>
+                  <div className="text-xs text-fog-600 mt-0.5">
+                    Monitor fluids independently without clinic association (you
+                    can share access later anytime)
+                  </div>
+                </button>
+
+                <Button
+                  fullWidth
+                  variant="ghost"
+                  onClick={() => setPatientPathway(null)}
+                >
+                  Back
+                </Button>
               </div>
-              <div className="text-sm text-fog-600 mt-1">
-                Recording your own fluids, or a family member's
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                setAccountMode("healthcare");
-                setRole("nurse");
-                setStep(2);
-              }}
-              className="w-full text-left rounded-2xl bg-white border-2 border-navy-900/10 p-5 hover:border-output-500 hover:bg-output-50"
-            >
-              <div className="font-bold text-navy-900 text-lg">
-                A healthcare professional
-              </div>
-              <div className="text-sm text-fog-600 mt-1">
-                Nurse, healthcare assistant or clinician
-              </div>
-            </button>
+            )}
+
+            {patientPathway === "join_clinic" && (
+              <Card className="p-5 space-y-4 text-left">
+                <h2 className="text-base font-bold text-navy-900">
+                  Enter Clinic Invite Code
+                </h2>
+                <p className="text-xs text-fog-600">
+                  Enter the code provided by your clinic or healthcare team.
+                  This links your entries directly to their team dashboard.
+                </p>
+                <Field label="Clinic Invite Code">
+                  <Input
+                    value={patientClinicCode}
+                    onChange={(e) =>
+                      setPatientClinicCode(e.target.value.toUpperCase())
+                    }
+                    placeholder="e.g. A1B2C3D4"
+                  />
+                </Field>
+                {clinicJoinError && (
+                  <p className="text-xs text-alert-600 font-semibold">
+                    {clinicJoinError}
+                  </p>
+                )}
+                <Button
+                  fullWidth
+                  disabled={joiningClinic || !patientClinicCode.trim()}
+                  onClick={handleJoinClinicSubmit}
+                >
+                  {joiningClinic ? "Verifying..." : "Verify Code & Continue"}
+                </Button>
+                <Button
+                  fullWidth
+                  variant="ghost"
+                  disabled={joiningClinic}
+                  onClick={() => setPatientPathway("choose")}
+                >
+                  Back
+                </Button>
+              </Card>
+            )}
           </div>
         )}
 
@@ -309,6 +424,7 @@ export function OnboardingFlow() {
                   </p>
                 ) : roleSynced ? (
                   <WorkspaceSetup
+                    role={role}
                     onJoined={(id, name) => {
                       setJoinedOrgId(id);
                       setJoinedOrgName(name);

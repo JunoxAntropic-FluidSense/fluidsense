@@ -9,6 +9,7 @@ import {
   signInWithPassword,
   signUpWithPassword,
 } from "../../lib/supabase/auth";
+import { pullUserRow } from "../../lib/supabase/accountSync";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
 import { Field, Input } from "../ui/Field";
@@ -57,6 +58,7 @@ export function EmailPasswordForm({
         return;
       }
       if (result.session) {
+        await pullUserRow(result.session.user.id);
         onSuccess?.(result.session);
       } else {
         setNeedsConfirmation(true);

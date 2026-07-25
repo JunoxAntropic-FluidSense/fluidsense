@@ -1,5 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
-import { Microphone } from "@phosphor-icons/react";
+import { Navigate } from "react-router-dom";
 import { useFluidData } from "../hooks/useFluidData";
 import { useStore } from "../store/useStore";
 import { BalanceCard } from "../components/today/BalanceCard";
@@ -8,7 +7,6 @@ import { QuickAddGrid } from "../components/today/QuickAddGrid";
 import { ActivityTimeline } from "../components/today/ActivityTimeline";
 import { TodayContextCard } from "../components/today/TodayContextCard";
 import { EmptyToday } from "../components/today/EmptyToday";
-import { Button } from "../components/ui/Button";
 
 export function TodayPage() {
   const { patient, balance, reliability, lastEvent, windowEvents, range } =
@@ -34,16 +32,6 @@ export function TodayPage() {
         </h1>
         <p className="text-sm text-fog-600">{patient.careSetting}</p>
       </div>
-
-      <Link to="/voice">
-        <Button
-          fullWidth
-          size="xl"
-          icon={<Microphone size={24} weight="fill" aria-hidden="true" />}
-        >
-          Speak an entry
-        </Button>
-      </Link>
 
       {hasAnyEvents ? (
         <BalanceCard

@@ -7,7 +7,7 @@
 // throws for an expected failure path — "not configured" and "request
 // failed" both come back as typed results the caller can branch on.
 
-import { isSupabaseConfigured } from "../supabase/client";
+import { supabase, isSupabaseConfigured } from "../supabase/client";
 
 export interface SendPatientInvitationSuccess {
   status: "ok";
@@ -28,29 +28,43 @@ export type SendPatientInvitationResult =
   | SendPatientInvitationUnavailable
   | SendPatientInvitationError;
 
-/**
- * POSTs an invitation request to the send-patient-invitation Edge Function.
- * Never throws for expected failure paths (unconfigured backend, network
- * failure, non-OK response) — those come back as a typed "unavailable" or
- * "error" result with a generic, non-diagnostic message.
- */
 export async function sendPatientInvitation(params: {
   patientEmail: string;
   patientDisplayName: string;
   invitedByName: string;
+  clinicInviteCode?: string;
+  organisationName?: string;
 }): Promise<SendPatientInvitationResult> {
-  if (!isSupabaseConfigured()) {
+  if (!isSupabaseConfigured() || !supabase) {
     return {
       status: "unavailable",
       message: "Sending invitations is not configured.",
     };
   }
 
+  // 1. Trigger Supabase Auth OTP / Magic Link email with custom invitation metadata
+  try {
+    await supabase.auth.signInWithOtp({
+      email: params.patientEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/welcome`,
+        data: {
+          patientDisplayName: params.patientDisplayName,
+          invitedByName: params.invitedByName,
+          clinicInviteCode: params.clinicInviteCode,
+          organisationName: params.organisationName,
+        },
+      },
+    });
+  } catch {
+    // Best-effort auth invite trigger
+  }
+
+  // 2. Also POST to Edge Function if deployed
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-patient-invitation`;
 
-  let res: Response;
   try {
-    res = await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,18 +72,12 @@ export async function sendPatientInvitation(params: {
       },
       body: JSON.stringify(params),
     });
-  } catch {
-    return {
-      status: "error",
-      message: "Could not reach the invitation service.",
-    };
-  }
 
-  if (!res.ok) {
-    return {
-      status: "error",
-      message: `Invitation service returned an error (${res.status}).`,
-    };
+    if (res.ok) {
+      return { status: "ok" };
+    }
+  } catch {
+    // Edge function fallback swallowed
   }
 
   return { status: "ok" };

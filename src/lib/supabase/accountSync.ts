@@ -82,37 +82,74 @@ function toUsersRowUpsert(
  * is a background convenience sync, not a critical path, and must never
  * block or surface errors in the local-first UI.
  */
+import { pullOrganisationData } from "./patientSync";
+import { getMyOrganisation } from "./organisations";
+import type { Role, Mode } from "../../types";
+
+/**
+ * Pulls the public.users row from Supabase on sign-in and merges it into useStore.
+ * Restores onboardingCompleted, displayName, role, mode, timezone, and workspace organisation.
+ */
+export async function pullUserRow(authUserId: string): Promise<void> {
+  if (!canSyncNow()) return;
+  try {
+    const { data: userRow } = await supabase!
+      .from("users")
+      .select("*")
+      .eq("id", authUserId)
+      .maybeSingle();
+
+    if (userRow) {
+      const userMode = (userRow.mode as Mode) || "patient";
+      const userRole = (userRow.role as Role) || "patient";
+      const orgResult = await getMyOrganisation();
+
+      useStore.setState((state) => ({
+        mode: userMode,
+        currentUser: {
+          ...state.currentUser,
+          mode: userMode,
+          role: userRole,
+          displayName: userRow.display_name || state.currentUser.displayName,
+          timezone: userRow.timezone || state.currentUser.timezone,
+          onboardingCompleted:
+            userRow.onboarding_completed ??
+            state.currentUser.onboardingCompleted,
+          saveVoiceTranscripts:
+            userRow.save_voice_transcripts ??
+            state.currentUser.saveVoiceTranscripts,
+          organisationId:
+            orgResult.organisationId ?? state.currentUser.organisationId,
+          organisationName:
+            orgResult.organisationName ?? state.currentUser.organisationName,
+        },
+      }));
+      void pullOrganisationData();
+    }
+  } catch {
+    // Best-effort only — swallow errors
+  }
+}
+
+/**
+ * Best-effort upsert of the public.users row for `authUserId`. Never throws:
+ * any failure (network, RLS, offline, misconfiguration) is swallowed — this
+ * is a background convenience sync, not a critical path, and must never
+ * block or surface errors in the local-first UI.
+ */
 async function upsertUserRow(authUserId: string): Promise<void> {
-  // Re-check right here, at the moment of the call — not from a value
-  // captured earlier in this function's caller. This is intentionally
-  // re-evaluated even though callers already checked, because store state
-  // (viewContext) can change between a subscriber firing and this async
-  // function actually running.
   if (!canSyncNow()) return;
   try {
     const row = toUsersRowUpsert(authUserId, useStore.getState());
-    // supabase is guaranteed non-null here: canSyncNow() already confirmed
-    // isSupabaseConfigured(), and client.ts only exports a non-null client
-    // when configured.
     await supabase!.from("users").upsert(row);
   } catch {
-    // Best-effort only — swallow. Never let a sync failure surface to the
-    // user or interrupt the local-first flow.
+    // Best-effort only — swallow.
   }
 }
 
 /**
  * Upserts just `role`/`mode` for `authUserId`, bypassing the reactive
- * store-subscription path above. `public.users.role` normally only gets
- * written once `completeOnboarding()` runs and `currentUser` changes — too
- * late for a role-gated RPC called *during* onboarding itself (e.g.
- * create_organisation, which checks the caller's public.users.role; see
- * 0004_care_teams.sql). Partial upsert is safe: every other column on
- * public.users has a database default, so this either inserts a new row
- * with those defaults or updates only role/mode on an existing one — it
- * never blanks out fields a prior full sync already wrote. Returns whether
- * the write is confirmed to have landed, so a caller gating a role-checked
- * action can wait for `true` instead of racing a fire-and-forget sync.
+ * store-subscription path above.
  */
 export async function syncAccountRoleNow(
   authUserId: string,
@@ -139,25 +176,20 @@ function handleAuthChange(): void {
     if (lastLinkedAuthUserId !== authUserId) {
       lastLinkedAuthUserId = authUserId;
       linkAuthAccount(authUserId);
+      void pullUserRow(authUserId);
     }
-    // Re-checked live inside upsertUserRow/canSyncNow — not gated here.
-    void upsertUserRow(authUserId);
   } else if (authState.status === "signed-out") {
-    if (lastLinkedAuthUserId !== null) {
+    if (
+      lastLinkedAuthUserId !== null ||
+      useStore.getState().authUserId !== null
+    ) {
       lastLinkedAuthUserId = null;
       unlinkAuthAccount();
+      useStore.getState().resetAccount();
     }
   }
 }
 
-/**
- * Fires on every useStore change. Only pushes a sync when fields that
- * actually feed the public.users row changed (currentUser, or the
- * active-patient/units mirror) — but the safety-critical guard is inside
- * upsertUserRow/canSyncNow, re-read via getState() at call time, not here.
- * This function must never assume "signed in" or "live" based on values
- * captured before this invocation.
- */
 function handleStoreChange(
   state: StoreSnapshot,
   prevState: StoreSnapshot
@@ -171,7 +203,12 @@ function handleStoreChange(
     state.patients !== prevState.patients;
   if (!relevantChanged) return;
 
-  void upsertUserRow(authState.user.id);
+  if (
+    state.currentUser.onboardingCompleted ||
+    prevState.currentUser.onboardingCompleted
+  ) {
+    void upsertUserRow(authState.user.id);
+  }
 }
 
 let unsubscribeAuth: (() => void) | null = null;

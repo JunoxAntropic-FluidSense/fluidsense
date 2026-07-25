@@ -12,14 +12,14 @@ export function RequireOnboarding() {
 
   // Demo mode stays fully local and never requires an account.
   if (viewContext === "live") {
-    if (!onboardingCompleted) {
-      return <Navigate to="/welcome" replace />;
-    }
     // Auth session is still resolving (getSession() hasn't returned yet) —
     // render nothing rather than flash a sign-in redirect that immediately
     // reverses once the session is confirmed.
     if (authStatus === "loading") {
       return null;
+    }
+    if (!onboardingCompleted) {
+      return <Navigate to="/welcome" replace />;
     }
     if (authStatus !== "signed-in") {
       return <Navigate to="/welcome" replace />;

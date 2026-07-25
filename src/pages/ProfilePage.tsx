@@ -11,6 +11,7 @@ import { Field, Input } from "../components/ui/Field";
 import { Switch } from "../components/ui/Checkbox";
 import { SignOutButton } from "../components/auth";
 import { WorkspaceSetup } from "../components/onboarding/WorkspaceSetup";
+import { PatientClinicSharingCard } from "../components/profile/PatientClinicSharingCard";
 import type { DeploymentMode, Role, Units } from "../types";
 import { format } from "date-fns";
 import { enableCheckInPush, disableCheckInPush } from "../lib/push/subscribe";
@@ -77,6 +78,7 @@ function TeamWorkspaceSection() {
   if (!organisationId) {
     return (
       <WorkspaceSetup
+        role={currentUser.role}
         onJoined={(id, name) => setOrganisation(id, name ?? undefined)}
       />
     );
@@ -260,6 +262,10 @@ export function ProfilePage() {
 
       {mode === "healthcare" && viewContext === "live" && (
         <TeamWorkspaceSection />
+      )}
+
+      {mode === "patient" && viewContext === "live" && (
+        <PatientClinicSharingCard />
       )}
 
       {viewContext === "demo" && (

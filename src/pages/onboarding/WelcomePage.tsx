@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
+import { BrandLogo } from "../../components/ui/BrandLogo";
 import {
   EmailPasswordForm,
   MagicLinkForm,
@@ -19,23 +20,22 @@ export function WelcomePage() {
   const viewContext = useStore((s) => s.viewContext);
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
-  // Account creation always comes first now — "Get started" opens the
-  // sign-up panel directly, rather than sending people into onboarding
-  // before they have an account. See OnboardingFlow.tsx, which no longer
-  // has its own embedded sign-up step.
   const [authPanel, setAuthPanel] = useState<"sign-up" | "sign-in" | null>(
     null
   );
   const [useMagicLink, setUseMagicLink] = useState(false);
 
+  const mode = useStore((s) => s.mode);
+
   if (viewContext === "demo") return <Navigate to="/" replace />;
-  // Still resolving the session — avoid flashing the landing screen before
-  // we know whether to redirect straight past it.
   if (authStatus === "loading") return null;
-  // Signed in already: never show the landing/sign-in screen again — send
-  // them straight into onboarding (or the app, if that's done too).
   if (authStatus === "signed-in") {
-    return <Navigate to={onboardingCompleted ? "/" : "/onboarding"} replace />;
+    const target = onboardingCompleted
+      ? mode === "healthcare"
+        ? "/dashboard"
+        : "/"
+      : "/onboarding";
+    return <Navigate to={target} replace />;
   }
 
   return (
@@ -43,9 +43,7 @@ export function WelcomePage() {
       <PrototypeBanner />
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 max-w-md mx-auto w-full gap-6 text-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-navy-900 tracking-tight">
-            FluidSense
-          </h1>
+          <BrandLogo size="lg" className="justify-center mb-2" />
           <p className="mt-2 text-fog-600">
             Quick, <em className="accent">voice-friendly</em> fluid intake and
             output tracking.
@@ -110,9 +108,15 @@ export function WelcomePage() {
             ) : (
               <EmailPasswordForm
                 mode={authPanel}
-                onSuccess={() =>
-                  navigate(onboardingCompleted ? "/" : "/onboarding")
-                }
+                onSuccess={() => {
+                  const state = useStore.getState();
+                  const target = state.currentUser.onboardingCompleted
+                    ? state.mode === "healthcare"
+                      ? "/dashboard"
+                      : "/"
+                    : "/onboarding";
+                  navigate(target);
+                }}
               />
             )}
             <div className="flex items-center justify-between">

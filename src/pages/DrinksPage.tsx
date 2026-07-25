@@ -29,6 +29,7 @@ export function DrinksPage() {
   const addFluidProfile = useStore((s) => s.addFluidProfile);
   const toggleFavouriteFluid = useStore((s) => s.toggleFavouriteFluid);
   const addContainer = useStore((s) => s.addContainer);
+  const loadStandardPresets = useStore((s) => s.loadStandardPresets);
 
   const [showNewDrink, setShowNewDrink] = useState(false);
   const [showNewContainer, setShowNewContainer] = useState(false);
@@ -36,147 +37,174 @@ export function DrinksPage() {
   if (!patient) return null;
 
   return (
-    <div className="max-w-lg mx-auto space-y-4">
-      <div>
-        <h1 className="text-2xl font-extrabold text-navy-900">
-          {mode === "healthcare" ? "Patient fluid library" : "My drinks"}
-        </h1>
-        <p className="text-sm text-fog-600">
-          Teach FluidSense about commonly consumed drinks so quick-add and voice
-          entry can recognise them.
-        </p>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-extrabold text-navy-900">
+            {mode === "healthcare" ? "Patient fluid library" : "My drinks"}
+          </h1>
+          <p className="text-sm text-fog-600">
+            Teach FluidSense about commonly consumed drinks so quick-add and
+            voice entry can recognise them.
+          </p>
+        </div>
+        <Button
+          size="md"
+          variant="secondary"
+          onClick={() => loadStandardPresets(patient.id)}
+        >
+          Load Standard Presets
+        </Button>
       </div>
 
-      <Card className="p-5">
-        <CardHeading
-          action={
-            <Button
-              size="md"
-              variant="secondary"
-              onClick={() => setShowNewContainer(true)}
-            >
-              Add container
-            </Button>
-          }
-        >
-          Saved containers
-        </CardHeading>
-        {patient.containers.length === 0 ? (
-          <p className="text-sm text-fog-600">
-            No personal containers saved yet.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {patient.containers.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
-              >
-                <span className="font-semibold text-navy-800">{c.name}</span>
-                <span className="text-sm text-fog-600">
-                  {c.fullVolumeMl} mL full
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-
-      <Card className="p-5">
-        <CardHeading
-          action={
-            <Button size="md" onClick={() => setShowNewDrink(true)}>
-              Add drink
-            </Button>
-          }
-        >
-          Fluid profiles
-        </CardHeading>
-        {fluidProfiles.length === 0 ? (
-          <div className="text-center py-4">
-            <p className="font-bold text-navy-900">No favourite drinks saved</p>
-            <p className="text-sm text-fog-600 mt-1">
-              Teach FluidSense about a cup, mug, bottle or drink you use
-              regularly.
-            </p>
-          </div>
-        ) : (
-          <ul className="space-y-3">
-            {fluidProfiles.map((fp) => {
-              const isFav = patient.favouriteFluidIds.includes(fp.id);
-              const consumed =
-                fp.containerVolumeMl && fp.usualServingFraction != null
-                  ? Math.round(fp.containerVolumeMl * fp.usualServingFraction)
-                  : undefined;
-              const waterMl =
-                consumed && fp.waterContentPercent
-                  ? Math.round(consumed * (fp.waterContentPercent / 100))
-                  : undefined;
-              return (
-                <li
-                  key={fp.id}
-                  className="rounded-2xl border border-navy-900/10 p-4"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+        <Card className="p-5">
+          <CardHeading
+            action={
+              <div className="flex gap-2">
+                <Button
+                  size="md"
+                  variant="secondary"
+                  onClick={() => setShowNewContainer(true)}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <CategoryIcon
-                          category={fp.category}
-                          size={18}
-                          aria-hidden="true"
-                        />
-                        <span className="font-bold text-navy-900">
-                          {fp.name}
-                        </span>
-                        <Badge tone={fp.verified ? "intake" : "amber"}>
-                          {fp.verified ? "Verified" : "Personalised estimate"}
-                        </Badge>
+                  Add container
+                </Button>
+              </div>
+            }
+          >
+            Saved containers
+          </CardHeading>
+          {patient.containers.length === 0 ? (
+            <div className="text-center py-5 space-y-2">
+              <p className="text-sm text-fog-600">
+                No personal containers saved yet.
+              </p>
+              <Button
+                size="md"
+                variant="secondary"
+                onClick={() => loadStandardPresets(patient.id)}
+              >
+                Prefill UK/NHS Standard Containers & Drinks
+              </Button>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {patient.containers.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
+                >
+                  <span className="font-semibold text-navy-800">{c.name}</span>
+                  <span className="text-sm text-fog-600 font-mono font-medium">
+                    {c.fullVolumeMl} mL full
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <CardHeading
+            action={
+              <Button size="md" onClick={() => setShowNewDrink(true)}>
+                Add drink
+              </Button>
+            }
+          >
+            Fluid profiles
+          </CardHeading>
+          {fluidProfiles.length === 0 ? (
+            <div className="text-center py-5 space-y-2">
+              <p className="font-bold text-navy-900">
+                No favourite drinks saved
+              </p>
+              <p className="text-sm text-fog-600">
+                Teach FluidSense about a cup, mug, bottle or drink you use
+                regularly.
+              </p>
+              <Button size="md" onClick={() => loadStandardPresets(patient.id)}>
+                Prefill Standard Drinks Library
+              </Button>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {fluidProfiles.map((fp) => {
+                const isFav = patient.favouriteFluidIds.includes(fp.id);
+                const consumed =
+                  fp.containerVolumeMl && fp.usualServingFraction != null
+                    ? Math.round(fp.containerVolumeMl * fp.usualServingFraction)
+                    : undefined;
+                const waterMl =
+                  consumed && fp.waterContentPercent
+                    ? Math.round(consumed * (fp.waterContentPercent / 100))
+                    : undefined;
+                return (
+                  <li
+                    key={fp.id}
+                    className="rounded-2xl border border-navy-900/10 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <CategoryIcon
+                            category={fp.category}
+                            size={18}
+                            aria-hidden="true"
+                          />
+                          <span className="font-bold text-navy-900">
+                            {fp.name}
+                          </span>
+                          <Badge tone={fp.verified ? "intake" : "amber"}>
+                            {fp.verified ? "Verified" : "Personalised estimate"}
+                          </Badge>
+                        </div>
+                        {fp.brand && (
+                          <p className="text-xs text-fog-500">{fp.brand}</p>
+                        )}
                       </div>
-                      {fp.brand && (
-                        <p className="text-xs text-fog-500">{fp.brand}</p>
+                      <button
+                        onClick={() => toggleFavouriteFluid(patient.id, fp.id)}
+                        aria-pressed={isFav}
+                        aria-label={
+                          isFav
+                            ? `Remove ${fp.name} from favourites`
+                            : `Add ${fp.name} to favourites`
+                        }
+                        className={`flex items-center justify-center min-h-11 min-w-11 ${isFav ? "text-amber-500" : "text-fog-300"}`}
+                      >
+                        <Star size={22} weight={isFav ? "fill" : "regular"} />
+                      </button>
+                    </div>
+                    <div className="mt-2 text-sm text-fog-600 space-y-1">
+                      {consumed != null && (
+                        <p>
+                          Consumed volume (usual serving):{" "}
+                          <span className="font-semibold text-navy-800">
+                            {consumed} mL
+                          </span>
+                        </p>
+                      )}
+                      {fp.waterContentPercent != null && (
+                        <p>
+                          Estimated water contribution:{" "}
+                          <span className="font-semibold text-navy-800">
+                            {waterMl} mL
+                          </span>{" "}
+                          <span className="text-fog-500">
+                            ({fp.waterContentPercent}% water-content estimate —{" "}
+                            {fp.waterContentSource})
+                          </span>
+                        </p>
                       )}
                     </div>
-                    <button
-                      onClick={() => toggleFavouriteFluid(patient.id, fp.id)}
-                      aria-pressed={isFav}
-                      aria-label={
-                        isFav
-                          ? `Remove ${fp.name} from favourites`
-                          : `Add ${fp.name} to favourites`
-                      }
-                      className={`flex items-center justify-center min-h-11 min-w-11 ${isFav ? "text-amber-500" : "text-fog-300"}`}
-                    >
-                      <Star size={22} weight={isFav ? "fill" : "regular"} />
-                    </button>
-                  </div>
-                  <div className="mt-2 text-sm text-fog-600 space-y-1">
-                    {consumed != null && (
-                      <p>
-                        Consumed volume (usual serving):{" "}
-                        <span className="font-semibold text-navy-800">
-                          {consumed} mL
-                        </span>
-                      </p>
-                    )}
-                    {fp.waterContentPercent != null && (
-                      <p>
-                        Estimated water contribution:{" "}
-                        <span className="font-semibold text-navy-800">
-                          {waterMl} mL
-                        </span>{" "}
-                        <span className="text-fog-500">
-                          ({fp.waterContentPercent}% water-content estimate —{" "}
-                          {fp.waterContentSource})
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Card>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
+      </div>
 
       {showNewContainer && (
         <NewContainerModal

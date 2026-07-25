@@ -19,6 +19,9 @@ import { getPeriodRange } from "../lib/period";
 import { formatDistanceToNow, subDays } from "date-fns";
 import type { DeploymentMode } from "../types";
 import { sendPatientInvitation } from "../lib/patients/sendInvitation";
+import { createOrganisationInvite } from "../lib/supabase/organisations";
+import { pullOrganisationData } from "../lib/supabase/patientSync";
+import { supabase } from "../lib/supabase/client";
 import {
   AttentionSection,
   type AttentionCategory,
@@ -42,10 +45,10 @@ type SortKey =
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "reliability", label: "Lowest reliability" },
-  { value: "output_gap", label: "Longest time since output" },
-  { value: "largest_positive", label: "Largest recorded positive balance" },
-  { value: "largest_negative", label: "Largest recorded negative balance" },
-  { value: "unmeasured", label: "Most unmeasured events" },
+  { value: "output_gap", label: "Longest output gap" },
+  { value: "largest_positive", label: "Largest + balance" },
+  { value: "largest_negative", label: "Largest - balance" },
+  { value: "unmeasured", label: "Most unmeasured" },
 ];
 
 const RELIABILITY_RANK = { Low: 0, Moderate: 1, High: 2 };
@@ -67,6 +70,12 @@ export function DashboardPage() {
   const [newSetting, setNewSetting] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [invitePending, setInvitePending] = useState(false);
+
+  const [offboardTarget, setOffboardTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [offboarding, setOffboarding] = useState(false);
 
   const now = useMemo(() => new Date(), []);
   const range = useMemo(() => getPeriodRange("24h", now), [now]);
@@ -226,9 +235,18 @@ export function DashboardPage() {
           </p>
         </div>
         {viewContext === "live" && (
-          <Button size="md" onClick={() => setShowAddPatient(true)}>
-            Add patient
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="md"
+              variant="secondary"
+              onClick={() => void pullOrganisationData()}
+            >
+              Sync Workspace
+            </Button>
+            <Button size="md" onClick={() => setShowAddPatient(true)}>
+              Add patient
+            </Button>
+          </div>
         )}
       </div>
 
@@ -405,18 +423,79 @@ export function DashboardPage() {
                 )}
               </dl>
 
-              <Button
-                fullWidth
-                variant="secondary"
-                className="mt-4"
-                onClick={() => openPatient(patient.id)}
-              >
-                Open patient
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => openPatient(patient.id)}
+                >
+                  Open patient
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-xs text-alert-600 hover:text-alert-700 hover:bg-alert-50 px-3"
+                  onClick={() =>
+                    setOffboardTarget({
+                      id: patient.id,
+                      name: patient.displayName,
+                    })
+                  }
+                >
+                  Offboard
+                </Button>
+              </div>
             </Card>
           )
         )}
       </FocusCardGrid>
+
+      {offboardTarget && (
+        <div
+          className="fixed inset-0 z-40 flex items-end md:items-center md:justify-center bg-navy-950/40"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Offboard patient"
+        >
+          <div className="bg-white w-full md:max-w-md md:rounded-3xl rounded-t-3xl p-5 space-y-4">
+            <h2 className="text-lg font-extrabold text-navy-900">
+              Offboard {offboardTarget.name}?
+            </h2>
+            <p className="text-sm text-fog-600">
+              This removes the patient from your clinic's workspace caseload.
+              Your team will no longer see or receive updates for this patient.
+            </p>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button
+                variant="secondary"
+                disabled={offboarding}
+                onClick={() => setOffboardTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                disabled={offboarding}
+                onClick={async () => {
+                  setOffboarding(true);
+                  updatePatient(offboardTarget.id, {
+                    organisationId: undefined,
+                  });
+                  if (supabase) {
+                    await supabase
+                      .from("profiles")
+                      .update({ organisation_id: null })
+                      .eq("id", offboardTarget.id);
+                  }
+                  setOffboarding(false);
+                  setOffboardTarget(null);
+                }}
+              >
+                {offboarding ? "Offboarding..." : "Offboard Patient"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddPatient && (
         <div
@@ -471,10 +550,20 @@ export function DashboardPage() {
                   if (email) {
                     updatePatient(created.id, { patientEmail: email });
                     setInvitePending(true);
+                    let clinicInviteCode: string | undefined = undefined;
+                    if (currentUser.organisationId) {
+                      const invRes = await createOrganisationInvite(
+                        currentUser.organisationId
+                      );
+                      if (invRes.code) clinicInviteCode = invRes.code;
+                    }
                     await sendPatientInvitation({
                       patientEmail: email,
                       patientDisplayName: displayName,
-                      invitedByName: currentUser.displayName,
+                      invitedByName:
+                        currentUser.displayName || "Your care team",
+                      clinicInviteCode,
+                      organisationName: currentUser.organisationName,
                     });
                     setInvitePending(false);
                   }

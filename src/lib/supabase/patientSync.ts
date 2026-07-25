@@ -46,9 +46,13 @@ function canSyncNow(): boolean {
   if (!isSupabaseConfigured() || useStore.getState().viewContext !== "live") {
     return false;
   }
-  const { currentUser } = useStore.getState();
+  const state = useStore.getState();
+  const { currentUser, patients, activePatientId } = state;
+  const activePatient = patients.find((p) => p.id === activePatientId);
   return (
-    currentUser.mode === "healthcare" && Boolean(currentUser.organisationId)
+    (currentUser.mode === "healthcare" &&
+      Boolean(currentUser.organisationId)) ||
+    Boolean(activePatient?.organisationId)
   );
 }
 
@@ -250,16 +254,22 @@ function diffById<T extends { id: string }>(next: T[], prev: T[]): T[] {
 async function pushPatients(changed: PatientProfile[]): Promise<void> {
   if (!supabase || changed.length === 0) return;
   const { currentUser, authUserId } = useStore.getState();
-  if (!authUserId || !currentUser.organisationId) return;
+  if (!authUserId) return;
   try {
-    const rows = changed.map((p) =>
-      toProfileRow(p, authUserId, currentUser.organisationId!)
-    );
-    await supabase.from("profiles").upsert(rows);
+    const rows = changed
+      .filter((p) => Boolean(currentUser.organisationId || p.organisationId))
+      .map((p) =>
+        toProfileRow(
+          p,
+          authUserId,
+          (p.organisationId || currentUser.organisationId)!
+        )
+      );
+    if (rows.length > 0) {
+      await supabase.from("profiles").upsert(rows);
+    }
   } catch {
-    // Best-effort only — same convention as accountSync.ts. A push retries
-    // naturally on the next relevant store change; nothing here is the only
-    // copy of the data (it's still in localStorage regardless).
+    // Best-effort only — see pushPatients.
   }
 }
 
@@ -293,7 +303,12 @@ function mergeById<T extends { id: string }>(local: T[], remote: T[]): T[] {
  */
 export async function pullOrganisationData(): Promise<void> {
   if (!canSyncNow() || !supabase) return;
-  const organisationId = useStore.getState().currentUser.organisationId;
+  const state = useStore.getState();
+  const activePatient = state.patients.find(
+    (p) => p.id === state.activePatientId
+  );
+  const organisationId =
+    state.currentUser.organisationId || activePatient?.organisationId;
   if (!organisationId) return;
 
   try {
@@ -326,10 +341,20 @@ export async function pullOrganisationData(): Promise<void> {
       }
     }
 
-    useStore.setState((s) => ({
-      patients: mergeById(s.patients, remotePatients),
-      events: mergeById(s.events, remoteEvents),
-    }));
+    useStore.setState((s) => {
+      const mergedPatients = mergeById(s.patients, remotePatients);
+      const activePatientId =
+        s.activePatientId &&
+        mergedPatients.some((p) => p.id === s.activePatientId)
+          ? s.activePatientId
+          : (mergedPatients[0]?.id ?? s.activePatientId);
+
+      return {
+        patients: mergedPatients,
+        events: mergeById(s.events, remoteEvents),
+        activePatientId,
+      };
+    });
   } catch {
     // Best-effort only — see pushPatients.
   }

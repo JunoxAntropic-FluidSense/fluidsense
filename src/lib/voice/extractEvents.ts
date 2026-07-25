@@ -138,11 +138,11 @@ function buildEvent(
   const classification = classifyDirection(clause);
   let direction = classification.direction;
 
-  const category =
+  let category =
     direction === "intake"
-      ? (detectIntakeCategory(clause) ?? undefined)
+      ? (detectIntakeCategory(clause) ?? "water")
       : direction === "output"
-        ? (detectOutputCategory(clause) ?? undefined)
+        ? (detectOutputCategory(clause) ?? "urine")
         : (detectIntakeCategory(clause) ??
           detectOutputCategory(clause) ??
           undefined);
