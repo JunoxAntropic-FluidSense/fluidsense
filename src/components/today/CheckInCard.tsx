@@ -32,7 +32,8 @@ function statusText(s: CheckInWindowStatus): string {
   }
 }
 
-export function CheckInCard() {
+/** Check-in status rows with no Card wrapper, for embedding inside another card (see TodayContextCard). */
+export function CheckInStatusList() {
   const navigate = useNavigate();
   const { patient, windowEvents } = useFluidData("since_midnight");
 
@@ -41,40 +42,46 @@ export function CheckInCard() {
   const statuses = getCheckInStatuses(windowEvents, new Date());
 
   return (
+    <div className="space-y-2">
+      {statuses.map((s) => {
+        const actionable = s.status !== "done";
+        const row = (
+          <div
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left ${ROW_CLASS[s.status]}`}
+          >
+            <span
+              aria-hidden="true"
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[s.status]}`}
+            />
+            <span className="flex-1 text-sm font-semibold text-navy-900">
+              {s.label}
+            </span>
+            <span className="text-sm text-fog-600">{statusText(s)}</span>
+          </div>
+        );
+
+        return actionable ? (
+          <button
+            key={s.window}
+            type="button"
+            onClick={() => navigate("/voice")}
+            className="w-full cursor-pointer transition-opacity hover:opacity-80"
+          >
+            {row}
+          </button>
+        ) : (
+          <div key={s.window}>{row}</div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function CheckInCard() {
+  return (
     <Card className="p-5">
       <CardHeading>Check-ins today</CardHeading>
-      <div className="space-y-2">
-        {statuses.map((s) => {
-          const actionable = s.status !== "done";
-          const row = (
-            <div
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left ${ROW_CLASS[s.status]}`}
-            >
-              <span
-                aria-hidden="true"
-                className={`h-2.5 w-2.5 shrink-0 rounded-full ${DOT_CLASS[s.status]}`}
-              />
-              <span className="flex-1 text-sm font-semibold text-navy-900">
-                {s.label}
-              </span>
-              <span className="text-sm text-fog-600">{statusText(s)}</span>
-            </div>
-          );
-
-          return actionable ? (
-            <button
-              key={s.window}
-              type="button"
-              onClick={() => navigate("/voice")}
-              className="w-full cursor-pointer transition-opacity hover:opacity-80"
-            >
-              {row}
-            </button>
-          ) : (
-            <div key={s.window}>{row}</div>
-          );
-        })}
-      </div>
+      <CheckInStatusList />
     </Card>
   );
 }

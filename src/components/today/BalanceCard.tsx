@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Card } from "../ui/Card";
 import { ReliabilityPill } from "../ui/ReliabilityPill";
 import { Button } from "../ui/Button";
+import { StatRow } from "../ui/StatRow";
 import { formatMl, formatMlPlain } from "../../lib/calc";
 import type {
   BalanceBreakdown,
@@ -31,23 +32,25 @@ export function BalanceCard({
         <ReliabilityPill level={reliability.level} />
       </div>
 
-      <dl className="mt-3 space-y-2.5">
-        <Row
+      <div className="mt-4">
+        <p className="text-4xl md:text-5xl font-extrabold text-navy-900 tabular-nums leading-none">
+          {formatMl(balance.recordedBalanceMl)}
+        </p>
+        <p className="mt-1 text-sm text-fog-600">Recorded balance</p>
+      </div>
+
+      <dl className="mt-4 space-y-2.5 border-t border-navy-900/5 pt-3">
+        <StatRow
           label="Recorded intake"
           value={formatMlPlain(balance.totalIntakeMl)}
           tone="intake"
         />
-        <Row
+        <StatRow
           label="Measured output"
           value={formatMlPlain(balance.measuredOutputMl)}
           tone="output"
         />
-        <Row
-          label="Recorded balance"
-          value={formatMl(balance.recordedBalanceMl)}
-          strong
-        />
-        <Row
+        <StatRow
           label="Unmeasured events"
           value={String(balance.unmeasuredCount)}
           tone="fog"
@@ -72,34 +75,5 @@ export function BalanceCard({
         </Button>
       </Link>
     </Card>
-  );
-}
-
-function Row({
-  label,
-  value,
-  tone = "navy",
-  strong,
-}: {
-  label: string;
-  value: string;
-  tone?: "intake" | "output" | "navy" | "fog";
-  strong?: boolean;
-}) {
-  const toneClass: Record<string, string> = {
-    intake: "text-intake-700",
-    output: "text-output-700",
-    navy: "text-navy-900",
-    fog: "text-fog-600",
-  };
-  return (
-    <div className="flex items-baseline justify-between">
-      <dt className="text-sm text-fog-600">{label}</dt>
-      <dd
-        className={`font-bold ${strong ? "text-xl" : "text-base"} ${toneClass[tone]}`}
-      >
-        {value}
-      </dd>
-    </div>
   );
 }

@@ -4,6 +4,9 @@ import { useStore } from "../store/useStore";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ReliabilityPill } from "../components/ui/ReliabilityPill";
+import { StatRow } from "../components/ui/StatRow";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { FocusCardGrid } from "../components/ui/FocusCardGrid";
 import {
   eventsInWindow,
   computeBalance,
@@ -140,22 +143,17 @@ export function DashboardPage() {
         )}
       </div>
 
-      <label className="block text-sm font-semibold text-navy-700 max-w-xs">
-        Sort by
-        <select
+      <div>
+        <p className="text-sm font-semibold text-navy-700 mb-1.5">Sort by</p>
+        <SegmentedTabs
+          label="Sort patients by"
           value={sortKey}
-          onChange={(e) => setSortKey(e.target.value as SortKey)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          onChange={setSortKey}
+          options={SORT_OPTIONS}
+        />
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <FocusCardGrid>
         {sorted.map(
           ({
             patient,
@@ -182,24 +180,29 @@ export function DashboardPage() {
               </div>
 
               <dl className="mt-3 space-y-1.5">
-                <Row
+                <StatRow
+                  dense
                   label="Recorded intake"
                   value={formatMlPlain(balance.totalIntakeMl)}
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Measured output"
                   value={formatMlPlain(balance.measuredOutputMl)}
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Recorded balance"
                   value={formatMl(balance.recordedBalanceMl)}
                   strong
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Unmeasured events"
                   value={String(balance.unmeasuredCount)}
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Last intake"
                   value={
                     lastIntake
@@ -209,7 +212,8 @@ export function DashboardPage() {
                       : "None recorded"
                   }
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Last output"
                   value={
                     lastOutput
@@ -219,14 +223,16 @@ export function DashboardPage() {
                       : "None recorded"
                   }
                 />
-                <Row
+                <StatRow
+                  dense
                   label="Last weight"
                   value={
                     lastWeight ? `${lastWeight.weightKg} kg` : "Not recorded"
                   }
                 />
                 {patient.allowance && (
-                  <Row
+                  <StatRow
+                    dense
                     label="Fluid allowance"
                     value={formatMlPlain(patient.allowance.dailyMl)}
                   />
@@ -244,7 +250,7 @@ export function DashboardPage() {
             </Card>
           )
         )}
-      </div>
+      </FocusCardGrid>
 
       {showAddPatient && (
         <div
@@ -301,27 +307,6 @@ export function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function Row({
-  label,
-  value,
-  strong,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <dt className="text-sm text-fog-600">{label}</dt>
-      <dd
-        className={`font-semibold text-navy-900 ${strong ? "text-base font-bold" : "text-sm"}`}
-      >
-        {value}
-      </dd>
     </div>
   );
 }

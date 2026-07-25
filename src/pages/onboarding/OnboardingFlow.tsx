@@ -4,8 +4,19 @@ import { useStore } from "../../store/useStore";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
+import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
 import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
 import type { Mode, Role, Units } from "../../types";
+
+const UNITS_OPTIONS: { value: Units; label: string }[] = [
+  { value: "mL", label: "mL" },
+  { value: "L", label: "Litres" },
+];
+
+const PATIENT_ROLE_OPTIONS: { value: Role; label: string }[] = [
+  { value: "patient", label: "Myself" },
+  { value: "family_carer", label: "Someone else" },
+];
 
 const COMMON_TIMEZONES = [
   "Europe/London",
@@ -40,6 +51,8 @@ function timezoneOptions(detected: string): string[] {
 }
 
 const HEALTHCARE_ROLES: Role[] = ["nurse", "healthcare_assistant", "clinician"];
+const HEALTHCARE_ROLE_OPTIONS: { value: Role; label: string }[] =
+  HEALTHCARE_ROLES.map((r) => ({ value: r, label: r.replace("_", " ") }));
 
 export function OnboardingFlow() {
   const navigate = useNavigate();
@@ -154,30 +167,28 @@ export function OnboardingFlow() {
                 className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
             </label>
-            <label className="block text-sm font-semibold text-navy-700">
-              I am the
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-              >
-                <option value="patient">Patient, tracking my own fluids</option>
-                <option value="family_carer">
-                  Family carer, tracking for someone else
-                </option>
-              </select>
-            </label>
-            <label className="block text-sm font-semibold text-navy-700">
-              Preferred units
-              <select
+            <div>
+              <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                Tracking fluids for
+              </p>
+              <SegmentedTabs
+                label="Tracking fluids for"
+                value={role === "family_carer" ? "family_carer" : "patient"}
+                onChange={setRole}
+                options={PATIENT_ROLE_OPTIONS}
+              />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                Preferred units
+              </p>
+              <SegmentedTabs
+                label="Preferred units"
                 value={units}
-                onChange={(e) => setUnits(e.target.value as Units)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-              >
-                <option value="mL">mL</option>
-                <option value="L">Litres</option>
-              </select>
-            </label>
+                onChange={setUnits}
+                options={UNITS_OPTIONS}
+              />
+            </div>
             <label className="block text-sm font-semibold text-navy-700">
               Timezone
               <select
@@ -235,20 +246,15 @@ export function OnboardingFlow() {
                 className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
             </label>
-            <label className="block text-sm font-semibold text-navy-700">
-              Role
-              <select
+            <div>
+              <p className="text-sm font-semibold text-navy-700 mb-1.5">Role</p>
+              <SegmentedTabs
+                label="Role"
                 value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-              >
-                {HEALTHCARE_ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {r.replace("_", " ")}
-                  </option>
-                ))}
-              </select>
-            </label>
+                onChange={setRole}
+                options={HEALTHCARE_ROLE_OPTIONS}
+              />
+            </div>
             <label className="block text-sm font-semibold text-navy-700">
               Organisation (optional)
               <input
@@ -258,17 +264,17 @@ export function OnboardingFlow() {
                 className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
             </label>
-            <label className="block text-sm font-semibold text-navy-700">
-              Preferred units
-              <select
+            <div>
+              <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                Preferred units
+              </p>
+              <SegmentedTabs
+                label="Preferred units"
                 value={units}
-                onChange={(e) => setUnits(e.target.value as Units)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-              >
-                <option value="mL">mL</option>
-                <option value="L">Litres</option>
-              </select>
-            </label>
+                onChange={setUnits}
+                options={UNITS_OPTIONS}
+              />
+            </div>
             <label className="block text-sm font-semibold text-navy-700">
               Timezone
               <select

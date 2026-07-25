@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFluidData } from "../hooks/useFluidData";
 import { useStore } from "../store/useStore";
 import { Card, CardHeading } from "../components/ui/Card";
@@ -8,7 +8,10 @@ import { ReliabilityPill } from "../components/ui/ReliabilityPill";
 import { WeatherNote } from "../components/today/WeatherNote";
 import { PERIOD_OPTIONS } from "../lib/period";
 import { formatMl, formatMlPlain, describeUnmeasured } from "../lib/calc";
+import { isSupabaseConfigured } from "../lib/supabase/client";
+import { sendCareTeamSummary } from "../lib/careTeam/sendSummary";
 import { format } from "date-fns";
+import { DIALYSIS_MODALITY_LABEL } from "../types";
 import type { SummaryPeriod } from "../types";
 
 export function SummaryPage() {
@@ -23,7 +26,13 @@ export function SummaryPage() {
     range,
   } = useFluidData("24h");
   const weightEvents = useStore((s) => s.weightEvents);
+  const medicationEvents = useStore((s) => s.medicationEvents);
+  const dialysisAppointments = useStore((s) => s.dialysisAppointments);
   const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendResultMessage, setSendResultMessage] = useState<string | null>(
+    null
+  );
 
   const patientWeights = useMemo(
     () =>
@@ -42,6 +51,28 @@ export function SummaryPage() {
   const unmeasuredDescriptions = useMemo(
     () => describeUnmeasured(balance.unmeasuredEvents),
     [balance.unmeasuredEvents]
+  );
+
+  const patientMedications = useMemo(
+    () =>
+      medicationEvents
+        .filter((m) => m.patientId === patient?.id)
+        .sort(
+          (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+        ),
+    [medicationEvents, patient]
+  );
+  const patientDialysis = useMemo(
+    () =>
+      dialysisAppointments
+        .filter((d) => d.patientId === patient?.id)
+        .sort(
+          (a, b) =>
+            new Date(b.scheduledTime).getTime() -
+            new Date(a.scheduledTime).getTime()
+        )
+        .slice(0, 5),
+    [dialysisAppointments, patient]
   );
 
   if (!patient) return null;
@@ -84,6 +115,25 @@ export function SummaryPage() {
             "",
           ]
         : []),
+      ...(patientMedications.length
+        ? [
+            "Medications:",
+            ...patientMedications.map(
+              (m) => `- ${m.name}, ${m.dose}, ${m.frequency}`
+            ),
+            "",
+          ]
+        : []),
+      ...(patientDialysis.length
+        ? [
+            "Recent dialysis / renal replacement therapy:",
+            ...patientDialysis.map(
+              (d) =>
+                `- ${DIALYSIS_MODALITY_LABEL[d.modality]}, ${format(new Date(d.scheduledTime), "d MMM, HH:mm")}, ${d.attended ? "attended" : "missed"}`
+            ),
+            "",
+          ]
+        : []),
       "This summary describes recorded information and does not determine the patient's actual fluid status.",
     ];
     return lines.join("\n");
@@ -96,6 +146,33 @@ export function SummaryPage() {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
+    }
+  };
+
+  const canSendReal =
+    isSupabaseConfigured() &&
+    !!patient.careTeamShareConsent &&
+    (patient.careTeamContacts?.length ?? 0) > 0;
+
+  const shareWithCareTeam = async () => {
+    if (!canSendReal) {
+      await copySummary();
+      return;
+    }
+    setSending(true);
+    setSendResultMessage(null);
+    const result = await sendCareTeamSummary({
+      recipients: patient.careTeamContacts!,
+      patientDisplayName: patient.displayName,
+      summaryText,
+    });
+    setSending(false);
+    if (result.status === "ok") {
+      setSendResultMessage(
+        `Sent to ${result.sent} contact${result.sent === 1 ? "" : "s"}.`
+      );
+    } else {
+      setSendResultMessage("Couldn't send right now — please try again.");
     }
   };
 
@@ -239,6 +316,38 @@ export function SummaryPage() {
         </Card>
       )}
 
+      {(patientMedications.length > 0 || patientDialysis.length > 0) && (
+        <Card className="p-5">
+          <CardHeading>Medications &amp; dialysis</CardHeading>
+          {patientMedications.length > 0 && (
+            <ul className="text-sm text-navy-800 space-y-1 mb-2">
+              {patientMedications.slice(0, 5).map((m) => (
+                <li key={m.id}>
+                  {m.name} — {m.dose}, {m.frequency}
+                </li>
+              ))}
+            </ul>
+          )}
+          {patientDialysis.length > 0 && (
+            <ul className="text-sm text-fog-600 space-y-1">
+              {patientDialysis.map((d) => (
+                <li key={d.id}>
+                  {DIALYSIS_MODALITY_LABEL[d.modality]},{" "}
+                  {format(new Date(d.scheduledTime), "d MMM, HH:mm")} —{" "}
+                  {d.attended ? "attended" : "missed"}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            to="/care-log"
+            className="text-xs font-semibold underline text-navy-700 mt-2 inline-block"
+          >
+            Open full log
+          </Link>
+        </Card>
+      )}
+
       <Card className="p-5 bg-navy-900 text-fog-100">
         <p className="text-sm font-semibold">
           This summary describes recorded information and does not determine the
@@ -253,14 +362,28 @@ export function SummaryPage() {
         <Button variant="secondary" onClick={() => window.print()}>
           Print / Download
         </Button>
-        <Button variant="secondary" onClick={copySummary}>
-          Share with healthcare team
+        <Button
+          variant="secondary"
+          onClick={shareWithCareTeam}
+          disabled={sending}
+        >
+          {sending
+            ? "Sending…"
+            : canSendReal
+              ? "Send to care team"
+              : "Share with healthcare team"}
         </Button>
         <Button onClick={() => navigate("/")}>Return to Today</Button>
       </div>
+      {sendResultMessage && (
+        <p className="text-xs text-center text-navy-700" aria-live="polite">
+          {sendResultMessage}
+        </p>
+      )}
       <p className="text-xs text-fog-500 text-center">
-        "Share" copies formatted text in this prototype rather than sending real
-        clinical data.
+        {canSendReal
+          ? "This sends your summary above to the contacts you've added in Profile → Care team sharing."
+          : '"Share" copies formatted text in this prototype rather than sending real clinical data.'}
       </p>
 
       <p className="sr-only" aria-live="polite">

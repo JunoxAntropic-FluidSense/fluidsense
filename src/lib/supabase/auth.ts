@@ -28,10 +28,22 @@ const NOT_CONFIGURED_ERROR: NormalizedAuthError = {
   message: "Supabase is not configured.",
 };
 
+const GENERIC_ERROR_MESSAGE =
+  "Something went wrong. Please try again in a moment.";
+
+/**
+ * Some server-side failures (e.g. a misconfigured SMTP provider) return a
+ * malformed or empty error body — supabase-js then falls back to something
+ * like the literal string "{}" for `.message`, which is meaningless shown to
+ * a user. Guard against that here rather than rendering it verbatim.
+ */
 function normalizeError(
   error: { message: string } | null | undefined
 ): NormalizedAuthError | null {
-  return error ? { message: error.message } : null;
+  if (!error) return null;
+  const message = error.message?.trim();
+  const isUsefulMessage = Boolean(message) && !/^[{[]/.test(message);
+  return { message: isUsefulMessage ? message : GENERIC_ERROR_MESSAGE };
 }
 
 export async function signUpWithPassword(

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 import { useStore } from "../store/useStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useActivePatient } from "../hooks/useFluidData";
@@ -51,6 +52,8 @@ export function ProfilePage() {
   );
   const [checkInPending, setCheckInPending] = useState(false);
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
+  const [contactNameInput, setContactNameInput] = useState("");
+  const [contactEmailInput, setContactEmailInput] = useState("");
 
   if (!patient) return null;
 
@@ -70,6 +73,18 @@ export function ProfilePage() {
     if (!result.ok && result.message) {
       setCheckInMessage(result.message);
     }
+  };
+
+  const handleAddCareTeamContact = () => {
+    const name = contactNameInput.trim();
+    const email = contactEmailInput.trim();
+    if (!name || !email.includes("@")) return;
+    const newContact = { id: uuid(), name, email };
+    updatePatient(patient.id, {
+      careTeamContacts: [...(patient.careTeamContacts ?? []), newContact],
+    });
+    setContactNameInput("");
+    setContactEmailInput("");
   };
 
   return (
@@ -325,6 +340,85 @@ export function ProfilePage() {
             </li>
           ))}
         </ul>
+      </Card>
+
+      <Card className="p-5">
+        <CardHeading>Care team sharing</CardHeading>
+        <p className="text-sm text-fog-600 mb-3">
+          Choose who can receive a copy of your recorded fluid summary. Nothing
+          is sent unless you turn this on and add at least one contact.
+        </p>
+        <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+          <input
+            type="checkbox"
+            checked={patient.careTeamShareConsent ?? false}
+            onChange={(e) =>
+              updatePatient(patient.id, {
+                careTeamShareConsent: e.target.checked,
+              })
+            }
+            className="w-5 h-5"
+          />
+          Allow sharing my summary with the contacts below
+        </label>
+
+        <div
+          className={patient.careTeamShareConsent ? "mt-4" : "mt-4 opacity-60"}
+        >
+          {(patient.careTeamContacts ?? []).length > 0 && (
+            <ul className="space-y-2 mb-3">
+              {(patient.careTeamContacts ?? []).map((contact) => (
+                <li
+                  key={contact.id}
+                  className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-navy-800">
+                      {contact.name}
+                    </p>
+                    <p className="text-xs text-fog-500">{contact.email}</p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      updatePatient(patient.id, {
+                        careTeamContacts: (
+                          patient.careTeamContacts ?? []
+                        ).filter((c) => c.id !== contact.id),
+                      })
+                    }
+                    className="text-sm font-bold text-navy-500 hover:text-navy-700"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={contactNameInput}
+              onChange={(e) => setContactNameInput(e.target.value)}
+              placeholder="Contact name"
+              className="flex-1 rounded-xl border border-navy-900/15 px-3 py-2.5"
+            />
+            <input
+              value={contactEmailInput}
+              onChange={(e) => setContactEmailInput(e.target.value)}
+              placeholder="Contact email"
+              className="flex-1 rounded-xl border border-navy-900/15 px-3 py-2.5"
+            />
+            <Button
+              size="md"
+              disabled={
+                !contactNameInput.trim() || !contactEmailInput.includes("@")
+              }
+              onClick={handleAddCareTeamContact}
+            >
+              Add
+            </Button>
+          </div>
+        </div>
       </Card>
 
       <Card className="p-5">

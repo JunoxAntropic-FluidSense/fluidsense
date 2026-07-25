@@ -5,9 +5,7 @@ import { BalanceCard } from "../components/today/BalanceCard";
 import { AllowanceCard } from "../components/today/AllowanceCard";
 import { QuickAddGrid } from "../components/today/QuickAddGrid";
 import { ActivityTimeline } from "../components/today/ActivityTimeline";
-import { ReminderBanner } from "../components/today/ReminderBanner";
-import { CheckInCard } from "../components/today/CheckInCard";
-import { WeatherNote } from "../components/today/WeatherNote";
+import { TodayContextCard } from "../components/today/TodayContextCard";
 import { EmptyToday } from "../components/today/EmptyToday";
 import { Button } from "../components/ui/Button";
 
@@ -23,7 +21,7 @@ export function TodayPage() {
   );
 
   return (
-    <div className="space-y-4 max-w-lg mx-auto">
+    <div className="space-y-4 max-w-lg md:max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-extrabold text-navy-900">
           Hello, {patient.displayName}
@@ -45,10 +43,6 @@ export function TodayPage() {
         </Button>
       </Link>
 
-      <ReminderBanner patient={patient} events={windowEvents} />
-      <CheckInCard />
-      <WeatherNote />
-
       {hasAnyEvents ? (
         <BalanceCard
           balance={balance}
@@ -60,12 +54,19 @@ export function TodayPage() {
         <EmptyToday />
       )}
 
-      {patient.allowance && (
-        <AllowanceCard
-          allowance={patient.allowance}
-          recordedIntakeMl={balance.totalIntakeMl}
+      <div className="grid gap-4 md:grid-cols-2">
+        {patient.allowance && (
+          <AllowanceCard
+            allowance={patient.allowance}
+            recordedIntakeMl={balance.totalIntakeMl}
+          />
+        )}
+        <TodayContextCard
+          patient={patient}
+          events={windowEvents}
+          className={patient.allowance ? "" : "md:col-span-2"}
         />
-      )}
+      </div>
 
       <QuickAddGrid patient={patient} />
 

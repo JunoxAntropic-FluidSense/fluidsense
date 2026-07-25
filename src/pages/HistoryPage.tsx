@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { EventRow } from "../components/EventRow";
 import { EditEventModal } from "../components/EditEventModal";
 import type { FluidEvent } from "../types";
@@ -10,6 +11,25 @@ import type { FluidEvent } from "../types";
 type DirectionFilter = "all" | "intake" | "output" | "unmeasured";
 type StatusFilter = "all" | "measured" | "estimated";
 type MethodFilter = "all" | "voice" | "manual";
+
+const DIRECTION_OPTIONS: { value: DirectionFilter; label: string }[] = [
+  { value: "all", label: "All entries" },
+  { value: "intake", label: "Intake" },
+  { value: "output", label: "Output" },
+  { value: "unmeasured", label: "Unmeasured" },
+];
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All statuses" },
+  { value: "measured", label: "Measured" },
+  { value: "estimated", label: "Estimated" },
+];
+
+const METHOD_OPTIONS: { value: MethodFilter; label: string }[] = [
+  { value: "all", label: "All methods" },
+  { value: "voice", label: "Voice" },
+  { value: "manual", label: "Manual / tap" },
+];
 
 const UNDO_WINDOW_MS = 8000;
 
@@ -155,39 +175,35 @@ export function HistoryPage() {
         </Button>
       </div>
 
-      <Card className="p-5">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <FilterSelect
-            label="Direction"
-            value={direction}
-            onChange={(v) => setDirection(v as DirectionFilter)}
-            options={[
-              ["all", "All entries"],
-              ["intake", "Intake"],
-              ["output", "Output"],
-              ["unmeasured", "Unmeasured events"],
-            ]}
-          />
-          <FilterSelect
-            label="Status"
-            value={status}
-            onChange={(v) => setStatus(v as StatusFilter)}
-            options={[
-              ["all", "All statuses"],
-              ["measured", "Measured"],
-              ["estimated", "Estimated"],
-            ]}
-          />
-          <FilterSelect
-            label="Input method"
-            value={method}
-            onChange={(v) => setMethod(v as MethodFilter)}
-            options={[
-              ["all", "All methods"],
-              ["voice", "Voice entries"],
-              ["manual", "Manual / tap entries"],
-            ]}
-          />
+      <Card className="p-5 space-y-4">
+        <div className="space-y-3">
+          <FilterGroup label="Direction">
+            <SegmentedTabs
+              label="Direction"
+              value={direction}
+              onChange={setDirection}
+              options={DIRECTION_OPTIONS}
+            />
+          </FilterGroup>
+          <FilterGroup label="Status">
+            <SegmentedTabs
+              label="Status"
+              value={status}
+              onChange={setStatus}
+              options={STATUS_OPTIONS}
+            />
+          </FilterGroup>
+          <FilterGroup label="Input method">
+            <SegmentedTabs
+              label="Input method"
+              value={method}
+              onChange={setMethod}
+              options={METHOD_OPTIONS}
+            />
+          </FilterGroup>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 border-t border-navy-900/5 pt-4">
           <FilterSelect
             label="Recorded by"
             value={enteredBy}
@@ -311,6 +327,21 @@ export function HistoryPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function FilterGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-navy-700 mb-1.5">{label}</p>
+      {children}
     </div>
   );
 }

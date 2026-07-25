@@ -50,6 +50,18 @@ export function PrivacyPage() {
         </section>
 
         <section className="space-y-2">
+          <h2 className="font-bold text-navy-900">Care team sharing</h2>
+          <p className="text-sm text-fog-700">
+            Sharing is off by default. It only happens if you explicitly turn it
+            on and add a contact in Profile. When you use it, the same summary
+            shown on the Summary page is emailed — via a third-party provider,
+            Resend — to the contacts you've added. Nothing is sent automatically
+            or on a schedule; each email only goes out when you choose to send
+            it.
+          </p>
+        </section>
+
+        <section className="space-y-2">
           <h2 className="font-bold text-navy-900">Demo mode</h2>
           <p className="text-sm text-fog-700">
             Demo mode uses entirely fictional patients and fictional data,
