@@ -9,6 +9,8 @@ import type {
   FluidEvent,
   WeightEvent,
   SymptomEvent,
+  MedicationEvent,
+  DialysisAppointmentEvent,
   SavedContainer,
   EditRecord,
   Reminder,
@@ -35,6 +37,8 @@ interface LiveSnapshot {
   events: FluidEvent[];
   weightEvents: WeightEvent[];
   symptomEvents: SymptomEvent[];
+  medicationEvents: MedicationEvent[];
+  dialysisAppointments: DialysisAppointmentEvent[];
   monitoringPeriods: MonitoringPeriod[];
   activePatientId: string;
 }
@@ -48,6 +52,8 @@ interface StoreState {
   events: FluidEvent[];
   weightEvents: WeightEvent[];
   symptomEvents: SymptomEvent[];
+  medicationEvents: MedicationEvent[];
+  dialysisAppointments: DialysisAppointmentEvent[];
   monitoringPeriods: MonitoringPeriod[];
 
   viewContext: "live" | "demo";
@@ -111,6 +117,8 @@ interface StoreState {
 
   addWeightEvent: (w: Omit<WeightEvent, "id">) => void;
   addSymptomEvent: (s: Omit<SymptomEvent, "id">) => void;
+  addMedicationEvent: (m: Omit<MedicationEvent, "id">) => void;
+  addDialysisAppointment: (d: Omit<DialysisAppointmentEvent, "id">) => void;
 
   addReminder: (patientId: string, reminder: Omit<Reminder, "id">) => void;
   updateReminder: (
@@ -159,6 +167,8 @@ const emptyLiveSnapshot: LiveSnapshot = {
   events: [],
   weightEvents: [],
   symptomEvents: [],
+  medicationEvents: [],
+  dialysisAppointments: [],
   monitoringPeriods: [],
   activePatientId: "",
 };
@@ -259,6 +269,8 @@ export const useStore = create<StoreState>()(
       events: [],
       weightEvents: [],
       symptomEvents: [],
+      medicationEvents: [],
+      dialysisAppointments: [],
       monitoringPeriods: [],
 
       viewContext: "live",
@@ -342,6 +354,8 @@ export const useStore = create<StoreState>()(
           events: [],
           weightEvents: [],
           symptomEvents: [],
+          medicationEvents: [],
+          dialysisAppointments: [],
           monitoringPeriods: [period],
           activePatientId: profileId,
           viewContext: "live",
@@ -363,6 +377,8 @@ export const useStore = create<StoreState>()(
           events: [],
           weightEvents: [],
           symptomEvents: [],
+          medicationEvents: [],
+          dialysisAppointments: [],
         }),
 
       enterDemoMode: () => {
@@ -378,6 +394,8 @@ export const useStore = create<StoreState>()(
             events: s.events,
             weightEvents: s.weightEvents,
             symptomEvents: s.symptomEvents,
+            medicationEvents: s.medicationEvents,
+            dialysisAppointments: s.dialysisAppointments,
             monitoringPeriods: s.monitoringPeriods,
             activePatientId: s.activePatientId,
           },
@@ -386,6 +404,8 @@ export const useStore = create<StoreState>()(
           events: demo.events,
           weightEvents: demo.weightEvents,
           symptomEvents: [],
+          medicationEvents: [],
+          dialysisAppointments: [],
           monitoringPeriods: demo.monitoringPeriods,
           activePatientId: demo.patients[demo.patients.length - 1].id,
           mode: "patient",
@@ -621,6 +641,17 @@ export const useStore = create<StoreState>()(
         set((s) => ({
           symptomEvents: [{ ...sy, id: uuid() }, ...s.symptomEvents],
         })),
+      addMedicationEvent: (m) =>
+        set((s) => ({
+          medicationEvents: [{ ...m, id: uuid() }, ...s.medicationEvents],
+        })),
+      addDialysisAppointment: (d) =>
+        set((s) => ({
+          dialysisAppointments: [
+            { ...d, id: uuid() },
+            ...s.dialysisAppointments,
+          ],
+        })),
 
       addReminder: (patientId, reminder) =>
         set((s) => ({
@@ -730,6 +761,8 @@ export const useStore = create<StoreState>()(
                 events: state.events,
                 weightEvents: state.weightEvents,
                 symptomEvents: state.symptomEvents,
+                medicationEvents: state.medicationEvents,
+                dialysisAppointments: state.dialysisAppointments,
                 monitoringPeriods: state.monitoringPeriods,
                 activePatientId: state.activePatientId,
               };

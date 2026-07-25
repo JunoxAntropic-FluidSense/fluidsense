@@ -12,6 +12,7 @@ import { SummaryPage } from "./pages/SummaryPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DrinksPage } from "./pages/DrinksPage";
+import { CareLogPage } from "./pages/CareLogPage";
 import { DataSettingsPage } from "./pages/DataSettingsPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { TermsPage } from "./pages/TermsPage";
@@ -38,6 +39,7 @@ function App() {
           <Route path="/settings/data" element={<DataSettingsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/drinks" element={<DrinksPage />} />
+          <Route path="/care-log" element={<CareLogPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

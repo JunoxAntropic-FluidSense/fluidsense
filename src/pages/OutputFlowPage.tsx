@@ -235,7 +235,8 @@ export function OutputFlowPage() {
       {step === 2 &&
         (category === "stoma" ||
           category === "drain" ||
-          category === "nasogastric") && (
+          category === "nasogastric" ||
+          category === "dialysis") && (
           <div className="mt-4 space-y-3">
             <MethodButton
               label="Exact volume"
@@ -255,7 +256,8 @@ export function OutputFlowPage() {
       {step === 3 &&
         (category === "stoma" ||
           category === "drain" ||
-          category === "nasogastric") && (
+          category === "nasogastric" ||
+          category === "dialysis") && (
           <ExactVolumeStep
             amounts={OUTPUT_QUICK_AMOUNTS}
             raw={rawInput}

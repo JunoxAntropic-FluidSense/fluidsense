@@ -358,6 +358,17 @@ export function ProfilePage() {
       )}
 
       <Card className="p-5">
+        <CardHeading>Medications &amp; dialysis</CardHeading>
+        <p className="text-sm text-fog-600 mb-3">
+          Log diuretic or other medications, and renal replacement therapy /
+          dialysis appointments and attendance.
+        </p>
+        <Button variant="secondary" onClick={() => navigate("/care-log")}>
+          Open medications &amp; dialysis log
+        </Button>
+      </Card>
+
+      <Card className="p-5">
         <CardHeading>Data and monitoring settings</CardHeading>
         <p className="text-sm text-fog-600 mb-3">
           Start a new day, clear entries, or permanently delete data.

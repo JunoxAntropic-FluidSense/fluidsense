@@ -22,6 +22,7 @@ export const CATEGORY_ICON: Record<FluidCategory | OutputCategory, string> = {
   drain: "🩸",
   nasogastric: "🧪",
   sweating: "💦",
+  dialysis: "🔄",
   other_output: "➖",
 };
 
@@ -47,6 +48,7 @@ export const CATEGORY_LABEL: Record<FluidCategory | OutputCategory, string> = {
   drain: "Drain output",
   nasogastric: "Nasogastric output",
   sweating: "Sweating",
+  dialysis: "Dialysis fluid removed",
   other_output: "Other output",
 };
 
@@ -75,6 +77,7 @@ export const OUTPUT_CATEGORIES: OutputCategory[] = [
   "drain",
   "nasogastric",
   "sweating",
+  "dialysis",
   "other_output",
 ];
 

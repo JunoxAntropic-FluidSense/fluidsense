@@ -83,6 +83,7 @@ export type OutputCategory =
   | "drain"
   | "nasogastric"
   | "sweating"
+  | "dialysis"
   | "other_output";
 
 export interface FluidProfile {
@@ -166,6 +167,52 @@ export interface SymptomEvent {
   note?: string;
 }
 
+// --- Medications ---------------------------------------------------------------
+// A recorded log only — name/dose/frequency as entered by the patient, carer,
+// or clinician. The app never computes or suggests a dose change; any
+// question about whether a dose needs adjusting is for the care team,
+// reachable via the existing "Share with care team" action on the summary
+// screen (see SummaryPage.tsx / src/lib/careTeam/), never an app judgment.
+
+export interface MedicationEvent {
+  id: string;
+  patientId: string;
+  name: string; // medicine name, e.g. "Furosemide"
+  dose: string; // free text, e.g. "40 mg" — dosing forms vary too much for a strict unit split
+  frequency: string; // free text, e.g. "Once daily", "Twice daily", "As needed"
+  time: string; // ISO — when taken / recorded
+  note?: string;
+  enteredBy: string;
+  recordedTime: string;
+}
+
+// --- Renal replacement therapy / dialysis ---------------------------------------
+// Attendance + modality log only. The fluid actually removed during a session
+// is recorded separately as a normal output FluidEvent (category "dialysis"),
+// so it flows through the same balance calculation as any other output —
+// this record just tracks whether/what kind of session happened.
+
+export type DialysisModality =
+  "haemodialysis" | "peritoneal_dialysis" | "crrt" | "other";
+
+export const DIALYSIS_MODALITY_LABEL: Record<DialysisModality, string> = {
+  haemodialysis: "Haemodialysis",
+  peritoneal_dialysis: "Peritoneal dialysis",
+  crrt: "CRRT (continuous renal replacement therapy)",
+  other: "Other renal replacement therapy",
+};
+
+export interface DialysisAppointmentEvent {
+  id: string;
+  patientId: string;
+  modality: DialysisModality;
+  scheduledTime: string; // ISO
+  attended: boolean;
+  note?: string;
+  enteredBy: string;
+  recordedTime: string;
+}
+
 // --- Reminders ---------------------------------------------------------------
 
 export type ReminderKind =
@@ -219,6 +266,12 @@ export interface QuickButtonPref {
   enabled: boolean;
 }
 
+export interface CareTeamContact {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface PatientProfile {
   id: string;
   displayName: string; // fictional name only
@@ -236,6 +289,8 @@ export interface PatientProfile {
   reminders: Reminder[];
   contactInstructions?: string;
   isDemo?: boolean;
+  careTeamShareConsent?: boolean;
+  careTeamContacts?: CareTeamContact[];
 }
 
 // --- Reliability ---------------------------------------------------------------
