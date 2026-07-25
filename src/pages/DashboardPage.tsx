@@ -7,6 +7,7 @@ import { ReliabilityPill } from "../components/ui/ReliabilityPill";
 import { StatRow } from "../components/ui/StatRow";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { FocusCardGrid } from "../components/ui/FocusCardGrid";
+import { Field, Input } from "../components/ui/Field";
 import {
   eventsInWindow,
   computeBalance,
@@ -16,6 +17,12 @@ import {
 import { computeReliability } from "../lib/reliability";
 import { getPeriodRange } from "../lib/period";
 import { formatDistanceToNow } from "date-fns";
+import type { DeploymentMode } from "../types";
+
+const DEPLOYMENT_MODE_OPTIONS: { value: DeploymentMode; label: string }[] = [
+  { value: "home_community", label: "Home & community" },
+  { value: "inpatient", label: "Inpatient" },
+];
 
 type SortKey =
   | "reliability"
@@ -41,6 +48,7 @@ export function DashboardPage() {
   const weightEvents = useStore((s) => s.weightEvents);
   const setActivePatient = useStore((s) => s.setActivePatient);
   const addPatient = useStore((s) => s.addPatient);
+  const updatePatient = useStore((s) => s.updatePatient);
   const viewContext = useStore((s) => s.viewContext);
   const [sortKey, setSortKey] = useState<SortKey>("reliability");
   const [showAddPatient, setShowAddPatient] = useState(false);
@@ -153,6 +161,19 @@ export function DashboardPage() {
         />
       </div>
 
+      {sorted.length === 0 && (
+        <Card className="p-6 text-center space-y-3">
+          <p className="font-bold text-navy-900">No patients yet</p>
+          <p className="text-sm text-fog-600">
+            Add your first patient to start recording and reviewing their fluid
+            data.
+          </p>
+          {viewContext === "live" && (
+            <Button onClick={() => setShowAddPatient(true)}>Add patient</Button>
+          )}
+        </Card>
+      )}
+
       <FocusCardGrid>
         {sorted.map(
           ({
@@ -177,6 +198,26 @@ export function DashboardPage() {
                   )}
                 </div>
                 <ReliabilityPill level={reliability.level} />
+              </div>
+
+              <div className="mt-3">
+                <p className="text-xs font-semibold text-navy-700 mb-1">
+                  Monitoring mode
+                </p>
+                <SegmentedTabs
+                  label={`Monitoring mode for ${patient.displayName}`}
+                  value={patient.deploymentMode ?? "home_community"}
+                  onChange={(deploymentMode) =>
+                    updatePatient(patient.id, { deploymentMode })
+                  }
+                  options={DEPLOYMENT_MODE_OPTIONS}
+                />
+                <p className="text-xs text-fog-500 mt-1">
+                  {(patient.deploymentMode ?? "home_community") ===
+                  "home_community"
+                    ? "Patient/carer records everything. You can review and add notes, but not alter their entries."
+                    : "Staff record most entries; the patient may also contribute. Staff can verify, correct, or reject any entry."}
+                </p>
               </div>
 
               <dl className="mt-3 space-y-1.5">
@@ -263,24 +304,20 @@ export function DashboardPage() {
             <h2 className="text-lg font-extrabold text-navy-900 mb-4">
               Add a patient
             </h2>
-            <label className="block text-sm font-semibold text-navy-700">
-              Display name
-              <input
+            <Field label="Display name">
+              <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="e.g. Patient in Bed 4"
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
-            </label>
-            <label className="block text-sm font-semibold text-navy-700 mt-3">
-              Care setting
-              <input
+            </Field>
+            <Field label="Care setting" className="mt-3">
+              <Input
                 value={newSetting}
                 onChange={(e) => setNewSetting(e.target.value)}
                 placeholder="e.g. Ward 3B"
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
-            </label>
+            </Field>
             <div className="grid grid-cols-2 gap-3 mt-5">
               <Button
                 variant="secondary"

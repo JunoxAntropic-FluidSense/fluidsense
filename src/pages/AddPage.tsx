@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Drop, Toilet, Microphone } from "@phosphor-icons/react";
 
 export function AddPage() {
   return (
@@ -13,9 +14,7 @@ export function AddPage() {
         to="/add/intake"
         className="block rounded-3xl bg-intake-600 text-white p-6 hover:bg-intake-700"
       >
-        <span className="text-3xl" aria-hidden="true">
-          💧
-        </span>
+        <Drop size={32} weight="fill" aria-hidden="true" />
         <h2 className="text-xl font-extrabold mt-2">Record intake</h2>
         <p className="text-sm text-intake-50/90">
           Drinks, IV fluids, feeds and more
@@ -26,9 +25,7 @@ export function AddPage() {
         to="/add/output"
         className="block rounded-3xl bg-output-600 text-white p-6 hover:bg-output-700"
       >
-        <span className="text-3xl" aria-hidden="true">
-          🚻
-        </span>
+        <Toilet size={32} weight="fill" aria-hidden="true" />
         <h2 className="text-xl font-extrabold mt-2">Record output or loss</h2>
         <p className="text-sm text-output-50/90">
           Urine, vomiting, diarrhoea, sweating and more
@@ -39,9 +36,12 @@ export function AddPage() {
         to="/voice"
         className="block rounded-3xl bg-white border-2 border-navy-900/10 p-6 hover:border-intake-400"
       >
-        <span className="text-3xl" aria-hidden="true">
-          🎙️
-        </span>
+        <Microphone
+          size={32}
+          weight="fill"
+          className="text-intake-600"
+          aria-hidden="true"
+        />
         <h2 className="text-xl font-extrabold text-navy-900 mt-2">
           Speak an entry
         </h2>

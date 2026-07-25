@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 import { useStore } from "../store/useStore";
@@ -7,10 +7,137 @@ import { useActivePatient } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { Field, Input } from "../components/ui/Field";
+import { Switch } from "../components/ui/Checkbox";
 import { SignOutButton } from "../components/auth";
-import type { Role, Units } from "../types";
+import { WorkspaceSetup } from "../components/onboarding/WorkspaceSetup";
+import type { DeploymentMode, Role, Units } from "../types";
 import { format } from "date-fns";
 import { enableCheckInPush, disableCheckInPush } from "../lib/push/subscribe";
+import {
+  getMyOrganisation,
+  createOrganisationInvite,
+  listOrganisationMembers,
+  type OrganisationMemberRow,
+} from "../lib/supabase/organisations";
+
+/**
+ * Team roster + invite-code generation for a healthcare account that's
+ * already in a workspace, or the create/join flow for one that isn't yet.
+ * Rendered both from the main profile body (once a patient exists) and from
+ * the no-patient-yet fallback below — workspace setup shouldn't be blocked
+ * on having added a patient first.
+ */
+function TeamWorkspaceSection() {
+  const currentUser = useStore((s) => s.currentUser);
+  const setOrganisation = useStore((s) => s.setOrganisation);
+  const authStatus = useAuthStore((s) => s.status);
+  const [members, setMembers] = useState<OrganisationMemberRow[]>([]);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [checkedRemote, setCheckedRemote] = useState(false);
+
+  const organisationId = currentUser.organisationId;
+
+  // Recovers workspace membership on a fresh device/browser where local
+  // state doesn't have it yet but the account's public.users row does (the
+  // membership itself lives entirely server-side).
+  useEffect(() => {
+    if (organisationId || authStatus !== "signed-in" || checkedRemote) return;
+    setCheckedRemote(true);
+    void getMyOrganisation().then((result) => {
+      if (result.organisationId) {
+        setOrganisation(
+          result.organisationId,
+          result.organisationName ?? undefined
+        );
+      }
+    });
+  }, [organisationId, authStatus, checkedRemote, setOrganisation]);
+
+  useEffect(() => {
+    if (!organisationId) return;
+    void listOrganisationMembers(organisationId).then((result) => {
+      if (!result.error) setMembers(result.members);
+    });
+  }, [organisationId]);
+
+  if (authStatus !== "signed-in") {
+    return (
+      <Card className="p-5">
+        <CardHeading>Team workspace</CardHeading>
+        <p className="text-sm text-fog-600">
+          Sign in to create or join your team's shared workspace.
+        </p>
+      </Card>
+    );
+  }
+
+  if (!organisationId) {
+    return (
+      <WorkspaceSetup
+        onJoined={(id, name) => setOrganisation(id, name ?? undefined)}
+      />
+    );
+  }
+
+  const generateInvite = async () => {
+    setBusy(true);
+    setError(null);
+    const result = await createOrganisationInvite(organisationId);
+    setBusy(false);
+    if (result.error || !result.code) {
+      setError(result.error?.message ?? "Couldn't generate an invite code.");
+      return;
+    }
+    setInviteCode(result.code);
+  };
+
+  return (
+    <Card className="p-5 space-y-3">
+      <CardHeading>Team workspace</CardHeading>
+      {currentUser.organisationName && (
+        <p className="text-sm text-navy-800 font-semibold">
+          {currentUser.organisationName}
+        </p>
+      )}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-fog-500 mb-1.5">
+          Staff
+        </p>
+        <ul className="space-y-1.5">
+          {members.map((m) => (
+            <li
+              key={m.id}
+              className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2 text-sm"
+            >
+              <span className="font-semibold text-navy-800">
+                {m.displayName || "Team member"}
+              </span>
+              <span className="text-fog-500">{m.role.replace("_", " ")}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {inviteCode ? (
+        <div className="rounded-xl bg-intake-50 border border-intake-200 p-3">
+          <p className="text-xs text-fog-600 mb-1">
+            Share this code with a colleague to add them to this workspace:
+          </p>
+          <p className="text-lg font-extrabold text-navy-900 tracking-wide">
+            {inviteCode}
+          </p>
+        </div>
+      ) : (
+        <Button variant="secondary" onClick={generateInvite} disabled={busy}>
+          {busy ? "Generating…" : "Invite a colleague"}
+        </Button>
+      )}
+      {error && <p className="text-xs text-alert-600">{error}</p>}
+    </Card>
+  );
+}
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "patient", label: "Patient" },
@@ -23,6 +150,11 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
 const UNITS_OPTIONS: { value: Units; label: string }[] = [
   { value: "mL", label: "mL" },
   { value: "L", label: "Litres" },
+];
+
+const LOCATION_OPTIONS: { value: DeploymentMode; label: string }[] = [
+  { value: "home_community", label: "At home" },
+  { value: "inpatient", label: "Checked in to hospital" },
 ];
 
 const REMINDER_LABELS: Record<string, string> = {
@@ -60,7 +192,30 @@ export function ProfilePage() {
   const [contactNameInput, setContactNameInput] = useState("");
   const [contactEmailInput, setContactEmailInput] = useState("");
 
-  if (!patient) return null;
+  if (!patient) {
+    // Healthcare accounts start with zero patients (see TodayPage's own
+    // redirect for the same reason) — workspace setup shouldn't be blocked
+    // on adding a patient first, so this gets a minimal standalone view
+    // instead of the blanket `return null` patient-mode falls back to.
+    if (mode === "healthcare") {
+      return (
+        <div className="max-w-lg mx-auto space-y-4 pb-8">
+          <div>
+            <h1 className="text-2xl font-extrabold text-navy-900">Profile</h1>
+            <p className="text-sm text-fog-600">
+              Set up your team workspace, then{" "}
+              <Link to="/dashboard" className="text-intake-600 font-semibold">
+                add your first patient
+              </Link>
+              .
+            </p>
+          </div>
+          <TeamWorkspaceSection />
+        </div>
+      );
+    }
+    return null;
+  }
 
   const handleCheckInToggle = async (enabled: boolean) => {
     setCheckInMessage(null);
@@ -102,6 +257,10 @@ export function ProfilePage() {
             : "Manage your account, reminders and preferences."}
         </p>
       </div>
+
+      {mode === "healthcare" && viewContext === "live" && (
+        <TeamWorkspaceSection />
+      )}
 
       {viewContext === "demo" && (
         <Card className="p-5 border-2 border-amber-200 bg-amber-50">
@@ -162,11 +321,9 @@ export function ProfilePage() {
           alongside a saved entry.
         </p>
         <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <input
-            type="checkbox"
+          <Switch
             checked={currentUser.saveVoiceTranscripts}
             onChange={(e) => setSaveVoiceTranscripts(e.target.checked)}
-            className="w-5 h-5"
           />
           Save the transcript with voice-created entries
         </label>
@@ -176,35 +333,29 @@ export function ProfilePage() {
         <CardHeading>Accessibility</CardHeading>
         <div className="space-y-3">
           <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="checkbox"
+            <Switch
               checked={currentUser.accessibility.largeText}
               onChange={(e) =>
                 setAccessibility({ largeText: e.target.checked })
               }
-              className="w-5 h-5"
             />
             Large text
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="checkbox"
+            <Switch
               checked={currentUser.accessibility.highContrast}
               onChange={(e) =>
                 setAccessibility({ highContrast: e.target.checked })
               }
-              className="w-5 h-5"
             />
             High contrast
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="checkbox"
+            <Switch
               checked={currentUser.accessibility.reduceMotion}
               onChange={(e) =>
                 setAccessibility({ reduceMotion: e.target.checked })
               }
-              className="w-5 h-5"
             />
             Reduce motion
           </label>
@@ -213,26 +364,22 @@ export function ProfilePage() {
 
       <Card className="p-5">
         <CardHeading>Patient details</CardHeading>
-        <label className="block text-sm font-semibold text-navy-700">
-          Display name
-          <input
+        <Field label="Display name">
+          <Input
             defaultValue={patient.displayName}
             onBlur={(e) =>
               updatePatient(patient.id, { displayName: e.target.value })
             }
-            className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
           />
-        </label>
-        <label className="block text-sm font-semibold text-navy-700 mt-3">
-          Care setting
-          <input
+        </Field>
+        <Field label="Care setting" className="mt-3">
+          <Input
             defaultValue={patient.careSetting}
             onBlur={(e) =>
               updatePatient(patient.id, { careSetting: e.target.value })
             }
-            className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
           />
-        </label>
+        </Field>
         <div className="mt-3">
           <p className="text-sm font-semibold text-navy-700 mb-1.5">
             Preferred units
@@ -245,18 +392,32 @@ export function ProfilePage() {
           />
         </div>
         <label className="flex items-center gap-2 mt-3 text-sm font-semibold text-navy-700">
-          <input
-            type="checkbox"
+          <Switch
             defaultChecked={patient.dailyWeightEnabled}
             onChange={(e) =>
               updatePatient(patient.id, {
                 dailyWeightEnabled: e.target.checked,
               })
             }
-            className="w-5 h-5"
           />
           Track daily weight
         </label>
+      </Card>
+
+      <Card className="p-5">
+        <CardHeading>Location</CardHeading>
+        <p className="text-sm text-fog-600 mb-3">
+          Lets your care team know whether you're recording from home or
+          currently admitted.
+        </p>
+        <SegmentedTabs
+          label="Location"
+          value={patient.deploymentMode ?? "home_community"}
+          onChange={(deploymentMode: DeploymentMode) =>
+            updatePatient(patient.id, { deploymentMode })
+          }
+          options={LOCATION_OPTIONS}
+        />
       </Card>
 
       <Card className="p-5">
@@ -277,12 +438,12 @@ export function ProfilePage() {
         )}
         {mode === "healthcare" ? (
           <div className="flex gap-2">
-            <input
+            <Input
               inputMode="decimal"
               value={allowanceInput}
               onChange={(e) => setAllowanceInput(e.target.value)}
               placeholder="Daily allowance (mL)"
-              className="flex-1 rounded-xl border border-navy-900/15 px-3 py-2.5"
+              className="flex-1"
             />
             <Button
               size="md"
@@ -321,15 +482,13 @@ export function ProfilePage() {
                 {REMINDER_LABELS[r.kind] ?? r.kind}
               </span>
               <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
+                <Switch
                   checked={r.enabled}
                   onChange={(e) =>
                     updateReminder(patient.id, r.id, {
                       enabled: e.target.checked,
                     })
                   }
-                  className="w-5 h-5"
                 />
                 Enabled
               </label>
@@ -345,15 +504,13 @@ export function ProfilePage() {
           is sent unless you turn this on and add at least one contact.
         </p>
         <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <input
-            type="checkbox"
+          <Switch
             checked={patient.careTeamShareConsent ?? false}
             onChange={(e) =>
               updatePatient(patient.id, {
                 careTeamShareConsent: e.target.checked,
               })
             }
-            className="w-5 h-5"
           />
           Allow sharing my summary with the contacts below
         </label>
@@ -392,17 +549,17 @@ export function ProfilePage() {
           )}
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <input
+            <Input
               value={contactNameInput}
               onChange={(e) => setContactNameInput(e.target.value)}
               placeholder="Contact name"
-              className="flex-1 rounded-xl border border-navy-900/15 px-3 py-2.5"
+              className="flex-1"
             />
-            <input
+            <Input
               value={contactEmailInput}
               onChange={(e) => setContactEmailInput(e.target.value)}
               placeholder="Contact email"
-              className="flex-1 rounded-xl border border-navy-900/15 px-3 py-2.5"
+              className="flex-1"
             />
             <Button
               size="md"
@@ -424,14 +581,12 @@ export function ProfilePage() {
           afternoon, or evening window.
         </p>
         <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <input
-            type="checkbox"
+          <Switch
             checked={currentUser.checkInNotificationsEnabled}
             disabled={checkInPending}
             onChange={(e) => {
               void handleCheckInToggle(e.target.checked);
             }}
-            className="w-5 h-5"
           />
           Check-in reminders
         </label>

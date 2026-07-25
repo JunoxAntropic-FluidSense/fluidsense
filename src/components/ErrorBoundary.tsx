@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Warning } from "@phosphor-icons/react";
 
 interface Props {
   children: ReactNode;
@@ -25,9 +26,11 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-dvh flex items-center justify-center bg-fog-50 px-6">
           <div className="max-w-sm text-center space-y-4">
-            <p className="text-3xl" aria-hidden="true">
-              ⚠️
-            </p>
+            <Warning
+              size={32}
+              className="mx-auto text-alert-500"
+              aria-hidden="true"
+            />
             <h1 className="text-lg font-extrabold text-navy-900">
               Something went wrong
             </h1>

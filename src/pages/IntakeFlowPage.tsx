@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
+import { Field, Input } from "../components/ui/Field";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import {
   PhotoCaptureField,
   type PhotoAttachHandle,
@@ -16,7 +18,7 @@ import type {
 } from "../types";
 import {
   INTAKE_CATEGORIES,
-  CATEGORY_ICON,
+  CategoryIcon,
   CATEGORY_LABEL,
 } from "../lib/eventMeta";
 import { APPROX_INTAKE_AMOUNTS, CONTAINER_FRACTIONS } from "../lib/amounts";
@@ -101,6 +103,7 @@ export function IntakeFlowPage() {
       containerFraction: fraction ?? undefined,
       eventTime: new Date().toISOString(),
       enteredBy: currentUser.displayName,
+      enteredByRole: currentUser.role,
       inputMethod: "manual",
       note: note || undefined,
     });
@@ -146,9 +149,12 @@ export function IntakeFlowPage() {
               }}
               className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white border border-navy-900/10 py-4 hover:border-intake-500 hover:bg-intake-50 min-h-24"
             >
-              <span className="text-2xl" aria-hidden="true">
-                {CATEGORY_ICON[c]}
-              </span>
+              <CategoryIcon
+                category={c}
+                size={24}
+                className="text-intake-600"
+                aria-hidden="true"
+              />
               <span className="text-xs font-semibold text-navy-800 text-center">
                 {CATEGORY_LABEL[c]}
               </span>
@@ -210,24 +216,22 @@ export function IntakeFlowPage() {
 
       {step === 3 && method === "exact" && (
         <div className="mt-4 space-y-4">
-          <div className="flex gap-2">
-            {(["mL", "L"] as const).map((u) => (
-              <button
-                key={u}
-                onClick={() => setUnitInput(u)}
-                className={`min-h-11 px-4 rounded-xl font-bold text-sm ${unitInput === u ? "bg-intake-600 text-white" : "bg-white border border-navy-900/15 text-navy-700"}`}
-              >
-                {u}
-              </button>
-            ))}
-          </div>
-          <input
+          <SegmentedTabs
+            label="Unit"
+            value={unitInput}
+            onChange={setUnitInput}
+            options={[
+              { value: "mL", label: "mL" },
+              { value: "L", label: "Litres" },
+            ]}
+          />
+          <Input
             inputMode="decimal"
             value={rawInput}
             onChange={(e) => setRawInput(e.target.value)}
             placeholder={unitInput === "mL" ? "e.g. 250" : "e.g. 0.5"}
             aria-label={`Volume in ${unitInput}`}
-            className="w-full text-3xl font-bold text-navy-900 rounded-2xl border border-navy-900/15 px-4 py-4"
+            className="text-3xl font-bold py-4"
           />
           <Button
             fullWidth
@@ -317,13 +321,13 @@ export function IntakeFlowPage() {
 
       {step === 3.5 && (
         <div className="mt-4 space-y-4">
-          <input
+          <Input
             inputMode="decimal"
             value={rawInput}
             onChange={(e) => setRawInput(e.target.value)}
             placeholder="Approximate mL"
             aria-label="Approximate volume in mL"
-            className="w-full text-3xl font-bold text-navy-900 rounded-2xl border border-navy-900/15 px-4 py-4"
+            className="text-3xl font-bold py-4"
           />
           <Button
             fullWidth
@@ -363,15 +367,13 @@ export function IntakeFlowPage() {
               </p>
             )}
             <p className="text-sm text-fog-600">Time: now</p>
-            <label className="block text-sm font-semibold text-navy-700 pt-1">
-              Optional note
-              <input
+            <Field label="Optional note" className="pt-1">
+              <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
                 placeholder="Add a note (optional)"
               />
-            </label>
+            </Field>
             <PhotoCaptureField
               onAcceptEstimate={(estimatedMl) => {
                 setAmountMl(estimatedMl);

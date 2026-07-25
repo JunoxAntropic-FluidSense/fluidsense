@@ -5,9 +5,13 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
 import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
+import { Field, Input, Select } from "../../components/ui/Field";
+import { Checkbox } from "../../components/ui/Checkbox";
 import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
+import { WorkspaceSetup } from "../../components/onboarding/WorkspaceSetup";
 import { enableCheckInPush } from "../../lib/push/subscribe";
-import type { Mode, Role, Units } from "../../types";
+import { useAuthStore } from "../../store/useAuthStore";
+import type { Mode, Role, Sex, Units } from "../../types";
 
 const UNITS_OPTIONS: { value: Units; label: string }[] = [
   { value: "mL", label: "mL" },
@@ -17,6 +21,12 @@ const UNITS_OPTIONS: { value: Units; label: string }[] = [
 const PATIENT_ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "patient", label: "Myself" },
   { value: "family_carer", label: "Someone else" },
+];
+
+const SEX_OPTIONS: { value: Sex; label: string }[] = [
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
 ];
 
 const COMMON_TIMEZONES = [
@@ -72,6 +82,8 @@ export function OnboardingFlow() {
   const setCheckInNotificationsEnabled = useStore(
     (s) => s.setCheckInNotificationsEnabled
   );
+  const setOrganisation = useStore((s) => s.setOrganisation);
+  const authStatus = useAuthStore((s) => s.status);
 
   const detectedTz = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -82,6 +94,7 @@ export function OnboardingFlow() {
 
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>("patient");
+  const [sex, setSex] = useState<Sex>("prefer_not_to_say");
   const [careSetting, setCareSetting] = useState("");
   const [units, setUnits] = useState<Units>("mL");
   const [timezone, setTimezone] = useState(detectedTz);
@@ -95,6 +108,8 @@ export function OnboardingFlow() {
   const [careTeamShareConsent, setCareTeamShareConsent] = useState(false);
   const [wantsCheckInReminders, setWantsCheckInReminders] = useState(false);
   const [organisationName, setOrganisationName] = useState("");
+  const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
+  const [joinedOrgName, setJoinedOrgName] = useState<string | null>(null);
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
   const [showSignUp, setShowSignUp] = useState(false);
   const [signUpUseMagicLink, setSignUpUseMagicLink] = useState(false);
@@ -121,14 +136,22 @@ export function OnboardingFlow() {
       timezone,
       wantsAllowanceTracking: isPatient ? wantsAllowance : undefined,
       allowanceMl: allowanceMl ? parseFloat(allowanceMl) : undefined,
-      organisationName: organisationName || undefined,
+      organisationName: joinedOrgName || organisationName || undefined,
       isTestWorkspace,
       careSetting: isPatient ? careSetting : undefined,
+      sex: isPatient ? sex : undefined,
       dailyWeightEnabled: isPatient ? dailyWeightEnabled : undefined,
       saveVoiceTranscripts,
       accessibility: { largeText, highContrast, reduceMotion },
       careTeamShareConsent: isPatient ? careTeamShareConsent : undefined,
     });
+
+    // completeOnboarding replaces currentUser wholesale, so organisationId
+    // must be set after it runs, not before — setting it first would be
+    // silently wiped out by that replacement.
+    if (isHealthcare && joinedOrgId) {
+      setOrganisation(joinedOrgId, joinedOrgName ?? undefined);
+    }
 
     if (isPatient && wantsCheckInReminders) {
       const newPatientId = useStore.getState().activePatientId;
@@ -191,15 +214,15 @@ export function OnboardingFlow() {
         {step === 2 && (
           <div className="space-y-4">
             <SectionHeading>About you</SectionHeading>
-            <label className="block text-sm font-semibold text-navy-700">
-              {isPatient ? "Display name or nickname" : "Display name"}
-              <input
+            <Field
+              label={isPatient ? "Display name or nickname" : "Display name"}
+            >
+              <Input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder={isPatient ? "e.g. Sam" : "e.g. J. Patel"}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
-            </label>
+            </Field>
 
             {isPatient && (
               <>
@@ -214,15 +237,28 @@ export function OnboardingFlow() {
                     options={PATIENT_ROLE_OPTIONS}
                   />
                 </div>
-                <label className="block text-sm font-semibold text-navy-700">
-                  Care setting
-                  <input
+                <Field label="Care setting">
+                  <Input
                     value={careSetting}
                     onChange={(e) => setCareSetting(e.target.value)}
                     placeholder="e.g. Home, Ward 4B"
-                    className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
                   />
-                </label>
+                </Field>
+                <div>
+                  <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                    Sex
+                  </p>
+                  <SegmentedTabs
+                    label="Sex"
+                    value={sex}
+                    onChange={setSex}
+                    options={SEX_OPTIONS}
+                  />
+                  <p className="text-xs text-fog-500 mt-1">
+                    Used only to show relevant logging options, like menstrual
+                    pad tracking.
+                  </p>
+                </div>
               </>
             )}
 
@@ -239,15 +275,36 @@ export function OnboardingFlow() {
                     options={HEALTHCARE_ROLE_OPTIONS}
                   />
                 </div>
-                <label className="block text-sm font-semibold text-navy-700">
-                  Organisation (optional)
-                  <input
-                    value={organisationName}
-                    onChange={(e) => setOrganisationName(e.target.value)}
-                    placeholder="e.g. City Hospital"
-                    className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-                  />
-                </label>
+                {authStatus === "signed-in" ? (
+                  joinedOrgId ? (
+                    <p className="text-sm text-navy-700 font-semibold">
+                      Workspace set up
+                      {joinedOrgName ? `: ${joinedOrgName}` : ""} — continue
+                      below.
+                    </p>
+                  ) : (
+                    <WorkspaceSetup
+                      onJoined={(id, name) => {
+                        setJoinedOrgId(id);
+                        setJoinedOrgName(name);
+                      }}
+                    />
+                  )
+                ) : (
+                  <>
+                    <Field label="Organisation (optional)">
+                      <Input
+                        value={organisationName}
+                        onChange={(e) => setOrganisationName(e.target.value)}
+                        placeholder="e.g. City Hospital"
+                      />
+                    </Field>
+                    <p className="text-xs text-fog-500">
+                      Sign in below to create or join your team's shared
+                      workspace now — or do it later from Profile.
+                    </p>
+                  </>
+                )}
               </>
             )}
 
@@ -263,54 +320,44 @@ export function OnboardingFlow() {
                 options={UNITS_OPTIONS}
               />
             </div>
-            <label className="block text-sm font-semibold text-navy-700">
-              Timezone
-              <select
+            <Field label="Timezone">
+              <Select
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
               >
                 {tzOptions.map((tz) => (
                   <option key={tz} value={tz}>
                     {tz}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={saveVoiceTranscripts}
                 onChange={(e) => setSaveVoiceTranscripts(e.target.checked)}
-                className="w-5 h-5"
               />
               Save the transcript with voice-created entries
             </label>
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={largeText}
                   onChange={(e) => setLargeText(e.target.checked)}
-                  className="w-5 h-5"
                 />
                 Large text
               </label>
               <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={highContrast}
                   onChange={(e) => setHighContrast(e.target.checked)}
-                  className="w-5 h-5"
                 />
                 High contrast
               </label>
               <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={reduceMotion}
                   onChange={(e) => setReduceMotion(e.target.checked)}
-                  className="w-5 h-5"
                 />
                 Reduce motion
               </label>
@@ -320,53 +367,42 @@ export function OnboardingFlow() {
               <>
                 <SectionHeading>Monitoring</SectionHeading>
                 <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={wantsAllowance}
                     onChange={(e) => setWantsAllowance(e.target.checked)}
-                    className="w-5 h-5"
                   />
                   I need to track a fluid allowance
                 </label>
                 {wantsAllowance && (
-                  <label className="block text-sm font-semibold text-navy-700">
-                    Allowance, if already set by your healthcare team (mL/day,
-                    optional)
-                    <input
+                  <Field label="Allowance, if already set by your healthcare team (mL/day, optional)">
+                    <Input
                       inputMode="decimal"
                       value={allowanceMl}
                       onChange={(e) => setAllowanceMl(e.target.value)}
                       placeholder="e.g. 1500"
-                      className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
                     />
-                  </label>
+                  </Field>
                 )}
                 <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={dailyWeightEnabled}
                     onChange={(e) => setDailyWeightEnabled(e.target.checked)}
-                    className="w-5 h-5"
                   />
                   Track daily weight
                 </label>
                 <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={wantsCheckInReminders}
                     onChange={(e) => setWantsCheckInReminders(e.target.checked)}
-                    className="w-5 h-5"
                   />
                   Remind me if I haven't logged anything in a while
                 </label>
 
                 <SectionHeading>Sharing</SectionHeading>
                 <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={careTeamShareConsent}
                     onChange={(e) => setCareTeamShareConsent(e.target.checked)}
-                    className="w-5 h-5"
                   />
                   Allow sharing my summary with care team contacts I add later
                 </label>
@@ -375,11 +411,9 @@ export function OnboardingFlow() {
 
             {isHealthcare && (
               <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={isTestWorkspace}
                   onChange={(e) => setIsTestWorkspace(e.target.checked)}
-                  className="w-5 h-5"
                 />
                 This is a test / training workspace
               </label>

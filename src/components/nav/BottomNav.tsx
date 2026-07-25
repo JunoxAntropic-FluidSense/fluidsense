@@ -36,9 +36,11 @@ export function BottomNav() {
                       className="absolute inset-x-2 top-1 bottom-1 rounded-xl bg-intake-50"
                     />
                   )}
-                  <span className="relative text-lg" aria-hidden="true">
-                    {item.icon}
-                  </span>
+                  <item.icon
+                    size={20}
+                    className="relative"
+                    aria-hidden="true"
+                  />
                   <span className="relative">{item.label}</span>
                   {isActive && <span className="sr-only">(current page)</span>}
                 </>

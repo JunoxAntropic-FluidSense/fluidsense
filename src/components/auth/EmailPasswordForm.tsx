@@ -1,8 +1,6 @@
 // Email + password sign-up / sign-in form. Presentational and self-contained —
 // callers decide what happens next via onSuccess (routing/wiring is Issue 4's
-// job, not this component's). Follows the hand-rolled input pattern used
-// elsewhere in the app (see OnboardingFlow.tsx) rather than introducing a new
-// Field/Input abstraction.
+// job, not this component's).
 
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -13,6 +11,7 @@ import {
 } from "../../lib/supabase/auth";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
+import { Field, Input } from "../ui/Field";
 
 export type EmailPasswordMode = "sign-in" | "sign-up";
 
@@ -64,9 +63,8 @@ export function EmailPasswordForm({
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
-      <label className="block text-sm font-semibold text-navy-700">
-        Email
-        <input
+      <Field label="Email">
+        <Input
           type="email"
           required
           autoComplete="email"
@@ -74,12 +72,10 @@ export function EmailPasswordForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={busy}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal disabled:opacity-60"
         />
-      </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Password
-        <input
+      </Field>
+      <Field label="Password">
+        <Input
           type="password"
           required
           minLength={8}
@@ -90,9 +86,8 @@ export function EmailPasswordForm({
           onChange={(e) => setPassword(e.target.value)}
           placeholder="At least 8 characters"
           disabled={busy}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal disabled:opacity-60"
         />
-      </label>
+      </Field>
 
       {error && (
         <div className="rounded-xl border border-alert-100 bg-alert-50 p-3">

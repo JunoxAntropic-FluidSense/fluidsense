@@ -7,10 +7,11 @@ import type {
   MeasurementStatus,
   OutputCategory,
 } from "../../types";
-import { CATEGORY_ICON } from "../../lib/eventMeta";
+import { CategoryIcon } from "../../lib/eventMeta";
 import {
   APPROX_INTAKE_AMOUNTS,
   CONTINENCE_SUBTYPES,
+  MENSTRUAL_QUALITATIVE,
   UNMEASURED_URINE_SUBTYPES,
   VOMIT_QUALITATIVE,
   SWEATING_LEVELS,
@@ -18,6 +19,7 @@ import {
   OUTPUT_QUICK_AMOUNTS,
 } from "../../lib/amounts";
 import { Button } from "../ui/Button";
+import { Field, Input } from "../ui/Field";
 
 interface Props {
   kind: "intake" | "output";
@@ -58,6 +60,7 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
       unit: "mL",
       eventTime: new Date().toISOString(),
       enteredBy: currentUser.displayName,
+      enteredByRole: currentUser.role,
       inputMethod: "tap",
       ...fields,
     });
@@ -74,7 +77,8 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
       <div className="bg-white w-full md:max-w-md md:rounded-3xl rounded-t-3xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-extrabold text-navy-900 flex items-center gap-2">
-            <span aria-hidden="true">{CATEGORY_ICON[category]}</span> {label}
+            <CategoryIcon category={category} size={20} aria-hidden="true" />{" "}
+            {label}
           </h2>
           <button
             onClick={onClose}
@@ -144,15 +148,14 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
               </div>
             </div>
             <div className="flex gap-2 items-end">
-              <label className="flex-1 text-sm font-semibold text-navy-700">
-                Exact amount (mL)
-                <input
+              <Field label="Exact amount (mL)" className="flex-1">
+                <Input
                   inputMode="decimal"
                   value={customMl}
                   onChange={(e) => setCustomMl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-3 text-lg font-bold"
+                  className="py-3 text-lg font-bold"
                 />
-              </label>
+              </Field>
               <Button
                 disabled={!customMl}
                 onClick={() =>
@@ -168,15 +171,14 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
         {kind === "output" && category === "urine" && (
           <div className="space-y-4">
             <div className="flex gap-2 items-end">
-              <label className="flex-1 text-sm font-semibold text-navy-700">
-                Measured volume (mL)
-                <input
+              <Field label="Measured volume (mL)" className="flex-1">
+                <Input
                   inputMode="decimal"
                   value={customMl}
                   onChange={(e) => setCustomMl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-3 text-lg font-bold"
+                  className="py-3 text-lg font-bold"
                 />
-              </label>
+              </Field>
               <Button
                 variant="output"
                 disabled={!customMl}
@@ -196,6 +198,12 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
         {kind === "output" && category === "continence" && (
           <ChipGrid
             options={CONTINENCE_SUBTYPES}
+            onPick={(v) => log({ status: "unmeasured", subtype: v })}
+          />
+        )}
+        {kind === "output" && category === "menstrual_pad" && (
+          <ChipGrid
+            options={MENSTRUAL_QUALITATIVE}
             onPick={(v) => log({ status: "unmeasured", subtype: v })}
           />
         )}
@@ -267,15 +275,14 @@ export function QuickAddSheet({ kind, category, label, onClose }: Props) {
         {kind === "output" && category === "other_output" && (
           <div className="space-y-4">
             <div className="flex gap-2 items-end">
-              <label className="flex-1 text-sm font-semibold text-navy-700">
-                Volume (mL)
-                <input
+              <Field label="Volume (mL)" className="flex-1">
+                <Input
                   inputMode="decimal"
                   value={customMl}
                   onChange={(e) => setCustomMl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-3 text-lg font-bold"
+                  className="py-3 text-lg font-bold"
                 />
-              </label>
+              </Field>
               <Button
                 variant="output"
                 disabled={!customMl}

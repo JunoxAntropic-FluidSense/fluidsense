@@ -50,7 +50,7 @@ export function SegmentedTabs<T extends string>({
                     ? { duration: 0 }
                     : { type: "spring", bounce: 0.25, duration: 0.4 }
                 }
-                className="absolute inset-0 rounded-full bg-white shadow-[0_1px_2px_rgba(15,51,65,0.08),0_1px_4px_-2px_rgba(15,51,65,0.16)]"
+                className="absolute inset-0 rounded-full bg-white shadow-[0_1px_2px_rgba(20,20,20,0.08),0_1px_4px_-2px_rgba(20,20,20,0.16)]"
               />
             )}
             <span

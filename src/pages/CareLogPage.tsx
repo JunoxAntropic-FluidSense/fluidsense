@@ -7,6 +7,7 @@ import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { Field, Input } from "../components/ui/Field";
 import { DIALYSIS_MODALITY_LABEL } from "../types";
 import type { DialysisModality } from "../types";
 
@@ -200,41 +201,30 @@ function MedicationForm({
 
   return (
     <div className="space-y-3 rounded-2xl border border-navy-900/10 p-3">
-      <label className="block text-sm font-semibold text-navy-700">
-        Medicine name
-        <input
+      <Field label="Medicine name">
+        <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Furosemide"
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
         />
-      </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Dose
-        <input
+      </Field>
+      <Field label="Dose">
+        <Input
           value={dose}
           onChange={(e) => setDose(e.target.value)}
           placeholder="e.g. 40 mg"
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
         />
-      </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Frequency
-        <input
+      </Field>
+      <Field label="Frequency">
+        <Input
           value={frequency}
           onChange={(e) => setFrequency(e.target.value)}
           placeholder="e.g. Once daily"
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
         />
-      </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Note (optional)
-        <input
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
-        />
-      </label>
+      </Field>
+      <Field label="Note (optional)">
+        <Input value={note} onChange={(e) => setNote(e.target.value)} />
+      </Field>
       <div className="grid grid-cols-2 gap-2">
         <Button variant="secondary" onClick={onCancel}>
           Cancel
@@ -300,45 +290,28 @@ function DialysisForm({
           options={MODALITY_TAB_OPTIONS}
         />
       </div>
-      <label className="block text-sm font-semibold text-navy-700">
-        Scheduled date &amp; time
-        <input
+      <Field label="Scheduled date & time">
+        <Input
           type="datetime-local"
           value={scheduledTime}
           onChange={(e) => setScheduledTime(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
         />
-      </label>
-      <div className="flex items-center gap-4">
-        <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <input
-            type="radio"
-            name="attended"
-            checked={attended}
-            onChange={() => setAttended(true)}
-            className="w-5 h-5"
-          />
-          Attended
-        </label>
-        <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <input
-            type="radio"
-            name="attended"
-            checked={!attended}
-            onChange={() => setAttended(false)}
-            className="w-5 h-5"
-          />
-          Missed
-        </label>
+      </Field>
+      <div>
+        <p className="text-sm font-semibold text-navy-700 mb-1.5">Attendance</p>
+        <SegmentedTabs
+          label="Attendance"
+          value={attended ? "attended" : "missed"}
+          onChange={(v) => setAttended(v === "attended")}
+          options={[
+            { value: "attended", label: "Attended" },
+            { value: "missed", label: "Missed" },
+          ]}
+        />
       </div>
-      <label className="block text-sm font-semibold text-navy-700">
-        Note (optional)
-        <input
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
-        />
-      </label>
+      <Field label="Note (optional)">
+        <Input value={note} onChange={(e) => setNote(e.target.value)} />
+      </Field>
       <div className="grid grid-cols-2 gap-2">
         <Button variant="secondary" onClick={onCancel}>
           Cancel

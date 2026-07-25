@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Sun } from "@phosphor-icons/react";
 import { useWeather } from "../../hooks/useWeather";
 
 export function WeatherNote() {
@@ -16,9 +17,12 @@ export function WeatherNote() {
       role="status"
       className="flex items-start gap-3 rounded-2xl bg-sky-50 border border-sky-200 px-4 py-3"
     >
-      <span aria-hidden="true" className="text-lg">
-        ☀️
-      </span>
+      <Sun
+        size={20}
+        weight="fill"
+        className="shrink-0 text-amber-500"
+        aria-hidden="true"
+      />
       <p className="flex-1 text-sm text-sky-800">
         Today: {temp}°C — warmer than the recent average for this location.
         Fluid needs can vary with temperature — worth keeping intake and output

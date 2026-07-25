@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { Microphone } from "@phosphor-icons/react";
 import { useFluidData } from "../hooks/useFluidData";
 import { useStore } from "../store/useStore";
 import { BalanceCard } from "../components/today/BalanceCard";
@@ -13,8 +14,13 @@ export function TodayPage() {
   const { patient, balance, reliability, lastEvent, windowEvents, range } =
     useFluidData("monitoring_day");
   const allEvents = useStore((s) => s.events);
+  const mode = useStore((s) => s.mode);
 
-  if (!patient) return null;
+  // Healthcare accounts start with no patients — send them to the dashboard's
+  // "add patient" flow instead of rendering a blank single-patient view.
+  if (!patient) {
+    return mode === "healthcare" ? <Navigate to="/dashboard" replace /> : null;
+  }
 
   const hasAnyEvents = allEvents.some(
     (e) => !e.deleted && e.patientId === patient.id
@@ -33,11 +39,7 @@ export function TodayPage() {
         <Button
           fullWidth
           size="xl"
-          icon={
-            <span aria-hidden="true" className="text-2xl">
-              🎙️
-            </span>
-          }
+          icon={<Microphone size={24} weight="fill" aria-hidden="true" />}
         >
           Speak an entry
         </Button>
@@ -54,6 +56,8 @@ export function TodayPage() {
         <EmptyToday />
       )}
 
+      <QuickAddGrid patient={patient} />
+
       <div className="grid gap-4 md:grid-cols-2">
         {patient.allowance && (
           <AllowanceCard
@@ -67,8 +71,6 @@ export function TodayPage() {
           className={patient.allowance ? "" : "md:col-span-2"}
         />
       </div>
-
-      <QuickAddGrid patient={patient} />
 
       {hasAnyEvents && <ActivityTimeline events={windowEvents} />}
     </div>

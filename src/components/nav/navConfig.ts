@@ -1,14 +1,24 @@
+import type { Icon } from "@phosphor-icons/react";
+import {
+  House,
+  Plus,
+  Microphone,
+  ClipboardText,
+  ChartBar,
+  UserCircle,
+} from "@phosphor-icons/react";
+
 export interface NavItem {
   to: string;
   label: string;
-  icon: string;
+  icon: Icon;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Today", icon: "🏠" },
-  { to: "/add", label: "Add", icon: "➕" },
-  { to: "/voice", label: "Voice", icon: "🎙️" },
-  { to: "/history", label: "History", icon: "📋" },
-  { to: "/summary", label: "Summary", icon: "📊" },
-  { to: "/profile", label: "Profile", icon: "👤" },
+  { to: "/", label: "Today", icon: House },
+  { to: "/add", label: "Add", icon: Plus },
+  { to: "/voice", label: "Voice", icon: Microphone },
+  { to: "/history", label: "History", icon: ClipboardText },
+  { to: "/summary", label: "Summary", icon: ChartBar },
+  { to: "/profile", label: "Profile", icon: UserCircle },
 ];

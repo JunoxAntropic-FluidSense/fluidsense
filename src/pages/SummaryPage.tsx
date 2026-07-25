@@ -5,6 +5,7 @@ import { useStore } from "../store/useStore";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ReliabilityPill } from "../components/ui/ReliabilityPill";
+import { Field, Select } from "../components/ui/Field";
 import { WeatherNote } from "../components/today/WeatherNote";
 import { PERIOD_OPTIONS } from "../lib/period";
 import { formatMl, formatMlPlain, describeUnmeasured } from "../lib/calc";
@@ -185,20 +186,18 @@ export function SummaryPage() {
         </p>
       </div>
 
-      <label className="block text-sm font-semibold text-navy-700">
-        Period
-        <select
+      <Field label="Period">
+        <Select
           value={period}
           onChange={(e) => setPeriod(e.target.value as SummaryPeriod)}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
         >
           {PERIOD_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
 
       <WeatherNote />
 

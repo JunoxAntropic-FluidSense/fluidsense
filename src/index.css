@@ -1,61 +1,86 @@
-@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Palette: brand kit (Onyx / Vivid Royal / Frosted Mint / Steel Blue /
+   Snow). Every named token family below is a hard product requirement —
+   the four measurement statuses and intake/output must stay visually
+   distinct by color, not just icon/label (see CLAUDE.md) — so each
+   family is derived from one of the five brand colors and kept mutually
+   distinguishable rather than collapsed into a single accent.
+   ------------------------------------------------------------------ */
 @theme {
-  /* Ink — headings, primary text */
-  --color-navy-950: #0a2029;
-  --color-navy-900: #0f3341;
-  --color-navy-800: #164e63;
-  --color-navy-700: #29677d;
-  --color-navy-600: #3d8098;
+  /* Onyx — headings, primary text, hairline borders (via opacity modifiers) */
+  --color-navy-950: #0d0d0d;
+  --color-navy-900: #141414;
+  --color-navy-800: #2b2b2b;
+  --color-navy-700: #454545;
+  --color-navy-600: #5f5f5f;
+  --color-navy-500: #797979;
 
-  /* Cyan — intake */
-  --color-intake-50: #ecfeff;
-  --color-intake-100: #cffafe;
-  --color-intake-200: #a5f3fc;
-  --color-intake-500: #06b6d4;
-  --color-intake-600: #0891b2;
-  --color-intake-700: #0e7490;
+  /* Steel Blue — the one emphasis accent: links, focus rings, checked states */
+  --color-fern-50: #eaf4fc;
+  --color-fern-100: #cfe7f8;
+  --color-fern-200: #9ecdf0;
+  --color-fern-500: #0a81d1;
+  --color-fern-600: #086bac;
 
-  /* Violet — output (kept a distinct hue family from intake) */
-  --color-output-50: #f5f3ff;
-  --color-output-100: #ede9fe;
-  --color-output-200: #ddd6fe;
-  --color-output-500: #7c6cd9;
-  --color-output-600: #6952c4;
-  --color-output-700: #55429e;
+  /* Steel Blue — intake (water) */
+  --color-intake-50: #eaf4fc;
+  --color-intake-100: #cfe7f8;
+  --color-intake-200: #9ecdf0;
+  --color-intake-300: #6bb3e8;
+  --color-intake-400: #3a9ade;
+  --color-intake-500: #0a81d1;
+  --color-intake-600: #086bac;
+  --color-intake-700: #06547e;
+
+  /* Vivid Royal — output (kept a distinct value from intake's Steel Blue) */
+  --color-output-50: #eaebf7;
+  --color-output-100: #ccd0ec;
+  --color-output-200: #99a1d9;
+  --color-output-500: #0d21a1;
+  --color-output-600: #0a1a80;
+  --color-output-700: #081465;
 
   /* Amber — uncertainty / estimates */
-  --color-amber-50: #fffbeb;
-  --color-amber-100: #fef3c7;
-  --color-amber-200: #fde68a;
-  --color-amber-500: #d97706;
-  --color-amber-600: #b45309;
-  --color-amber-700: #92400e;
+  --color-amber-50: #fdf6e7;
+  --color-amber-100: #f6e8c8;
+  --color-amber-200: #ecd69f;
+  --color-amber-300: #dcbb6e;
+  --color-amber-500: #b3791f;
+  --color-amber-600: #93611a;
+  --color-amber-700: #764d15;
+  --color-amber-800: #5c3d11;
 
-  /* Fog — unmeasured, neutral surfaces */
-  --color-fog-50: #f3f7f8;
-  --color-fog-100: #e5ebed;
-  --color-fog-200: #d1dadd;
-  --color-fog-400: #90a3a9;
-  --color-fog-500: #6d8188;
-  --color-fog-600: #52646a;
-  --color-fog-700: #3b4a4f;
+  /* Snow — page surface, hairline borders, neutral text ladder */
+  --color-fog-50: #fcf7f8;
+  --color-fog-100: #f2eeee;
+  --color-fog-200: #e6e2e2;
+  --color-fog-300: #d3cfcf;
+  --color-fog-400: #aaa6a6;
+  --color-fog-500: #868282;
+  --color-fog-600: #6b6767;
+  --color-fog-700: #524f4f;
 
   /* Red — restrained, errors only */
-  --color-alert-50: #fef2f2;
-  --color-alert-100: #fde2e1;
-  --color-alert-500: #dc2626;
-  --color-alert-600: #b91c1c;
+  --color-alert-50: #fdecea;
+  --color-alert-100: #f8cfc9;
+  --color-alert-500: #d1372a;
+  --color-alert-600: #a82c21;
 
-  /* Green — UI confirmations only (never used to imply fluid-balance status) */
-  --color-success-50: #ecfdf5;
-  --color-success-100: #d1fae5;
-  --color-success-500: #059669;
-  --color-success-600: #047857;
+  /* Frosted Mint — UI confirmations only (never used to imply fluid-balance status) */
+  --color-success-50: #f3fdf1;
+  --color-success-100: #e4fde1;
+  --color-success-500: #3f9c37;
+  --color-success-600: #2f7a29;
 
-  --font-sans: "Noto Sans", system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Figtree", "Noto Sans", system-ui, sans-serif;
+  /* Card surfaces read as Snow, never stark pure white */
+  --color-white: #fcf7f8;
+
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter Tight", "Inter", system-ui, sans-serif;
 }
 
 :root {
@@ -77,9 +102,19 @@ body {
 h1,
 h2,
 h3,
+h4,
 .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.01em;
+}
+
+/* One colored emphasis phrase inside a heading, e.g. <h1>Hello <em>there</em></h1>. */
+h1 em,
+h2 em,
+h3 em,
+.accent {
+  font-style: normal;
+  color: var(--color-fern-500);
 }
 
 #root {
@@ -91,7 +126,7 @@ h3,
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-intake-600);
+  outline: 3px solid var(--color-fern-500);
   outline-offset: 2px;
   border-radius: 4px;
 }

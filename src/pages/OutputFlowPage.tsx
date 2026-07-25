@@ -3,17 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
+import { Field, Input } from "../components/ui/Field";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import type { MeasurementStatus, OutputCategory } from "../types";
 import {
   OUTPUT_CATEGORIES,
-  CATEGORY_ICON,
+  CategoryIcon,
   CATEGORY_LABEL,
 } from "../lib/eventMeta";
 import {
   OUTPUT_QUICK_AMOUNTS,
   CONTINENCE_SUBTYPES,
+  MENSTRUAL_QUALITATIVE,
   UNMEASURED_URINE_SUBTYPES,
   VOMIT_QUALITATIVE,
   SWEATING_LEVELS,
@@ -52,6 +54,7 @@ export function OutputFlowPage() {
       episodeCount: category === "diarrhoea" ? episodeCount : undefined,
       eventTime: new Date().toISOString(),
       enteredBy: currentUser.displayName,
+      enteredByRole: currentUser.role,
       inputMethod: "manual",
       note: note || undefined,
     });
@@ -75,15 +78,20 @@ export function OutputFlowPage() {
 
       {step === 1 && (
         <div className="grid grid-cols-3 gap-3 mt-4">
-          {OUTPUT_CATEGORIES.map((c) => (
+          {OUTPUT_CATEGORIES.filter(
+            (c) => c !== "menstrual_pad" || patient.sex === "female"
+          ).map((c) => (
             <button
               key={c}
               onClick={() => pickCategory(c)}
               className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white border border-navy-900/10 py-4 hover:border-output-500 hover:bg-output-50 min-h-24"
             >
-              <span className="text-2xl" aria-hidden="true">
-                {CATEGORY_ICON[c]}
-              </span>
+              <CategoryIcon
+                category={c}
+                size={24}
+                className="text-output-600"
+                aria-hidden="true"
+              />
               <span className="text-xs font-semibold text-navy-800 text-center">
                 {CATEGORY_LABEL[c]}
               </span>
@@ -129,6 +137,19 @@ export function OutputFlowPage() {
         <div className="mt-4">
           <ChipGrid
             options={CONTINENCE_SUBTYPES}
+            onPick={(v) => {
+              setSubtype(v);
+              setStatus("unmeasured");
+              confirm();
+            }}
+          />
+        </div>
+      )}
+
+      {step === 2 && category === "menstrual_pad" && (
+        <div className="mt-4">
+          <ChipGrid
+            options={MENSTRUAL_QUALITATIVE}
             onPick={(v) => {
               setSubtype(v);
               setStatus("unmeasured");
@@ -347,15 +368,13 @@ export function OutputFlowPage() {
               </p>
             )}
             <p className="text-sm text-fog-600">Time: now</p>
-            <label className="block text-sm font-semibold text-navy-700 pt-1">
-              Optional note
-              <input
+            <Field label="Optional note" className="pt-1">
+              <Input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 text-sm font-normal"
                 placeholder="Add a note (optional)"
               />
-            </label>
+            </Field>
           </Card>
           <Button fullWidth size="xl" variant="output" onClick={save}>
             Confirm and save
@@ -451,13 +470,13 @@ function ExactVolumeStep({
         Or enter a precise amount
       </p>
       <div className="flex gap-2">
-        <input
+        <Input
           inputMode="decimal"
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           placeholder="mL"
           aria-label="Volume in mL"
-          className="flex-1 text-2xl font-bold text-navy-900 rounded-2xl border border-navy-900/15 px-4 py-3"
+          className="flex-1 text-2xl font-bold py-3"
         />
         <Button disabled={!raw} onClick={() => onDone(parseFloat(raw))}>
           Use

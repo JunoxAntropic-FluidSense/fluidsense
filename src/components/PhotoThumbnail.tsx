@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Camera } from "@phosphor-icons/react";
 import { getDrinkPhotoSignedUrl } from "../lib/photo/storage";
 
 type PhotoThumbnailSize = "sm" | "md";
@@ -71,7 +72,7 @@ export function PhotoThumbnail({
       aria-label={failed ? "Photo unavailable" : "Loading photo"}
       title={failed ? "Photo unavailable" : "Loading photo…"}
     >
-      <span aria-hidden="true">📷</span>
+      <Camera aria-hidden="true" />
     </span>
   );
 }

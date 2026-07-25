@@ -6,7 +6,16 @@ import { supabase } from "../lib/supabase";
 import { useActivePatient, useFluidData } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
+import { Input, Select } from "../components/ui/Field";
+import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { getPeriodRange } from "../lib/period";
+import type { MonitoringDayStartMode } from "../types";
+
+const DAY_START_OPTIONS: { value: MonitoringDayStartMode; label: string }[] = [
+  { value: "midnight", label: "At midnight" },
+  { value: "custom_time", label: "Custom time" },
+  { value: "on_demand", label: "On demand" },
+];
 
 export function DataSettingsPage() {
   const navigate = useNavigate();
@@ -94,35 +103,25 @@ export function DataSettingsPage() {
         <p className="text-sm text-fog-600 mb-3">
           Choose when a new monitoring day begins by default.
         </p>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="radio"
-              name="daystart"
-              checked={patient.monitoringDayStartMode === "midnight"}
-              onChange={() => setMonitoringDayStart(patient.id, "midnight")}
-              className="w-5 h-5"
-            />
-            At midnight
-          </label>
-          <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="radio"
-              name="daystart"
-              checked={patient.monitoringDayStartMode === "custom_time"}
-              onChange={() =>
+        <div className="space-y-3">
+          <SegmentedTabs
+            label="Monitoring-day start time"
+            value={patient.monitoringDayStartMode}
+            onChange={(mode) => {
+              if (mode === "custom_time") {
                 setMonitoringDayStart(
                   patient.id,
                   "custom_time",
                   patient.monitoringDayCustomHour ?? 6
-                )
+                );
+              } else {
+                setMonitoringDayStart(patient.id, mode);
               }
-              className="w-5 h-5"
-            />
-            At a custom time
-          </label>
+            }}
+            options={DAY_START_OPTIONS}
+          />
           {patient.monitoringDayStartMode === "custom_time" && (
-            <select
+            <Select
               value={patient.monitoringDayCustomHour ?? 6}
               onChange={(e) =>
                 setMonitoringDayStart(
@@ -131,25 +130,21 @@ export function DataSettingsPage() {
                   parseInt(e.target.value, 10)
                 )
               }
-              className="ml-7 rounded-xl border border-navy-900/15 px-3 py-2 text-sm bg-white"
+              className="max-w-[160px] py-2 text-sm"
             >
               {Array.from({ length: 24 }, (_, h) => (
                 <option key={h} value={h}>
                   {String(h).padStart(2, "0")}:00
                 </option>
               ))}
-            </select>
+            </Select>
           )}
-          <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-            <input
-              type="radio"
-              name="daystart"
-              checked={patient.monitoringDayStartMode === "on_demand"}
-              onChange={() => setMonitoringDayStart(patient.id, "on_demand")}
-              className="w-5 h-5"
-            />
-            From the moment I press "Start new day"
-          </label>
+          {patient.monitoringDayStartMode === "on_demand" && (
+            <p className="text-xs text-fog-500">
+              A new monitoring day begins the moment you press "Start new day"
+              above.
+            </p>
+          )}
         </div>
       </Card>
 
@@ -383,12 +378,12 @@ function ConfirmModal({
         <h2 className="text-lg font-extrabold text-navy-900 mb-2">{title}</h2>
         <p className="text-sm text-fog-600 mb-4">{body}</p>
         {requireText && (
-          <input
+          <Input
             value={textValue}
             onChange={(e) => onTextChange?.(e.target.value)}
             placeholder={`Type ${requireText} to confirm`}
             aria-label={`Type ${requireText} to confirm`}
-            className="w-full rounded-xl border border-navy-900/15 px-3 py-2.5 mb-4 font-mono"
+            className="mb-4 font-mono"
           />
         )}
         <div className="grid grid-cols-2 gap-3">

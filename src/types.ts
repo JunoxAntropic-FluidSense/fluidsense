@@ -28,6 +28,10 @@ export interface AppUser {
   checkInNotificationsEnabled: boolean;
   /** Healthcare accounts only — the team/ward/organisation name entered at onboarding. */
   organisationName?: string;
+  /** Healthcare accounts only — the workspace (public.organisations.id) this
+   * staff member belongs to once they've created or joined one. Undefined
+   * until then, and always undefined for patient-mode accounts. */
+  organisationId?: string;
 }
 
 // --- Measurement status -----------------------------------------------------
@@ -75,6 +79,10 @@ export type FluidCategory =
   | "enteral_feed"
   | "iv_fluid"
   | "iv_medication"
+  | "sports_drink"
+  | "alcohol"
+  | "broth"
+  | "protein_shake"
   | "other_intake";
 
 export type OutputCategory =
@@ -110,6 +118,15 @@ export interface FluidProfile {
 export type Direction = "intake" | "output";
 export type InputMethod = "tap" | "manual" | "voice";
 
+// Inpatient-mode-only verification workflow: staff can verify, correct, or
+// reject a patient/carer-entered event, but the original entry is always
+// preserved via editHistory below — nothing is ever silently overwritten.
+// "rejected" excludes the event from confirmed numeric totals (see calc.ts)
+// but keeps it visible in the audit trail. Home & community mode never sets
+// this — clinicians there are read-only and can only add a ClinicalNote.
+export type VerificationStatus =
+  "unverified" | "verified" | "corrected" | "rejected";
+
 export interface FluidEvent {
   id: string;
   patientId: string;
@@ -127,7 +144,8 @@ export interface FluidEvent {
   estimatedWaterContributionMl?: number;
   eventTime: string; // ISO
   recordedTime: string; // ISO
-  enteredBy: string; // display name / role
+  enteredBy: string; // display name
+  enteredByRole?: Role; // who entered it: patient, carer, or healthcare professional
   inputMethod: InputMethod;
   transcript?: string;
   note?: string;
@@ -139,6 +157,9 @@ export interface FluidEvent {
   confidence?: number;
   photoStoragePath?: string; // Supabase Storage object path, e.g. `<profileId>/<eventId>.jpg`
   photoSource?: "attached" | "ai_estimate";
+  verificationStatus?: VerificationStatus; // inpatient mode only
+  verifiedBy?: string; // display name of the staff member who last set verificationStatus
+  verifiedAt?: string; // ISO
 }
 
 export interface EditRecord {
@@ -278,11 +299,20 @@ export interface CareTeamContact {
 
 export type Sex = "female" | "male" | "prefer_not_to_say";
 
+// Governs which permission ruleset a healthcare account's view of a patient
+// follows — see RequirePatientPermissions / DashboardPage. Set per-patient
+// (not per-installation): one care team can plausibly manage a mix of
+// home-monitored and admitted patients at once. Defaults to "home_community"
+// when absent (e.g. a patient-mode account with no healthcare involvement).
+// Only a healthcare account can change it, from the dashboard.
+export type DeploymentMode = "home_community" | "inpatient";
+
 export interface PatientProfile {
   id: string;
   displayName: string; // fictional name only
   careSetting: string; // e.g. 'Home', 'Ward 4B', 'ICU'
   sex?: Sex;
+  deploymentMode?: DeploymentMode;
   monitoringReason?: string;
   allowance?: FluidAllowance;
   monitoringDayStartMode: MonitoringDayStartMode;
@@ -298,6 +328,30 @@ export interface PatientProfile {
   isDemo?: boolean;
   careTeamShareConsent?: boolean;
   careTeamContacts?: CareTeamContact[];
+  /** Healthcare accounts only — the workspace this patient record belongs to,
+   * shared across every staff member in that organisation. Undefined for
+   * patient-mode profiles, which stay single-owner (see 0004_care_teams.sql). */
+  organisationId?: string;
+}
+
+// --- Clinical notes (home & community mode) -------------------------------------
+// A clinician's interpretation, target, or acknowledgement of review — always
+// kept separate from the patient/carer's own FluidEvent stream, never merged
+// with or capable of altering it. This is the only way a clinician can
+// contribute in home_community mode, where patient-entered records are
+// read-only to them.
+
+export type ClinicalNoteKind = "note" | "target" | "acknowledgement";
+
+export interface ClinicalNote {
+  id: string;
+  patientId: string;
+  authorName: string;
+  authorRole: Role;
+  kind: ClinicalNoteKind;
+  text: string;
+  targetMl?: number; // only meaningful when kind === "target"
+  time: string; // ISO
 }
 
 // --- Reliability ---------------------------------------------------------------

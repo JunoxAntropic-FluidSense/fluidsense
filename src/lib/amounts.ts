@@ -29,6 +29,13 @@ export const CONTINENCE_SUBTYPES: { value: string; label: string }[] = [
   { value: "unknown", label: "Amount unknown" },
 ];
 
+export const MENSTRUAL_QUALITATIVE: { value: string; label: string }[] = [
+  { value: "light", label: "Light" },
+  { value: "moderate", label: "Moderate" },
+  { value: "heavy", label: "Heavy" },
+  { value: "unknown", label: "Amount unknown" },
+];
+
 export const UNMEASURED_URINE_SUBTYPES: { value: string; label: string }[] = [
   { value: "unmeasured_toilet", label: "Passed into toilet" },
   { value: "small_unmeasured", label: "Small amount" },

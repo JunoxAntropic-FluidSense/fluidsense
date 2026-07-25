@@ -140,7 +140,7 @@ const quickButtons = (): QuickButtonPref[] => [
     id: uuid(),
     kind: "output",
     category: "continence",
-    label: "Wet pad",
+    label: "Wet pad (urine)",
     order: 11,
     enabled: true,
   },

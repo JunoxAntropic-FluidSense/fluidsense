@@ -1,7 +1,11 @@
 import { NavLink } from "react-router-dom";
+import { Gauge, Flask } from "@phosphor-icons/react";
 import { NAV_ITEMS } from "./navConfig";
+import { useStore } from "../../store/useStore";
 
 export function Sidebar() {
+  const organisationName = useStore((s) => s.currentUser.organisationName);
+
   return (
     <nav
       aria-label="Primary"
@@ -11,7 +15,9 @@ export function Sidebar() {
         <p className="text-lg font-extrabold text-navy-900 tracking-tight">
           FluidSense
         </p>
-        <p className="text-xs text-fog-500">Healthcare team mode</p>
+        <p className="text-xs text-fog-500">
+          {organisationName || "Healthcare team mode"}
+        </p>
       </div>
       {NAV_ITEMS.map((item) => (
         <NavLink
@@ -26,9 +32,7 @@ export function Sidebar() {
             }`
           }
         >
-          <span className="text-lg" aria-hidden="true">
-            {item.icon}
-          </span>
+          <item.icon size={20} aria-hidden="true" />
           {item.label}
         </NavLink>
       ))}
@@ -42,9 +46,7 @@ export function Sidebar() {
           }`
         }
       >
-        <span className="text-lg" aria-hidden="true">
-          🩺
-        </span>
+        <Gauge size={20} aria-hidden="true" />
         Patient dashboard
       </NavLink>
       <NavLink
@@ -57,9 +59,7 @@ export function Sidebar() {
           }`
         }
       >
-        <span className="text-lg" aria-hidden="true">
-          🧪
-        </span>
+        <Flask size={20} aria-hidden="true" />
         Patient fluid library
       </NavLink>
     </nav>

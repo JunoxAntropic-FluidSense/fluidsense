@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Bell } from "@phosphor-icons/react";
 import { differenceInHours } from "date-fns";
 import type { FluidEvent, PatientProfile } from "../../types";
 
@@ -60,9 +61,12 @@ export function ReminderBanner({
           role="status"
           className="flex items-start gap-3 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3"
         >
-          <span aria-hidden="true" className="text-lg">
-            🔔
-          </span>
+          <Bell
+            size={20}
+            weight="fill"
+            className="shrink-0 text-amber-600"
+            aria-hidden="true"
+          />
           <p className="flex-1 text-sm text-amber-800">{m.text}</p>
           <button
             onClick={() => setDismissed((d) => [...d, m.id])}

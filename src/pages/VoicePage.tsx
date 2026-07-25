@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Microphone } from "@phosphor-icons/react";
 import { useVoiceCapture } from "../hooks/useVoiceCapture";
 import { extractVoiceEvents } from "../lib/voice/extractEvents";
 import { SERVER_STT_CONFIGURED } from "../lib/voice/transcribe";
@@ -10,6 +11,7 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { Field, Input, Select } from "../components/ui/Field";
 import { PhotoCaptureField } from "../components/photo/PhotoCaptureField";
 import {
   CATEGORY_LABEL,
@@ -150,6 +152,7 @@ export function VoicePage() {
         containerFraction: c.containerFraction,
         eventTime: c.eventTime,
         enteredBy: currentUser.displayName,
+        enteredByRole: currentUser.role,
         inputMethod: "voice",
         transcript: currentUser.saveVoiceTranscripts
           ? c.originalTranscript
@@ -200,9 +203,9 @@ export function VoicePage() {
                 onClick={capture.start}
                 disabled={!capture.supported}
                 aria-label="Speak an entry"
-                className="w-28 h-28 rounded-full bg-intake-600 text-white text-4xl flex items-center justify-center shadow-lg hover:bg-intake-700 disabled:opacity-40"
+                className="w-28 h-28 rounded-full bg-intake-600 text-white flex items-center justify-center shadow-lg hover:bg-intake-700 disabled:opacity-40"
               >
-                🎙️
+                <Microphone size={40} weight="fill" aria-hidden="true" />
               </button>
               <p className="font-bold text-navy-900">Speak an entry</p>
               {!capture.supported && (
@@ -241,7 +244,11 @@ export function VoicePage() {
                   className="absolute inset-0 rounded-full bg-intake-300/50 animate-ping"
                   aria-hidden="true"
                 />
-                <span className="text-4xl relative">🎙️</span>
+                <Microphone
+                  size={40}
+                  weight="fill"
+                  className="relative text-intake-700"
+                />
               </div>
               <p className="font-bold text-navy-900">Listening…</p>
               <p className="text-sm text-fog-600 tabular-nums">
@@ -631,16 +638,14 @@ function EditCandidate({
           options={DIRECTION_OPTIONS}
         />
       </div>
-      <label className="block text-sm font-semibold text-navy-700">
-        Type
-        <select
+      <Field label="Type">
+        <Select
           value={candidate.category ?? ""}
           onChange={(e) =>
             onChange({
               category: e.target.value as FluidCategory | OutputCategory,
             })
           }
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 font-normal"
         >
           <option value="">Select…</option>
           {categories.map((cat) => (
@@ -648,11 +653,10 @@ function EditCandidate({
               {CATEGORY_LABEL[cat]}
             </option>
           ))}
-        </select>
-      </label>
-      <label className="block text-sm font-semibold text-navy-700">
-        Volume (mL) — leave blank if unmeasured
-        <input
+        </Select>
+      </Field>
+      <Field label="Volume (mL) — leave blank if unmeasured">
+        <Input
           inputMode="decimal"
           value={candidate.amountMl ?? ""}
           onChange={(e) =>
@@ -660,9 +664,8 @@ function EditCandidate({
               amountMl: e.target.value ? parseFloat(e.target.value) : undefined,
             })
           }
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2 font-normal"
         />
-      </label>
+      </Field>
       <div>
         <p className="text-sm font-semibold text-navy-700 mb-1.5">Status</p>
         <SegmentedTabs

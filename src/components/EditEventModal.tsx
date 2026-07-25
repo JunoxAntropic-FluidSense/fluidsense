@@ -2,16 +2,26 @@ import { useState } from "react";
 import type { FluidEvent, MeasurementStatus } from "../types";
 import { useEscapeClose } from "../hooks/useEscapeClose";
 import { useStore } from "../store/useStore";
+import { useActivePatient } from "../hooks/useFluidData";
 import { Button } from "./ui/Button";
+import { Field, Input } from "./ui/Field";
+import { SegmentedTabs } from "./ui/SegmentedTabs";
 import { PhotoThumbnail } from "./PhotoThumbnail";
 import { CATEGORY_LABEL } from "../lib/eventMeta";
 import { format } from "date-fns";
 
-const STATUS_OPTIONS: MeasurementStatus[] = [
-  "measured",
-  "container_estimated",
-  "approximate",
-  "unmeasured",
+const VERIFICATION_LABEL: Record<string, string> = {
+  unverified: "Not yet reviewed",
+  verified: "Verified",
+  corrected: "Corrected",
+  rejected: "Rejected — excluded from confirmed totals",
+};
+
+const STATUS_OPTIONS: { value: MeasurementStatus; label: string }[] = [
+  { value: "measured", label: "Measured" },
+  { value: "container_estimated", label: "Container estimate" },
+  { value: "approximate", label: "Approximate" },
+  { value: "unmeasured", label: "Unmeasured" },
 ];
 
 export function EditEventModal({
@@ -23,8 +33,20 @@ export function EditEventModal({
 }) {
   useEscapeClose(onClose);
   const updateEvent = useStore((s) => s.updateEvent);
+  const correctEvent = useStore((s) => s.correctEvent);
+  const setEventVerification = useStore((s) => s.setEventVerification);
   const deleteEvent = useStore((s) => s.deleteEvent);
   const currentUser = useStore((s) => s.currentUser);
+  const mode = useStore((s) => s.mode);
+  const patient = useActivePatient();
+
+  // Inpatient mode: staff editing here are verifying/correcting a
+  // patient-entered record, not silently editing it — save() below routes
+  // through correctEvent so that's recorded in the same editHistory audit
+  // trail as everything else. Any other context (patient/carer editing their
+  // own entry, or home_community mode) is a plain edit via updateEvent.
+  const isInpatientReview =
+    mode === "healthcare" && patient?.deploymentMode === "inpatient";
 
   const [amountMl, setAmountMl] = useState(
     event.amountMl != null ? String(event.amountMl) : ""
@@ -35,21 +57,31 @@ export function EditEventModal({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const save = () => {
-    updateEvent(
-      event.id,
-      {
-        amountMl:
-          status === "unmeasured"
-            ? undefined
-            : amountMl
-              ? parseFloat(amountMl)
-              : undefined,
-        status,
-        note: note || undefined,
-      },
-      currentUser.displayName,
-      reason || undefined
-    );
+    const changes = {
+      amountMl:
+        status === "unmeasured"
+          ? undefined
+          : amountMl
+            ? parseFloat(amountMl)
+            : undefined,
+      status,
+      note: note || undefined,
+    };
+    if (isInpatientReview) {
+      correctEvent(
+        event.id,
+        changes,
+        currentUser.displayName,
+        reason || undefined
+      );
+    } else {
+      updateEvent(
+        event.id,
+        changes,
+        currentUser.displayName,
+        reason || undefined
+      );
+    }
     onClose();
   };
 
@@ -74,53 +106,56 @@ export function EditEventModal({
           </button>
         </div>
 
+        {isInpatientReview && (
+          <div className="mb-4 rounded-xl bg-fog-50 p-3 text-sm">
+            <span className="font-semibold text-navy-800">
+              Entered by {event.enteredBy}
+              {event.enteredByRole ? ` (${event.enteredByRole})` : ""}
+            </span>
+            <p className="text-fog-600 mt-0.5">
+              {VERIFICATION_LABEL[event.verificationStatus ?? "unverified"]}
+              {event.verifiedBy ? ` — by ${event.verifiedBy}` : ""}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
-          <label className="block text-sm font-semibold text-navy-700">
-            Measurement status
-            <select
+          <div>
+            <p className="text-sm font-semibold text-navy-700 mb-1.5">
+              Measurement status
+            </p>
+            <SegmentedTabs
+              label="Measurement status"
               value={status}
-              onChange={(e) => setStatus(e.target.value as MeasurementStatus)}
-              className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={setStatus}
+              options={STATUS_OPTIONS}
+            />
+          </div>
 
           {status !== "unmeasured" && (
-            <label className="block text-sm font-semibold text-navy-700">
-              Volume (mL) — original:{" "}
-              {event.amountMl != null ? `${event.amountMl} mL` : "none"}
-              <input
+            <Field
+              label="Volume (mL)"
+              hint={`Original: ${event.amountMl != null ? `${event.amountMl} mL` : "none"}`}
+            >
+              <Input
                 inputMode="decimal"
                 value={amountMl}
                 onChange={(e) => setAmountMl(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
-            </label>
+            </Field>
           )}
 
-          <label className="block text-sm font-semibold text-navy-700">
-            Note
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-            />
-          </label>
+          <Field label="Note">
+            <Input value={note} onChange={(e) => setNote(e.target.value)} />
+          </Field>
 
-          <label className="block text-sm font-semibold text-navy-700">
-            Reason for change (optional)
-            <input
+          <Field label="Reason for change (optional)">
+            <Input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. corrected transcription error"
-              className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
             />
-          </label>
+          </Field>
 
           {event.photoStoragePath && (
             <div className="block text-sm font-semibold text-navy-700 space-y-2">
@@ -165,8 +200,44 @@ export function EditEventModal({
 
         <div className="mt-5 space-y-2">
           <Button fullWidth onClick={save}>
-            Save changes
+            {isInpatientReview ? "Save correction" : "Save changes"}
           </Button>
+          {isInpatientReview && (
+            <div className="flex gap-2">
+              <Button
+                fullWidth
+                variant="secondary"
+                size="md"
+                onClick={() => {
+                  setEventVerification(
+                    event.id,
+                    "verified",
+                    currentUser.displayName,
+                    reason || undefined
+                  );
+                  onClose();
+                }}
+              >
+                Verify (no changes needed)
+              </Button>
+              <Button
+                fullWidth
+                variant="danger"
+                size="md"
+                onClick={() => {
+                  setEventVerification(
+                    event.id,
+                    "rejected",
+                    currentUser.displayName,
+                    reason || undefined
+                  );
+                  onClose();
+                }}
+              >
+                Reject
+              </Button>
+            </div>
+          )}
           {!confirmDelete ? (
             <Button
               fullWidth

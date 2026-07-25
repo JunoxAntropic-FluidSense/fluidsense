@@ -10,14 +10,17 @@
 import { useEffect, type ReactNode } from "react";
 import { useAuthBootstrap } from "../../hooks/useAuthBootstrap";
 import { startAccountSync } from "./accountSync";
+import { startPatientSync } from "./patientSync";
 
 export function AuthBootstrap({ children }: { children: ReactNode }) {
   useAuthBootstrap();
-  // startAccountSync() is idempotent (guarded internally), but still belongs
-  // in an effect rather than the render body, matching useAuthBootstrap's
-  // own pattern and avoiding a side effect during render.
+  // Both are idempotent (guarded internally) and safely no-op until their
+  // preconditions hold (signed in; healthcare account with a workspace,
+  // respectively) — started unconditionally here, in an effect rather than
+  // the render body, matching useAuthBootstrap's own pattern.
   useEffect(() => {
     startAccountSync();
+    startPatientSync();
   }, []);
   return children;
 }

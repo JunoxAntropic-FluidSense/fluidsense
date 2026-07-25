@@ -1,35 +1,28 @@
-import { Link } from "react-router-dom";
+import { Drop } from "@phosphor-icons/react";
 import { Card } from "../ui/Card";
-import { Button } from "../ui/Button";
 
+/**
+ * Deliberately has no buttons of its own — the hero "Speak an entry" button
+ * and the Quick add grid right below it already cover every way to log an
+ * entry. Repeating those actions a third time here is what made the empty
+ * state feel like a wall of competing buttons with no clear next step.
+ */
 export function EmptyToday() {
   return (
-    <Card className="p-6 text-center space-y-4">
-      <p className="text-3xl" aria-hidden="true">
-        💧
-      </p>
+    <Card className="p-6 text-center space-y-2">
+      <Drop
+        size={28}
+        weight="fill"
+        className="mx-auto text-intake-500"
+        aria-hidden="true"
+      />
       <div>
-        <h2 className="text-lg font-extrabold text-navy-900">
+        <h2 className="text-base font-extrabold text-navy-900">
           No fluid events recorded yet
         </h2>
         <p className="text-sm text-fog-600 mt-1">
-          Record an intake or output using a quick button or voice.
+          Tap a quick-add button below, or use Speak an entry above.
         </p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <Link to="/add/intake">
-          <Button fullWidth variant="secondary">
-            Add intake
-          </Button>
-        </Link>
-        <Link to="/add/output">
-          <Button fullWidth variant="secondary">
-            Add output
-          </Button>
-        </Link>
-        <Link to="/voice">
-          <Button fullWidth>Speak an entry</Button>
-        </Link>
       </div>
     </Card>
   );

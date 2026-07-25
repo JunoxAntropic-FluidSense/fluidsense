@@ -1,4 +1,5 @@
 import { useStore } from "../../store/useStore";
+import { Select } from "../ui/Field";
 
 export function PatientSwitcher() {
   const mode = useStore((s) => s.mode);
@@ -13,17 +14,17 @@ export function PatientSwitcher() {
       <span className="font-semibold text-navy-700 whitespace-nowrap">
         Patient
       </span>
-      <select
+      <Select
         value={activePatientId}
         onChange={(e) => setActivePatient(e.target.value)}
-        className="min-h-11 rounded-xl border border-navy-900/15 bg-white px-3 text-sm font-semibold text-navy-900 max-w-[55vw] md:max-w-xs"
+        className="min-h-11 py-0 text-sm font-semibold max-w-[55vw] md:max-w-xs"
       >
         {patients.map((p) => (
           <option key={p.id} value={p.id}>
             {p.displayName} — {p.careSetting}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }

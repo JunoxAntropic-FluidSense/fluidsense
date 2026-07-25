@@ -7,6 +7,7 @@ import type { FormEvent } from "react";
 import { signInWithMagicLink } from "../../lib/supabase/auth";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
+import { Field, Input } from "../ui/Field";
 
 export interface MagicLinkFormProps {
   /** Called once the magic-link email has been sent successfully. */
@@ -60,9 +61,8 @@ export function MagicLinkForm({
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
-      <label className="block text-sm font-semibold text-navy-700">
-        Email
-        <input
+      <Field label="Email">
+        <Input
           type="email"
           required
           autoComplete="email"
@@ -70,9 +70,8 @@ export function MagicLinkForm({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={busy}
-          className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal disabled:opacity-60"
         />
-      </label>
+      </Field>
 
       {error && (
         <div className="rounded-xl border border-alert-100 bg-alert-50 p-3">

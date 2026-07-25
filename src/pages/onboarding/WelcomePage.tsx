@@ -46,9 +46,14 @@ export function WelcomePage() {
             FluidSense
           </h1>
           <p className="mt-2 text-fog-600">
-            {awaitingSignIn
-              ? "Sign in to continue."
-              : "Quick, voice-friendly fluid intake and output tracking."}
+            {awaitingSignIn ? (
+              "Sign in to continue."
+            ) : (
+              <>
+                Quick, <em className="accent">voice-friendly</em> fluid intake
+                and output tracking.
+              </>
+            )}
           </p>
         </div>
 

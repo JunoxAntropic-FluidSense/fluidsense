@@ -28,6 +28,12 @@ export function computeBalance(events: FluidEvent[]): BalanceBreakdown {
   const unmeasuredEvents: FluidEvent[] = [];
 
   for (const e of events) {
+    // Rejected entries (inpatient-mode verification) are excluded from the
+    // confirmed record entirely — they still exist and stay visible in the
+    // event's own editHistory/audit trail, just not counted here or listed
+    // as an unmeasured event.
+    if (e.verificationStatus === "rejected") continue;
+
     const isNumeric =
       typeof e.amountMl === "number" && e.status !== "unmeasured";
     if (e.direction === "intake") {
@@ -89,6 +95,10 @@ function unmeasuredLabel(e: FluidEvent): string {
       return "urine episode (unmeasured)";
     case "continence":
       return e.subtype ? `${e.subtype.replace(/_/g, " ")}` : "continence event";
+    case "menstrual_pad":
+      return e.subtype
+        ? `menstrual pad (${e.subtype.replace(/_/g, " ")})`
+        : "menstrual pad";
     case "vomit":
       return "vomiting (unmeasured)";
     case "diarrhoea":

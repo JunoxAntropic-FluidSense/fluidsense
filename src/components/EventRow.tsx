@@ -1,12 +1,13 @@
 import { format } from "date-fns";
 import type { FluidEvent } from "../types";
 import { StatusBadge } from "./ui/Badge";
+import { Checkbox } from "./ui/Checkbox";
 import { PhotoThumbnail } from "./PhotoThumbnail";
 import {
-  CATEGORY_ICON,
+  CategoryIcon,
   CATEGORY_LABEL,
   INPUT_METHOD_LABEL,
-  INPUT_METHOD_ICON,
+  InputMethodIcon,
 } from "../lib/eventMeta";
 
 export function EventRow({
@@ -26,19 +27,18 @@ export function EventRow({
   return (
     <li className="flex items-start gap-3 py-3 border-b border-navy-900/5 last:border-0">
       {selectable && (
-        <input
-          type="checkbox"
+        <Checkbox
           checked={!!selected}
           onChange={() => onToggleSelect?.(event.id)}
           aria-label={`Select entry: ${event.category}`}
-          className="mt-2 w-5 h-5 shrink-0"
+          className="mt-2"
         />
       )}
       <span
-        className={`flex items-center justify-center w-10 h-10 rounded-full text-lg shrink-0 ${isIntake ? "bg-intake-50" : "bg-output-50"}`}
+        className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${isIntake ? "bg-intake-50 text-intake-700" : "bg-output-50 text-output-700"}`}
         aria-hidden="true"
       >
-        {CATEGORY_ICON[event.category]}
+        <CategoryIcon category={event.category} size={20} />
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -62,7 +62,12 @@ export function EventRow({
         <p className="text-xs text-fog-500 mt-1">
           {format(new Date(event.eventTime), "d MMM, HH:mm")} ·{" "}
           {event.enteredBy} ·{" "}
-          <span aria-hidden="true">{INPUT_METHOD_ICON[event.inputMethod]}</span>{" "}
+          <InputMethodIcon
+            method={event.inputMethod}
+            size={14}
+            className="inline align-[-2px]"
+            aria-hidden="true"
+          />{" "}
           {INPUT_METHOD_LABEL[event.inputMethod]}
         </p>
         {event.note && (

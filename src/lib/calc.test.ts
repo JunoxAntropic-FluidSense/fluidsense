@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeBalance } from "./calc";
+import { computeBalance, describeUnmeasured } from "./calc";
 import type { FluidEvent } from "../types";
 
 function ev(partial: Partial<FluidEvent>): FluidEvent {
@@ -88,6 +88,34 @@ describe("computeBalance", () => {
     expect(balance.recordedBalanceMl).toBe(300);
   });
 
+  it("excludes rejected events from the confirmed balance entirely", () => {
+    const events = [
+      ev({
+        direction: "intake",
+        category: "water",
+        amountMl: 1000,
+        status: "measured",
+      }),
+      ev({
+        direction: "output",
+        category: "urine",
+        amountMl: 400,
+        status: "measured",
+        verificationStatus: "rejected",
+      }),
+      ev({
+        direction: "output",
+        category: "continence",
+        status: "unmeasured",
+        verificationStatus: "rejected",
+      }),
+    ];
+    const balance = computeBalance(events);
+    expect(balance.totalNumericOutputMl).toBe(0);
+    expect(balance.unmeasuredCount).toBe(0);
+    expect(balance.recordedBalanceMl).toBe(1000);
+  });
+
   it("computes recorded balance as intake minus numeric output", () => {
     const events = [
       ev({
@@ -119,5 +147,30 @@ describe("computeBalance", () => {
       photoStoragePath: "p1/e1.jpg",
     });
     expect(computeBalance([withPhoto])).toEqual(computeBalance([withoutPhoto]));
+  });
+});
+
+describe("describeUnmeasured", () => {
+  it("labels a menstrual pad event with its subtype", () => {
+    const events = [
+      ev({
+        direction: "output",
+        category: "menstrual_pad",
+        status: "unmeasured",
+        subtype: "moderate",
+      }),
+    ];
+    expect(describeUnmeasured(events)).toEqual(["menstrual pad (moderate)"]);
+  });
+
+  it("labels a menstrual pad event with no subtype generically", () => {
+    const events = [
+      ev({
+        direction: "output",
+        category: "menstrual_pad",
+        status: "unmeasured",
+      }),
+    ];
+    expect(describeUnmeasured(events)).toEqual(["menstrual pad"]);
   });
 });

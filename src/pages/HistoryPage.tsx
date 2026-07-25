@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { endOfDay } from "date-fns";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { Field, Input, Select } from "../components/ui/Field";
+import { DateRangePicker } from "../components/ui/DateRangePicker";
 import { EventRow } from "../components/EventRow";
 import { EditEventModal } from "../components/EditEventModal";
-import type { FluidEvent } from "../types";
+import type { FluidEvent, PatientProfile } from "../types";
 
 type DirectionFilter = "all" | "intake" | "output" | "unmeasured";
 type StatusFilter = "all" | "measured" | "estimated";
@@ -36,6 +39,7 @@ const UNDO_WINDOW_MS = 8000;
 export function HistoryPage() {
   const patient = useActivePatient();
   const currentUser = useStore((s) => s.currentUser);
+  const mode = useStore((s) => s.mode);
   const events = useStore((s) => s.events);
   const deleteEvents = useStore((s) => s.deleteEvents);
   const restoreEvent = useStore((s) => s.restoreEvent);
@@ -45,8 +49,8 @@ export function HistoryPage() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [method, setMethod] = useState<MethodFilter>("all");
   const [enteredBy, setEnteredBy] = useState("all");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState<Date | undefined>(undefined);
+  const [to, setTo] = useState<Date | undefined>(undefined);
 
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -93,14 +97,24 @@ export function HistoryPage() {
         if (method === "voice" && e.inputMethod !== "voice") return false;
         if (method === "manual" && e.inputMethod === "voice") return false;
         if (enteredBy !== "all" && e.enteredBy !== enteredBy) return false;
-        if (from && new Date(e.eventTime) < new Date(from)) return false;
-        if (to && new Date(e.eventTime) > new Date(to)) return false;
+        if (from && new Date(e.eventTime) < from) return false;
+        if (to && new Date(e.eventTime) > endOfDay(to)) return false;
         return true;
       }),
     [patientEvents, direction, status, method, enteredBy, from, to]
   );
 
   if (!patient) return null;
+
+  // Home & community mode: a clinician viewing this patient's record is
+  // read-only on patient/carer-entered events — they can only add a
+  // ClinicalNote (below). Inpatient mode allows staff to open the edit
+  // modal, but only to verify/correct/reject (see EditEventModal), never a
+  // silent edit. Patient/carer accounts (mode === "patient") always retain
+  // full edit access to their own entries regardless of deploymentMode.
+  const clinicianReadOnly =
+    mode === "healthcare" &&
+    (patient.deploymentMode ?? "home_community") !== "inpatient";
 
   const toggleSelect = (id: string) =>
     setSelected((s) => {
@@ -153,6 +167,7 @@ export function HistoryPage() {
             Your recorded fluid events will appear here.
           </p>
         </Card>
+        {mode === "healthcare" && <ClinicalNotesCard patient={patient} />}
       </div>
     );
   }
@@ -166,14 +181,30 @@ export function HistoryPage() {
             {patient.displayName} · audit-style event log
           </p>
         </div>
-        <Button
-          size="md"
-          variant="secondary"
-          onClick={() => (selectMode ? clearSelection() : setSelectMode(true))}
-        >
-          {selectMode ? "Cancel" : "Select"}
-        </Button>
+        {!clinicianReadOnly && (
+          <Button
+            size="md"
+            variant="secondary"
+            onClick={() =>
+              selectMode ? clearSelection() : setSelectMode(true)
+            }
+          >
+            {selectMode ? "Cancel" : "Select"}
+          </Button>
+        )}
       </div>
+
+      {clinicianReadOnly && (
+        <Card className="p-4 bg-fog-50 border-navy-900/5">
+          <p className="text-sm text-navy-700">
+            Home &amp; community monitoring: this patient's entries are
+            read-only here. Add a clinical note below instead of editing their
+            record.
+          </p>
+        </Card>
+      )}
+
+      {mode === "healthcare" && <ClinicalNotesCard patient={patient} />}
 
       <Card className="p-5 space-y-4">
         <div className="space-y-3">
@@ -213,24 +244,16 @@ export function HistoryPage() {
               ...recorders.map((r) => [r, r] as [string, string]),
             ]}
           />
-          <label className="text-xs font-semibold text-navy-700">
-            From
-            <input
-              type="datetime-local"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-navy-900/15 px-2 py-2 text-sm font-normal"
+          <Field label="Date range" className="[&>span]:text-xs">
+            <DateRangePicker
+              from={from}
+              to={to}
+              onChange={(range) => {
+                setFrom(range.from);
+                setTo(range.to);
+              }}
             />
-          </label>
-          <label className="text-xs font-semibold text-navy-700">
-            To
-            <input
-              type="datetime-local"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-navy-900/15 px-2 py-2 text-sm font-normal"
-            />
-          </label>
+          </Field>
         </div>
       </Card>
 
@@ -269,7 +292,9 @@ export function HistoryPage() {
               <EventRow
                 key={e.id}
                 event={e}
-                onEdit={selectMode ? undefined : setEditing}
+                onEdit={
+                  selectMode || clinicianReadOnly ? undefined : setEditing
+                }
                 selectable={selectMode}
                 selected={selected.has(e.id)}
                 onToggleSelect={toggleSelect}
@@ -331,6 +356,61 @@ export function HistoryPage() {
   );
 }
 
+function ClinicalNotesCard({ patient }: { patient: PatientProfile }) {
+  const currentUser = useStore((s) => s.currentUser);
+  const clinicalNotes = useStore((s) => s.clinicalNotes);
+  const addClinicalNote = useStore((s) => s.addClinicalNote);
+  const [newNote, setNewNote] = useState("");
+  const patientNotes = clinicalNotes.filter((n) => n.patientId === patient.id);
+
+  return (
+    <Card className="p-5 space-y-3">
+      <p className="text-sm font-bold text-navy-900">Clinical notes</p>
+      <p className="text-xs text-fog-500">
+        Your interpretation, targets, or acknowledgement of review — kept
+        separate from {patient.displayName}'s own entries, never merged with
+        them.
+      </p>
+      <div className="flex gap-2 items-end">
+        <Field label="Add a note" className="flex-1">
+          <Input
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="e.g. Reviewed, balance trending negative"
+          />
+        </Field>
+        <Button
+          disabled={!newNote.trim()}
+          onClick={() => {
+            addClinicalNote({
+              patientId: patient.id,
+              authorName: currentUser.displayName,
+              authorRole: currentUser.role,
+              kind: "note",
+              text: newNote.trim(),
+            });
+            setNewNote("");
+          }}
+        >
+          Add
+        </Button>
+      </div>
+      {patientNotes.length > 0 && (
+        <ul className="space-y-2 pt-2 border-t border-navy-900/10">
+          {patientNotes.map((n) => (
+            <li key={n.id} className="text-sm">
+              <span className="text-fog-500">
+                {new Date(n.time).toLocaleString()} — {n.authorName}:
+              </span>{" "}
+              {n.text}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 function FilterGroup({
   label,
   children,
@@ -358,19 +438,18 @@ function FilterSelect({
   options: [string, string][];
 }) {
   return (
-    <label className="text-xs font-semibold text-navy-700">
-      {label}
-      <select
+    <Field label={label} className="[&>span]:text-xs">
+      <Select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-lg border border-navy-900/15 px-2 py-2 text-sm font-normal bg-white"
+        className="text-sm py-2"
       >
         {options.map(([v, l]) => (
           <option key={v} value={v}>
             {l}
           </option>
         ))}
-      </select>
-    </label>
+      </Select>
+    </Field>
   );
 }
