@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
+import { cn } from "../../lib/cn";
 
 type Variant = "primary" | "secondary" | "ghost" | "output" | "danger";
 type Size = "md" | "lg" | "xl";
@@ -41,7 +42,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={`inline-flex items-center justify-center gap-2 font-semibold cursor-pointer transition-colors duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${fullWidth ? "w-full" : ""} ${className}`}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 font-semibold cursor-pointer transition-colors duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
+          VARIANT_CLASSES[variant],
+          SIZE_CLASSES[size],
+          fullWidth && "w-full",
+          className
+        )}
         {...rest}
       >
         {icon}

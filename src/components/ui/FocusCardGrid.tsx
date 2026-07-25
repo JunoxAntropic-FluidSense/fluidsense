@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { cn } from "../../lib/cn";
 
 /**
  * Grid where hovering one item focuses it and blurs its siblings — adapted
@@ -17,7 +18,7 @@ export function FocusCardGrid({
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <div className={`grid gap-4 md:grid-cols-2 ${className}`}>
+    <div className={cn("grid gap-4 md:grid-cols-2", className)}>
       {children.map((child, index) => (
         <div
           key={index}

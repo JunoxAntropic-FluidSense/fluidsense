@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { MeasurementStatus } from "../../types";
+import { cn } from "../../lib/cn";
 
 const STATUS_STYLE: Record<MeasurementStatus, string> = {
   measured: "bg-intake-100 text-intake-700 border border-intake-200",
@@ -31,7 +32,11 @@ export function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[status]} ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        STATUS_STYLE[status],
+        className
+      )}
     >
       <span aria-hidden="true">{STATUS_ICON[status]}</span>
       {STATUS_TEXT[status]}
@@ -58,7 +63,11 @@ export function Badge({
   };
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tones[tone]} ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        tones[tone],
+        className
+      )}
     >
       {children}
     </span>

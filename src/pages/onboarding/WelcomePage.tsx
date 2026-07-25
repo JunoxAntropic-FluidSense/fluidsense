@@ -15,24 +15,21 @@ export function WelcomePage() {
   const viewContext = useStore((s) => s.viewContext);
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
-  // Onboarding is done locally but this account isn't signed in yet — sign-in
-  // is now required to reach the live app (RequireOnboarding enforces this).
-  const awaitingSignIn = onboardingCompleted && authStatus === "signed-out";
-  // Default to "sign-up" when bounced back here post-onboarding, since that's
-  // the more likely case (they finished onboarding without creating an
-  // account) — but "sign-in" is one tap away for anyone who already has one.
+  // Account creation always comes first now — "Get started" opens the
+  // sign-up panel directly, rather than sending people into onboarding
+  // before they have an account. See OnboardingFlow.tsx, which no longer
+  // has its own embedded sign-up step.
   const [authPanel, setAuthPanel] = useState<"sign-up" | "sign-in" | null>(
-    awaitingSignIn ? "sign-up" : null
+    null
   );
   const [useMagicLink, setUseMagicLink] = useState(false);
 
   if (viewContext === "demo") return <Navigate to="/" replace />;
-  // Still resolving the session — avoid flashing this page before we know.
-  if (onboardingCompleted && authStatus === "loading") return null;
-  // Signed in already: never show the landing/sign-in screen again, even if
-  // local onboarding hasn't run yet on this browser — send them straight
-  // into onboarding (or the app, if it's already done) instead of a screen
-  // that looks identical to being signed out.
+  // Still resolving the session — avoid flashing the landing screen before
+  // we know whether to redirect straight past it.
+  if (authStatus === "loading") return null;
+  // Signed in already: never show the landing/sign-in screen again — send
+  // them straight into onboarding (or the app, if that's done too).
   if (authStatus === "signed-in") {
     return <Navigate to={onboardingCompleted ? "/" : "/onboarding"} replace />;
   }
@@ -46,14 +43,8 @@ export function WelcomePage() {
             FluidSense
           </h1>
           <p className="mt-2 text-fog-600">
-            {awaitingSignIn ? (
-              "Sign in to continue."
-            ) : (
-              <>
-                Quick, <em className="accent">voice-friendly</em> fluid intake
-                and output tracking.
-              </>
-            )}
+            Quick, <em className="accent">voice-friendly</em> fluid intake and
+            output tracking.
           </p>
         </div>
 
@@ -65,57 +56,40 @@ export function WelcomePage() {
           </p>
         </Card>
 
-        <div className="w-full space-y-3">
-          {!awaitingSignIn && (
-            <Button fullWidth size="xl" onClick={() => navigate("/onboarding")}>
+        {!authPanel && (
+          <div className="w-full space-y-3">
+            <Button fullWidth size="xl" onClick={() => setAuthPanel("sign-up")}>
               Get started
             </Button>
-          )}
-          {DEMO_MODE_ENABLED && (
-            <Button
-              fullWidth
-              size="lg"
-              variant="secondary"
-              onClick={() => {
-                enterDemoMode();
-                navigate("/");
-              }}
+            {DEMO_MODE_ENABLED && (
+              <Button
+                fullWidth
+                size="lg"
+                variant="secondary"
+                onClick={() => {
+                  enterDemoMode();
+                  navigate("/");
+                }}
+              >
+                Explore demo
+              </Button>
+            )}
+            <button
+              type="button"
+              onClick={() => setAuthPanel("sign-in")}
+              className="text-sm text-fog-600 underline hover:no-underline"
             >
-              Explore demo
-            </Button>
-          )}
-          <div className="flex gap-3">
-            <Button
-              fullWidth
-              size="lg"
-              variant={authPanel === "sign-up" ? "primary" : "ghost"}
-              onClick={() =>
-                setAuthPanel((v) => (v === "sign-up" ? null : "sign-up"))
-              }
-            >
-              Sign up
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              variant={authPanel === "sign-in" ? "primary" : "ghost"}
-              onClick={() =>
-                setAuthPanel((v) => (v === "sign-in" ? null : "sign-in"))
-              }
-            >
-              Sign in
-            </Button>
+              Already have an account? Sign in
+            </button>
           </div>
-        </div>
+        )}
 
         {authPanel && (
           <Card className="w-full p-5 text-left space-y-3">
             <p className="text-xs text-fog-500">
-              {awaitingSignIn
-                ? "FluidSense now requires an account to continue."
-                : authPanel === "sign-up"
-                  ? "Create an account to use FluidSense."
-                  : "Already have an account? Sign in here."}
+              {authPanel === "sign-up"
+                ? "Create an account to get started."
+                : "Sign in to your account."}
             </p>
             {useMagicLink ? (
               <MagicLinkForm
@@ -151,6 +125,13 @@ export function WelcomePage() {
                   : "Sign up instead"}
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => setAuthPanel(null)}
+              className="text-xs text-fog-500 underline hover:no-underline"
+            >
+              Back
+            </button>
           </Card>
         )}
         {DEMO_MODE_ENABLED && (

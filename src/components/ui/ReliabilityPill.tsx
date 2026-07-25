@@ -1,4 +1,5 @@
 import type { ReliabilityLevel } from "../../types";
+import { cn } from "../../lib/cn";
 
 const STYLE: Record<ReliabilityLevel, string> = {
   High: "bg-intake-100 text-intake-700 border-intake-200",
@@ -21,7 +22,11 @@ export function ReliabilityPill({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-bold ${STYLE[level]} ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-bold",
+        STYLE[level],
+        className
+      )}
     >
       <span aria-hidden="true">{ICON[level]}</span>
       Reliability: {level}

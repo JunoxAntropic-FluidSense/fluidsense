@@ -5,6 +5,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import { forwardRef } from "react";
+import { cn } from "../../lib/cn";
 
 /** Label + optional hint wrapper for a single form field, left-aligned per Reverie. */
 export function Field({
@@ -19,7 +20,7 @@ export function Field({
   className?: string;
 }) {
   return (
-    <label className={`grid gap-1.5 text-left ${className}`}>
+    <label className={cn("grid gap-1.5 text-left", className)}>
       <span className="text-sm font-semibold text-navy-700">{label}</span>
       {children}
       {hint && <span className="text-xs text-fog-500">{hint}</span>}
@@ -37,7 +38,7 @@ export const Input = forwardRef<
   return (
     <input
       ref={ref}
-      className={`${fieldBase} rounded-full px-4 py-2.5 ${className}`}
+      className={cn(fieldBase, "rounded-full px-4 py-2.5", className)}
       {...rest}
     />
   );
@@ -50,7 +51,7 @@ export const Select = forwardRef<
   return (
     <select
       ref={ref}
-      className={`${fieldBase} rounded-full px-4 py-2.5 ${className}`}
+      className={cn(fieldBase, "rounded-full px-4 py-2.5", className)}
       {...rest}
     />
   );
@@ -63,7 +64,11 @@ export const Textarea = forwardRef<
   return (
     <textarea
       ref={ref}
-      className={`${fieldBase} rounded-2xl px-4 py-3 resize-y min-h-24 ${className}`}
+      className={cn(
+        fieldBase,
+        "rounded-2xl px-4 py-3 resize-y min-h-24",
+        className
+      )}
       {...rest}
     />
   );

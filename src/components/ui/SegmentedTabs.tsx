@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useId } from "react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { cn } from "../../lib/cn";
 
 /**
  * Segmented control for small, fixed option sets — a flatter alternative to
@@ -29,7 +30,10 @@ export function SegmentedTabs<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className={`inline-flex items-center gap-1 rounded-full bg-fog-100 p-1 overflow-x-auto max-w-full ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full bg-fog-100 p-1 overflow-x-auto max-w-full",
+        className
+      )}
     >
       {options.map((option) => {
         const isActive = option.value === value;

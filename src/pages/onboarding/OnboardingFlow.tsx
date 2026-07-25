@@ -1,16 +1,15 @@
 import { useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useStore } from "../../store/useStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
 import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
 import { Field, Input, Select } from "../../components/ui/Field";
 import { Checkbox } from "../../components/ui/Checkbox";
-import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
 import { WorkspaceSetup } from "../../components/onboarding/WorkspaceSetup";
 import { enableCheckInPush } from "../../lib/push/subscribe";
-import { useAuthStore } from "../../store/useAuthStore";
 import type { Mode, Role, Sex, Units } from "../../types";
 
 const UNITS_OPTIONS: { value: Units; label: string }[] = [
@@ -79,11 +78,11 @@ export function OnboardingFlow() {
     (s) => s.currentUser.onboardingCompleted
   );
   const completeOnboarding = useStore((s) => s.completeOnboarding);
+  const authStatus = useAuthStore((s) => s.status);
   const setCheckInNotificationsEnabled = useStore(
     (s) => s.setCheckInNotificationsEnabled
   );
   const setOrganisation = useStore((s) => s.setOrganisation);
-  const authStatus = useAuthStore((s) => s.status);
 
   const detectedTz = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -107,16 +106,20 @@ export function OnboardingFlow() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [careTeamShareConsent, setCareTeamShareConsent] = useState(false);
   const [wantsCheckInReminders, setWantsCheckInReminders] = useState(false);
-  const [organisationName, setOrganisationName] = useState("");
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
   const [joinedOrgName, setJoinedOrgName] = useState<string | null>(null);
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [signUpUseMagicLink, setSignUpUseMagicLink] = useState(false);
-  const [signUpDone, setSignUpDone] = useState(false);
   const [finishing, setFinishing] = useState(false);
 
   if (onboardingCompleted) return <Navigate to="/" replace />;
+  // Onboarding assumes an authenticated user throughout (account creation
+  // now happens on WelcomePage, before ever reaching here) — guard against
+  // landing on this URL directly (stale tab, bookmark, manual navigation)
+  // without a session, which would otherwise lose everything typed in here
+  // the moment `finish()` tries to enter the app and gets bounced by
+  // RequireOnboarding.
+  if (authStatus === "loading") return null;
+  if (authStatus !== "signed-in") return <Navigate to="/welcome" replace />;
 
   const tzOptions = timezoneOptions(detectedTz);
   const isPatient = accountMode === "patient";
@@ -136,7 +139,7 @@ export function OnboardingFlow() {
       timezone,
       wantsAllowanceTracking: isPatient ? wantsAllowance : undefined,
       allowanceMl: allowanceMl ? parseFloat(allowanceMl) : undefined,
-      organisationName: joinedOrgName || organisationName || undefined,
+      organisationName: joinedOrgName || undefined,
       isTestWorkspace,
       careSetting: isPatient ? careSetting : undefined,
       sex: isPatient ? sex : undefined,
@@ -173,7 +176,7 @@ export function OnboardingFlow() {
           Step {step} of 2
         </p>
         <h1 className="text-2xl font-extrabold text-navy-900 mb-6">
-          {step === 1 ? "How will you use FluidSense?" : "Set up your account"}
+          {step === 1 ? "How will you use FluidSense?" : "A few details"}
         </h1>
 
         {step === 1 && (
@@ -275,35 +278,19 @@ export function OnboardingFlow() {
                     options={HEALTHCARE_ROLE_OPTIONS}
                   />
                 </div>
-                {authStatus === "signed-in" ? (
-                  joinedOrgId ? (
-                    <p className="text-sm text-navy-700 font-semibold">
-                      Workspace set up
-                      {joinedOrgName ? `: ${joinedOrgName}` : ""} — continue
-                      below.
-                    </p>
-                  ) : (
-                    <WorkspaceSetup
-                      onJoined={(id, name) => {
-                        setJoinedOrgId(id);
-                        setJoinedOrgName(name);
-                      }}
-                    />
-                  )
+                {joinedOrgId ? (
+                  <p className="text-sm text-navy-700 font-semibold">
+                    Workspace set up
+                    {joinedOrgName ? `: ${joinedOrgName}` : ""} — continue
+                    below.
+                  </p>
                 ) : (
-                  <>
-                    <Field label="Organisation (optional)">
-                      <Input
-                        value={organisationName}
-                        onChange={(e) => setOrganisationName(e.target.value)}
-                        placeholder="e.g. City Hospital"
-                      />
-                    </Field>
-                    <p className="text-xs text-fog-500">
-                      Sign in below to create or join your team's shared
-                      workspace now — or do it later from Profile.
-                    </p>
-                  </>
+                  <WorkspaceSetup
+                    onJoined={(id, name) => {
+                      setJoinedOrgId(id);
+                      setJoinedOrgName(name);
+                    }}
+                  />
                 )}
               </>
             )}
@@ -429,51 +416,6 @@ export function OnboardingFlow() {
                 entered. It cannot measure fluids that were not recorded and
                 does not determine a patient's true fluid status.
               </p>
-            </Card>
-
-            <Card className="p-5 space-y-3">
-              <button
-                type="button"
-                onClick={() => setShowSignUp((v) => !v)}
-                className="w-full text-left"
-              >
-                <p className="text-sm font-semibold text-navy-800">
-                  Create an account
-                </p>
-                <p className="text-xs text-fog-500 mt-1">
-                  FluidSense requires an account to continue. You can do this
-                  now, or skip ahead and sign in on the next screen.
-                </p>
-              </button>
-              {showSignUp && (
-                <div className="space-y-3 pt-2 border-t border-navy-900/10">
-                  {signUpDone ? (
-                    <p className="text-sm text-navy-700 font-semibold">
-                      Account created — continue below to finish setup.
-                    </p>
-                  ) : signUpUseMagicLink ? (
-                    <MagicLinkForm
-                      redirectTo={`${window.location.origin}/auth/callback`}
-                    />
-                  ) : (
-                    <EmailPasswordForm
-                      mode="sign-up"
-                      onSuccess={() => setSignUpDone(true)}
-                    />
-                  )}
-                  {!signUpDone && (
-                    <button
-                      type="button"
-                      onClick={() => setSignUpUseMagicLink((v) => !v)}
-                      className="text-xs text-fog-500 underline hover:no-underline"
-                    >
-                      {signUpUseMagicLink
-                        ? "Use a password instead"
-                        : "Use a magic link instead"}
-                    </button>
-                  )}
-                </div>
-              )}
             </Card>
 
             <Button fullWidth size="xl" onClick={finish} disabled={finishing}>
