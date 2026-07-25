@@ -5,6 +5,7 @@ export { supabase, isSupabaseConfigured } from "./client";
 export {
   signUpWithPassword,
   signInWithPassword,
+  signInWithGoogle,
   signInWithMagicLink,
   completeAuthFromUrl,
   signOut,

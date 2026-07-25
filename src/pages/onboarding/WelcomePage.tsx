@@ -5,7 +5,11 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
-import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
+import {
+  EmailPasswordForm,
+  MagicLinkForm,
+  GoogleSignInButton,
+} from "../../components/auth";
 
 export function WelcomePage() {
   const navigate = useNavigate();
@@ -91,6 +95,14 @@ export function WelcomePage() {
                 ? "Create an account to get started."
                 : "Sign in to your account."}
             </p>
+            <GoogleSignInButton
+              redirectTo={`${window.location.origin}/auth/callback`}
+            />
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-navy-900/10" />
+              <p className="text-xs text-fog-400">or</p>
+              <div className="h-px flex-1 bg-navy-900/10" />
+            </div>
             {useMagicLink ? (
               <MagicLinkForm
                 redirectTo={`${window.location.origin}/auth/callback`}

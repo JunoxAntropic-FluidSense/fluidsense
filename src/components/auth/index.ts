@@ -9,5 +9,8 @@ export type {
 export { MagicLinkForm } from "./MagicLinkForm";
 export type { MagicLinkFormProps } from "./MagicLinkForm";
 
+export { GoogleSignInButton } from "./GoogleSignInButton";
+export type { GoogleSignInButtonProps } from "./GoogleSignInButton";
+
 export { SignOutButton } from "./SignOutButton";
 export type { SignOutButtonProps } from "./SignOutButton";

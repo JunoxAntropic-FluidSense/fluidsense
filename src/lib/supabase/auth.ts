@@ -3,10 +3,6 @@
 // need to know about supabase-js's error type. When no backend is configured
 // (see ./client.ts), calls resolve to a "not configured" error instead of
 // throwing, per CLAUDE.md's "backend is optional" rule.
-//
-// Deliberately no signInWithOAuth yet — but every result here follows the same
-// { error: { message } | null, ... } shape, so adding one later is additive,
-// not a rewrite.
 
 import type { EmailOtpType, Session, User } from "@supabase/supabase-js";
 import { supabase } from "./client";
@@ -77,6 +73,32 @@ export async function signInWithPassword(
     session: data.session,
     error: normalizeError(error),
   };
+}
+
+/**
+ * Redirects the browser to Google's OAuth consent screen. supabase-js
+ * navigates away as part of this call (via window.location) on success, so
+ * the returned promise resolving with no error is not "signed in" — the
+ * actual session only exists once the redirect back to `redirectTo`
+ * completes and lands on AuthCallbackPage, which calls completeAuthFromUrl
+ * (the PKCE `?code=...` branch handles this exact flow already).
+ *
+ * Requires the Google provider to be enabled in the Supabase project
+ * dashboard (Authentication -> Providers -> Google) with a Google Cloud
+ * OAuth client ID/secret configured there — that's project-level
+ * configuration outside this repo, not something this function can turn on.
+ */
+export async function signInWithGoogle(
+  redirectTo?: string
+): Promise<AuthResult> {
+  if (!supabase) {
+    return { error: NOT_CONFIGURED_ERROR };
+  }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: redirectTo ? { redirectTo } : undefined,
+  });
+  return { error: normalizeError(error) };
 }
 
 export async function signInWithMagicLink(
