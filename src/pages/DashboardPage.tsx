@@ -314,16 +314,94 @@ export function DashboardPage() {
       </div>
 
       {sorted.length === 0 && (
-        <Card className="p-6 text-center space-y-3">
-          <p className="font-bold text-navy-900">No patients yet</p>
-          <p className="text-sm text-fog-600">
-            Add your first patient to start recording and reviewing their fluid
-            data.
-          </p>
-          {viewContext === "live" && (
-            <Button onClick={() => setShowAddPatient(true)}>Add patient</Button>
-          )}
-        </Card>
+        <div className="relative">
+          {/* Decorative mock of a populated dashboard — fake placeholder
+              numbers/labels only, purely to preview the layout behind the
+              real CTA. Never real or demo patient data. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none select-none blur-sm opacity-50 space-y-4"
+          >
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="p-4">
+                <p className="text-xs font-semibold text-fog-500">Patients</p>
+                <p className="text-2xl font-extrabold text-navy-900 mt-1">8</p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-xs font-semibold text-fog-500">
+                  Needs attention
+                </p>
+                <p className="text-2xl font-extrabold text-navy-900 mt-1">2</p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-xs font-semibold text-fog-500">
+                  Entries, last 24h
+                </p>
+                <p className="text-2xl font-extrabold text-navy-900 mt-1">34</p>
+              </Card>
+            </div>
+            <Card className="p-5">
+              <p className="text-base font-bold text-navy-900 mb-3">
+                Needs attention
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-navy-900/10 bg-white p-4">
+                  <p className="text-2xl font-extrabold text-navy-900">1</p>
+                  <p className="text-sm font-semibold text-navy-800">
+                    Low data reliability
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-navy-900/10 bg-white p-4">
+                  <p className="text-2xl font-extrabold text-navy-900">1</p>
+                  <p className="text-sm font-semibold text-navy-800">
+                    No output recorded recently
+                  </p>
+                </div>
+              </div>
+            </Card>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card className="p-5">
+                <p className="text-base font-bold text-navy-900 mb-3">
+                  Reliability across patients
+                </p>
+                <div className="space-y-2">
+                  <div className="h-3 rounded-full bg-intake-200 w-4/5" />
+                  <div className="h-3 rounded-full bg-amber-200 w-2/5" />
+                  <div className="h-3 rounded-full bg-alert-100 w-1/5" />
+                </div>
+              </Card>
+              <Card className="p-5">
+                <p className="text-base font-bold text-navy-900 mb-3">
+                  Recorded entries, last 7 days
+                </p>
+                <div className="flex items-end gap-2 h-24">
+                  {[40, 65, 50, 80, 60, 90, 70].map((h, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-t-md bg-intake-200"
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <Card className="p-6 text-center space-y-3 shadow-xl max-w-sm w-full">
+              <p className="font-bold text-navy-900 text-lg">No patients yet</p>
+              <p className="text-sm text-fog-600">
+                Add your first patient to start recording and reviewing their
+                fluid data.
+              </p>
+              {viewContext === "live" && (
+                <Button fullWidth onClick={() => setShowAddPatient(true)}>
+                  Add patient
+                </Button>
+              )}
+            </Card>
+          </div>
+        </div>
       )}
 
       <FocusCardGrid>
