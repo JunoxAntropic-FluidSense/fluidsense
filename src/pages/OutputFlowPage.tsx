@@ -374,7 +374,7 @@ function StepHeader({ onBack, title }: { onBack: () => void; title: string }) {
       >
         ←
       </button>
-      <h1 className="text-lg font-extrabold text-navy-900">{title}</h1>
+      <h1 className="text-lg font-extrabold text-navy-900 flex-1">{title}</h1>
     </div>
   );
 }

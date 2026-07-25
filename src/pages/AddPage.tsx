@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function AddPage() {
   return (
-    <div className="max-w-md mx-auto space-y-4">
+    <div className="max-w-lg mx-auto space-y-4">
       <h1 className="text-2xl font-extrabold text-navy-900">Add an entry</h1>
       <p className="text-sm text-fog-600">
         Choose what you'd like to record, or use voice entry for a faster

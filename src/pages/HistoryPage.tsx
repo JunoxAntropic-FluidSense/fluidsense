@@ -155,7 +155,7 @@ export function HistoryPage() {
         </Button>
       </div>
 
-      <Card className="p-4">
+      <Card className="p-5">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <FilterSelect
             label="Direction"
@@ -219,7 +219,7 @@ export function HistoryPage() {
       </Card>
 
       {selectMode && (
-        <Card className="p-4 flex flex-wrap items-center justify-between gap-3">
+        <Card className="p-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-navy-800">
             {selected.size} selected
           </p>

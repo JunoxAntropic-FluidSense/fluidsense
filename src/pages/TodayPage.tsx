@@ -22,7 +22,7 @@ export function TodayPage() {
   );
 
   return (
-    <div className="space-y-4 max-w-lg mx-auto md:max-w-2xl">
+    <div className="space-y-4 max-w-lg mx-auto">
       <div>
         <h1 className="text-2xl font-extrabold text-navy-900">
           Hello, {patient.displayName}

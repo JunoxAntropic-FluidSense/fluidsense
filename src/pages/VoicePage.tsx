@@ -168,7 +168,7 @@ export function VoicePage() {
   if (!patient) return null;
 
   return (
-    <div className="max-w-lg mx-auto space-y-5 pb-8">
+    <div className="max-w-lg mx-auto space-y-4 pb-8">
       <div>
         <h1 className="text-2xl font-extrabold text-navy-900">Voice entry</h1>
         <p className="text-sm text-fog-600">
@@ -179,7 +179,7 @@ export function VoicePage() {
       {phase === "idle" && (
         <>
           {capture.status === "idle" && (
-            <Card className="p-6 flex flex-col items-center text-center gap-4">
+            <Card className="p-5 flex flex-col items-center text-center gap-4">
               <button
                 onClick={capture.start}
                 disabled={!capture.supported}
@@ -207,7 +207,7 @@ export function VoicePage() {
           )}
 
           {capture.status === "requesting_permission" && (
-            <Card className="p-6 text-center">
+            <Card className="p-5 text-center">
               <p className="font-bold text-navy-900">
                 Requesting microphone access…
               </p>
@@ -216,7 +216,7 @@ export function VoicePage() {
 
           {capture.status === "listening" && (
             <Card
-              className="p-6 flex flex-col items-center text-center gap-4"
+              className="p-5 flex flex-col items-center text-center gap-4"
               role="status"
               aria-live="polite"
             >
@@ -243,7 +243,7 @@ export function VoicePage() {
 
           {capture.status === "transcribing" && (
             <Card
-              className="p-6 text-center space-y-2"
+              className="p-5 text-center space-y-2"
               role="status"
               aria-live="polite"
             >
