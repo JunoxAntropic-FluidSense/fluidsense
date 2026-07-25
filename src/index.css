@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  /* Navy — headings, primary text */
+  --color-navy-950: #0b1220;
+  --color-navy-900: #101a2e;
+  --color-navy-800: #16233d;
+  --color-navy-700: #1f3153;
+  --color-navy-600: #2c4370;
+
+  /* Teal — intake */
+  --color-intake-50: #eefbfa;
+  --color-intake-100: #d4f4f1;
+  --color-intake-200: #a9e8e3;
+  --color-intake-500: #0f9d94;
+  --color-intake-600: #0c8078;
+  --color-intake-700: #0a655f;
+
+  /* Blue-grey / purple — output */
+  --color-output-50: #f1f0fb;
+  --color-output-100: #e0ddf5;
+  --color-output-200: #c3bdea;
+  --color-output-500: #6a5fb0;
+  --color-output-600: #574b98;
+  --color-output-700: #463c7c;
+
+  /* Amber — uncertainty / estimates */
+  --color-amber-50: #fef8ec;
+  --color-amber-100: #fcecc7;
+  --color-amber-200: #f8da8f;
+  --color-amber-500: #d9932a;
+  --color-amber-600: #b6771a;
+  --color-amber-700: #925f16;
+
+  /* Grey — unmeasured */
+  --color-fog-50: #f6f6f8;
+  --color-fog-100: #ebeaef;
+  --color-fog-200: #d7d5e0;
+  --color-fog-400: #9793a8;
+  --color-fog-500: #7b778e;
+  --color-fog-600: #615d72;
+  --color-fog-700: #494659;
+
+  /* Red — restrained, errors only */
+  --color-alert-50: #fdf1f0;
+  --color-alert-100: #f9dbd8;
+  --color-alert-500: #c94d43;
+  --color-alert-600: #ab3b32;
+
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-fog-50);
+  color: var(--color-navy-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-intake-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+.large-text {
+  font-size: 112.5%;
+}
+
+.high-contrast {
+  --color-fog-50: #ffffff;
+}
+.high-contrast body {
+  color: #000;
+}
