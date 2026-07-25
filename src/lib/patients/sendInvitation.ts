@@ -82,3 +82,36 @@ export async function sendPatientInvitation(params: {
 
   return { status: "ok" };
 }
+
+export async function sendColleagueInvitation(params: {
+  email: string;
+  invitedByName: string;
+  inviteCode: string;
+  organisationName?: string;
+}): Promise<SendPatientInvitationResult> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return {
+      status: "unavailable",
+      message: "Sending invitations is not configured.",
+    };
+  }
+
+  try {
+    await supabase.auth.signInWithOtp({
+      email: params.email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/welcome`,
+        data: {
+          invitedByName: params.invitedByName,
+          clinicInviteCode: params.inviteCode,
+          organisationName: params.organisationName,
+          inviteType: "colleague",
+        },
+      },
+    });
+  } catch {
+    // Best-effort auth invite trigger
+  }
+
+  return { status: "ok" };
+}

@@ -45,9 +45,9 @@ type SortKey =
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "reliability", label: "Lowest reliability" },
-  { value: "output_gap", label: "Longest output gap" },
-  { value: "largest_positive", label: "Largest + balance" },
-  { value: "largest_negative", label: "Largest - balance" },
+  { value: "output_gap", label: "Time since output" },
+  { value: "largest_positive", label: "Largest positive balance" },
+  { value: "largest_negative", label: "Largest negative balance" },
   { value: "unmeasured", label: "Most unmeasured" },
 ];
 

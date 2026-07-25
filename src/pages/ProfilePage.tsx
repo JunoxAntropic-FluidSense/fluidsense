@@ -21,6 +21,7 @@ import {
   listOrganisationMembers,
   type OrganisationMemberRow,
 } from "../lib/supabase/organisations";
+import { sendColleagueInvitation } from "../lib/patients/sendInvitation";
 
 /**
  * Team roster + invite-code generation for a healthcare account that's
@@ -38,6 +39,11 @@ function TeamWorkspaceSection() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkedRemote, setCheckedRemote] = useState(false);
+
+  const [colleagueEmail, setColleagueEmail] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const organisationId = currentUser.organisationId;
 
@@ -66,7 +72,7 @@ function TeamWorkspaceSection() {
 
   if (authStatus !== "signed-in") {
     return (
-      <Card className="p-5">
+      <Card className="p-5 space-y-2">
         <CardHeading>Team workspace</CardHeading>
         <p className="text-sm text-fog-600">
           Sign in to create or join your team's shared workspace.
@@ -84,20 +90,54 @@ function TeamWorkspaceSection() {
     );
   }
 
-  const generateInvite = async () => {
+  const generateInvite = async (): Promise<string | null> => {
+    if (inviteCode) return inviteCode;
     setBusy(true);
     setError(null);
     const result = await createOrganisationInvite(organisationId);
     setBusy(false);
     if (result.error || !result.code) {
       setError(result.error?.message ?? "Couldn't generate an invite code.");
-      return;
+      return null;
     }
     setInviteCode(result.code);
+    return result.code;
+  };
+
+  const handleSendEmailInvite = async () => {
+    if (!colleagueEmail.trim()) return;
+    setSendingEmail(true);
+    setError(null);
+    setEmailSuccess(null);
+
+    const code = await generateInvite();
+    if (!code) {
+      setSendingEmail(false);
+      return;
+    }
+
+    await sendColleagueInvitation({
+      email: colleagueEmail.trim(),
+      invitedByName: currentUser.displayName || "Your colleague",
+      inviteCode: code,
+      organisationName: currentUser.organisationName,
+    });
+
+    setSendingEmail(false);
+    setEmailSuccess(
+      `Invitation sent to ${colleagueEmail.trim()} with code ${code}!`
+    );
+    setColleagueEmail("");
+  };
+
+  const handleCopyCode = async (code: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   return (
-    <Card className="p-5 space-y-3">
+    <Card className="p-5 space-y-4">
       <CardHeading>Team workspace</CardHeading>
       {currentUser.organisationName && (
         <p className="text-sm text-navy-800 font-semibold">
@@ -106,7 +146,7 @@ function TeamWorkspaceSection() {
       )}
       <div>
         <p className="text-xs font-bold uppercase tracking-wide text-fog-500 mb-1.5">
-          Staff
+          Staff Members ({members.length})
         </p>
         <ul className="space-y-1.5">
           {members.map((m) => (
@@ -117,26 +157,72 @@ function TeamWorkspaceSection() {
               <span className="font-semibold text-navy-800">
                 {m.displayName || "Team member"}
               </span>
-              <span className="text-fog-500">{m.role.replace("_", " ")}</span>
+              <span className="text-fog-500 capitalize">
+                {m.role.replace("_", " ")}
+              </span>
             </li>
           ))}
         </ul>
       </div>
-      {inviteCode ? (
-        <div className="rounded-xl bg-intake-50 border border-intake-200 p-3">
-          <p className="text-xs text-fog-600 mb-1">
-            Share this code with a colleague to add them to this workspace:
-          </p>
-          <p className="text-lg font-extrabold text-navy-900 tracking-wide">
-            {inviteCode}
-          </p>
+
+      <div className="pt-2 border-t border-fog-200 space-y-3">
+        <p className="text-xs font-bold uppercase tracking-wide text-fog-500">
+          Invite a Colleague
+        </p>
+
+        {/* Email Invitation Form */}
+        <div className="space-y-2">
+          <Field label="Colleague Email Address">
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={colleagueEmail}
+                onChange={(e) => setColleagueEmail(e.target.value)}
+                placeholder="colleague@hospital.nhs.uk"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSendEmailInvite}
+                disabled={!colleagueEmail.trim() || sendingEmail}
+              >
+                {sendingEmail ? "Sending…" : "Send Invite Email"}
+              </Button>
+            </div>
+          </Field>
+          {emailSuccess && (
+            <div className="p-2.5 rounded-xl bg-success-50 border border-success-200 text-success-700 text-xs font-semibold">
+              ✓ {emailSuccess}
+            </div>
+          )}
         </div>
-      ) : (
-        <Button variant="secondary" onClick={generateInvite} disabled={busy}>
-          {busy ? "Generating…" : "Invite a colleague"}
-        </Button>
-      )}
-      {error && <p className="text-xs text-alert-600">{error}</p>}
+
+        {/* Invite Access Code */}
+        {inviteCode ? (
+          <div className="rounded-2xl bg-intake-50 border border-intake-200 p-3.5 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs text-fog-600 font-medium">
+                Workspace Access Code
+              </p>
+              <p className="text-xl font-extrabold text-navy-900 tracking-wider font-mono">
+                {inviteCode}
+              </p>
+            </div>
+            <Button
+              size="md"
+              variant="secondary"
+              onClick={() => handleCopyCode(inviteCode)}
+            >
+              {copiedCode ? "Copied!" : "Copy Code"}
+            </Button>
+          </div>
+        ) : (
+          <Button variant="secondary" onClick={generateInvite} disabled={busy}>
+            {busy ? "Generating Code…" : "Generate Access Code"}
+          </Button>
+        )}
+      </div>
+
+      {error && <p className="text-xs text-alert-600 font-medium">{error}</p>}
     </Card>
   );
 }
