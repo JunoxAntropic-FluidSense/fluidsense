@@ -26,6 +26,8 @@ export interface AppUser {
   saveVoiceTranscripts: boolean;
   /** Opt-in for morning/afternoon/evening check-in reminder push notifications. Defaults to false. */
   checkInNotificationsEnabled: boolean;
+  /** Healthcare accounts only — the team/ward/organisation name entered at onboarding. */
+  organisationName?: string;
 }
 
 // --- Measurement status -----------------------------------------------------
@@ -67,6 +69,7 @@ export type FluidCategory =
   | "milk"
   | "squash"
   | "soup"
+  | "smoothie"
   | "nutritional_drink"
   | "ice"
   | "enteral_feed"
@@ -77,6 +80,7 @@ export type FluidCategory =
 export type OutputCategory =
   | "urine"
   | "continence"
+  | "menstrual_pad"
   | "vomit"
   | "diarrhoea"
   | "stoma"
@@ -272,10 +276,13 @@ export interface CareTeamContact {
   email: string;
 }
 
+export type Sex = "female" | "male" | "prefer_not_to_say";
+
 export interface PatientProfile {
   id: string;
   displayName: string; // fictional name only
   careSetting: string; // e.g. 'Home', 'Ward 4B', 'ICU'
+  sex?: Sex;
   monitoringReason?: string;
   allowance?: FluidAllowance;
   monitoringDayStartMode: MonitoringDayStartMode;
@@ -347,4 +354,11 @@ export interface OnboardingInput {
   allowanceMl?: number;
   organisationName?: string;
   isTestWorkspace?: boolean;
+  careSetting?: string;
+  sex?: Sex;
+  dailyWeightEnabled?: boolean;
+  saveVoiceTranscripts?: boolean;
+  accessibility?: Partial<AccessibilityPrefs>;
+  careTeamShareConsent?: boolean;
+  wantsCheckInReminders?: boolean;
 }

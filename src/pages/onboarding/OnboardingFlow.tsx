@@ -6,6 +6,7 @@ import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
 import { SegmentedTabs } from "../../components/ui/SegmentedTabs";
 import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
+import { enableCheckInPush } from "../../lib/push/subscribe";
 import type { Mode, Role, Units } from "../../types";
 
 const UNITS_OPTIONS: { value: Units; label: string }[] = [
@@ -54,12 +55,23 @@ const HEALTHCARE_ROLES: Role[] = ["nurse", "healthcare_assistant", "clinician"];
 const HEALTHCARE_ROLE_OPTIONS: { value: Role; label: string }[] =
   HEALTHCARE_ROLES.map((r) => ({ value: r, label: r.replace("_", " ") }));
 
+function SectionHeading({ children }: { children: string }) {
+  return (
+    <p className="text-xs font-bold uppercase tracking-wide text-fog-500 mt-6 mb-2 first:mt-0">
+      {children}
+    </p>
+  );
+}
+
 export function OnboardingFlow() {
   const navigate = useNavigate();
   const onboardingCompleted = useStore(
     (s) => s.currentUser.onboardingCompleted
   );
   const completeOnboarding = useStore((s) => s.completeOnboarding);
+  const setCheckInNotificationsEnabled = useStore(
+    (s) => s.setCheckInNotificationsEnabled
+  );
 
   const detectedTz = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -70,40 +82,64 @@ export function OnboardingFlow() {
 
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>("patient");
+  const [careSetting, setCareSetting] = useState("");
   const [units, setUnits] = useState<Units>("mL");
   const [timezone, setTimezone] = useState(detectedTz);
   const [wantsAllowance, setWantsAllowance] = useState(false);
   const [allowanceMl, setAllowanceMl] = useState("");
+  const [dailyWeightEnabled, setDailyWeightEnabled] = useState(false);
+  const [saveVoiceTranscripts, setSaveVoiceTranscripts] = useState(true);
+  const [largeText, setLargeText] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [careTeamShareConsent, setCareTeamShareConsent] = useState(false);
+  const [wantsCheckInReminders, setWantsCheckInReminders] = useState(false);
   const [organisationName, setOrganisationName] = useState("");
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
   const [showSignUp, setShowSignUp] = useState(false);
   const [signUpUseMagicLink, setSignUpUseMagicLink] = useState(false);
   const [signUpDone, setSignUpDone] = useState(false);
+  const [finishing, setFinishing] = useState(false);
 
   if (onboardingCompleted) return <Navigate to="/" replace />;
 
   const tzOptions = timezoneOptions(detectedTz);
+  const isPatient = accountMode === "patient";
+  const isHealthcare = accountMode === "healthcare";
 
-  const finish = () => {
+  const finish = async () => {
+    setFinishing(true);
     completeOnboarding({
       accountMode: accountMode ?? "patient",
-      displayName:
-        displayName.trim() ||
-        (accountMode === "healthcare" ? "Staff member" : "Me"),
-      role:
-        accountMode === "healthcare"
+      displayName: displayName.trim() || (isHealthcare ? "Staff member" : "Me"),
+      role: isHealthcare
+        ? role
+        : role === "patient" || role === "family_carer"
           ? role
-          : role === "patient" || role === "family_carer"
-            ? role
-            : "patient",
+          : "patient",
       units,
       timezone,
-      wantsAllowanceTracking: wantsAllowance,
+      wantsAllowanceTracking: isPatient ? wantsAllowance : undefined,
       allowanceMl: allowanceMl ? parseFloat(allowanceMl) : undefined,
       organisationName: organisationName || undefined,
       isTestWorkspace,
+      careSetting: isPatient ? careSetting : undefined,
+      dailyWeightEnabled: isPatient ? dailyWeightEnabled : undefined,
+      saveVoiceTranscripts,
+      accessibility: { largeText, highContrast, reduceMotion },
+      careTeamShareConsent: isPatient ? careTeamShareConsent : undefined,
     });
-    navigate("/");
+
+    if (isPatient && wantsCheckInReminders) {
+      const newPatientId = useStore.getState().activePatientId;
+      if (newPatientId) {
+        const result = await enableCheckInPush(newPatientId);
+        setCheckInNotificationsEnabled(result.ok);
+      }
+    }
+    // Healthcare accounts start with no patients yet — land on the
+    // dashboard's "add patient" flow rather than a blank single-patient view.
+    navigate(isHealthcare ? "/dashboard" : "/");
   };
 
   return (
@@ -111,14 +147,10 @@ export function OnboardingFlow() {
       <PrototypeBanner />
       <div className="flex-1 px-6 py-8 max-w-md mx-auto w-full">
         <p className="text-xs font-bold uppercase tracking-wide text-fog-500 mb-1">
-          Step {step} of 3
+          Step {step} of 2
         </p>
         <h1 className="text-2xl font-extrabold text-navy-900 mb-6">
-          {step === 1
-            ? "How will you use FluidSense?"
-            : step === 2
-              ? "A few details"
-              : "Review and confirm"}
+          {step === 1 ? "How will you use FluidSense?" : "Set up your account"}
         </h1>
 
         {step === 1 && (
@@ -156,28 +188,70 @@ export function OnboardingFlow() {
           </div>
         )}
 
-        {step === 2 && accountMode === "patient" && (
+        {step === 2 && (
           <div className="space-y-4">
+            <SectionHeading>About you</SectionHeading>
             <label className="block text-sm font-semibold text-navy-700">
-              Display name or nickname
+              {isPatient ? "Display name or nickname" : "Display name"}
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. Sam"
+                placeholder={isPatient ? "e.g. Sam" : "e.g. J. Patel"}
                 className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
               />
             </label>
-            <div>
-              <p className="text-sm font-semibold text-navy-700 mb-1.5">
-                Tracking fluids for
-              </p>
-              <SegmentedTabs
-                label="Tracking fluids for"
-                value={role === "family_carer" ? "family_carer" : "patient"}
-                onChange={setRole}
-                options={PATIENT_ROLE_OPTIONS}
-              />
-            </div>
+
+            {isPatient && (
+              <>
+                <div>
+                  <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                    Tracking fluids for
+                  </p>
+                  <SegmentedTabs
+                    label="Tracking fluids for"
+                    value={role === "family_carer" ? "family_carer" : "patient"}
+                    onChange={setRole}
+                    options={PATIENT_ROLE_OPTIONS}
+                  />
+                </div>
+                <label className="block text-sm font-semibold text-navy-700">
+                  Care setting
+                  <input
+                    value={careSetting}
+                    onChange={(e) => setCareSetting(e.target.value)}
+                    placeholder="e.g. Home, Ward 4B"
+                    className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
+                  />
+                </label>
+              </>
+            )}
+
+            {isHealthcare && (
+              <>
+                <div>
+                  <p className="text-sm font-semibold text-navy-700 mb-1.5">
+                    Role
+                  </p>
+                  <SegmentedTabs
+                    label="Role"
+                    value={role}
+                    onChange={setRole}
+                    options={HEALTHCARE_ROLE_OPTIONS}
+                  />
+                </div>
+                <label className="block text-sm font-semibold text-navy-700">
+                  Organisation (optional)
+                  <input
+                    value={organisationName}
+                    onChange={(e) => setOrganisationName(e.target.value)}
+                    placeholder="e.g. City Hospital"
+                    className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
+                  />
+                </label>
+              </>
+            )}
+
+            <SectionHeading>Preferences</SectionHeading>
             <div>
               <p className="text-sm font-semibold text-navy-700 mb-1.5">
                 Preferred units
@@ -206,106 +280,115 @@ export function OnboardingFlow() {
             <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
               <input
                 type="checkbox"
-                checked={wantsAllowance}
-                onChange={(e) => setWantsAllowance(e.target.checked)}
+                checked={saveVoiceTranscripts}
+                onChange={(e) => setSaveVoiceTranscripts(e.target.checked)}
                 className="w-5 h-5"
               />
-              I need to track a fluid allowance
+              Save the transcript with voice-created entries
             </label>
-            {wantsAllowance && (
-              <label className="block text-sm font-semibold text-navy-700">
-                Allowance, if already set by your healthcare team (mL/day,
-                optional)
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
                 <input
-                  inputMode="decimal"
-                  value={allowanceMl}
-                  onChange={(e) => setAllowanceMl(e.target.value)}
-                  placeholder="e.g. 1500"
-                  className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
+                  type="checkbox"
+                  checked={largeText}
+                  onChange={(e) => setLargeText(e.target.checked)}
+                  className="w-5 h-5"
                 />
+                Large text
+              </label>
+              <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                <input
+                  type="checkbox"
+                  checked={highContrast}
+                  onChange={(e) => setHighContrast(e.target.checked)}
+                  className="w-5 h-5"
+                />
+                High contrast
+              </label>
+              <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                <input
+                  type="checkbox"
+                  checked={reduceMotion}
+                  onChange={(e) => setReduceMotion(e.target.checked)}
+                  className="w-5 h-5"
+                />
+                Reduce motion
+              </label>
+            </div>
+
+            {isPatient && (
+              <>
+                <SectionHeading>Monitoring</SectionHeading>
+                <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                  <input
+                    type="checkbox"
+                    checked={wantsAllowance}
+                    onChange={(e) => setWantsAllowance(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                  I need to track a fluid allowance
+                </label>
+                {wantsAllowance && (
+                  <label className="block text-sm font-semibold text-navy-700">
+                    Allowance, if already set by your healthcare team (mL/day,
+                    optional)
+                    <input
+                      inputMode="decimal"
+                      value={allowanceMl}
+                      onChange={(e) => setAllowanceMl(e.target.value)}
+                      placeholder="e.g. 1500"
+                      className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
+                    />
+                  </label>
+                )}
+                <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                  <input
+                    type="checkbox"
+                    checked={dailyWeightEnabled}
+                    onChange={(e) => setDailyWeightEnabled(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                  Track daily weight
+                </label>
+                <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                  <input
+                    type="checkbox"
+                    checked={wantsCheckInReminders}
+                    onChange={(e) => setWantsCheckInReminders(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                  Remind me if I haven't logged anything in a while
+                </label>
+
+                <SectionHeading>Sharing</SectionHeading>
+                <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                  <input
+                    type="checkbox"
+                    checked={careTeamShareConsent}
+                    onChange={(e) => setCareTeamShareConsent(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                  Allow sharing my summary with care team contacts I add later
+                </label>
+              </>
+            )}
+
+            {isHealthcare && (
+              <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                <input
+                  type="checkbox"
+                  checked={isTestWorkspace}
+                  onChange={(e) => setIsTestWorkspace(e.target.checked)}
+                  className="w-5 h-5"
+                />
+                This is a test / training workspace
               </label>
             )}
+
             <p className="text-xs text-fog-500">
-              You can add favourite drinks, containers and reminders any time
-              from Profile and My drinks.
+              Everything here stays editable later from Profile.
             </p>
-            <Button fullWidth onClick={() => setStep(3)}>
-              Continue
-            </Button>
-          </div>
-        )}
 
-        {step === 2 && accountMode === "healthcare" && (
-          <div className="space-y-4">
-            <label className="block text-sm font-semibold text-navy-700">
-              Display name
-              <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. J. Patel"
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-              />
-            </label>
-            <div>
-              <p className="text-sm font-semibold text-navy-700 mb-1.5">Role</p>
-              <SegmentedTabs
-                label="Role"
-                value={role}
-                onChange={setRole}
-                options={HEALTHCARE_ROLE_OPTIONS}
-              />
-            </div>
-            <label className="block text-sm font-semibold text-navy-700">
-              Organisation (optional)
-              <input
-                value={organisationName}
-                onChange={(e) => setOrganisationName(e.target.value)}
-                placeholder="e.g. City Hospital"
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
-              />
-            </label>
-            <div>
-              <p className="text-sm font-semibold text-navy-700 mb-1.5">
-                Preferred units
-              </p>
-              <SegmentedTabs
-                label="Preferred units"
-                value={units}
-                onChange={setUnits}
-                options={UNITS_OPTIONS}
-              />
-            </div>
-            <label className="block text-sm font-semibold text-navy-700">
-              Timezone
-              <select
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal bg-white"
-              >
-                {tzOptions.map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-              <input
-                type="checkbox"
-                checked={isTestWorkspace}
-                onChange={(e) => setIsTestWorkspace(e.target.checked)}
-                className="w-5 h-5"
-              />
-              This is a test / training workspace
-            </label>
-            <Button fullWidth onClick={() => setStep(3)}>
-              Continue
-            </Button>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4">
             <Card className="p-5">
               <p className="text-sm text-navy-800">
                 FluidSense records fluid events and summarises the information
@@ -313,26 +396,7 @@ export function OnboardingFlow() {
                 does not determine a patient's true fluid status.
               </p>
             </Card>
-            <Card className="p-5 space-y-1 text-sm text-fog-700">
-              <p>
-                <span className="font-semibold text-navy-800">Using as:</span>{" "}
-                {accountMode === "healthcare"
-                  ? "Healthcare professional"
-                  : "Patient / carer"}
-              </p>
-              <p>
-                <span className="font-semibold text-navy-800">Name:</span>{" "}
-                {displayName || "—"}
-              </p>
-              <p>
-                <span className="font-semibold text-navy-800">Units:</span>{" "}
-                {units}
-              </p>
-              <p>
-                <span className="font-semibold text-navy-800">Timezone:</span>{" "}
-                {timezone}
-              </p>
-            </Card>
+
             <Card className="p-5 space-y-3">
               <button
                 type="button"
@@ -377,10 +441,16 @@ export function OnboardingFlow() {
                 </div>
               )}
             </Card>
-            <Button fullWidth size="xl" onClick={finish}>
-              Start using FluidSense
+
+            <Button fullWidth size="xl" onClick={finish} disabled={finishing}>
+              {finishing ? "Setting up…" : "Start using FluidSense"}
             </Button>
-            <Button fullWidth variant="ghost" onClick={() => setStep(2)}>
+            <Button
+              fullWidth
+              variant="ghost"
+              onClick={() => setStep(1)}
+              disabled={finishing}
+            >
               Back
             </Button>
           </div>

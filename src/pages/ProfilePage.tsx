@@ -40,7 +40,6 @@ export function ProfilePage() {
   const viewContext = useStore((s) => s.viewContext);
   const exitDemoMode = useStore((s) => s.exitDemoMode);
   const currentUser = useStore((s) => s.currentUser);
-  const setUserRole = useStore((s) => s.setUserRole);
   const setAccessibility = useStore((s) => s.setAccessibility);
   const setSaveVoiceTranscripts = useStore((s) => s.setSaveVoiceTranscripts);
   const setCheckInNotificationsEnabled = useStore(
@@ -148,18 +147,11 @@ export function ProfilePage() {
 
       <Card className="p-5">
         <CardHeading>Your role</CardHeading>
-        <div className="grid grid-cols-2 gap-2">
-          {ROLE_OPTIONS.map((r) => (
-            <button
-              key={r.value}
-              onClick={() => setUserRole(r.value)}
-              aria-pressed={currentUser.role === r.value}
-              className={`rounded-xl px-3 py-2.5 text-sm font-bold border ${currentUser.role === r.value ? "bg-intake-600 text-white border-intake-600" : "bg-white text-navy-700 border-navy-900/15"}`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
+        <p className="text-sm font-semibold text-navy-800">
+          {ROLE_OPTIONS.find((r) => r.value === currentUser.role)?.label ??
+            currentUser.role}
+        </p>
+        <p className="text-xs text-fog-500 mt-1">Set when you signed up.</p>
       </Card>
 
       <Card className="p-5">
