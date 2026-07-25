@@ -5,7 +5,9 @@ import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { PatientSwitcher } from "./PatientSwitcher";
+import { SignOutButton } from "../auth";
 import { useStore } from "../../store/useStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { needsMidnightRollover } from "../../lib/period";
 
@@ -17,6 +19,8 @@ export function AppShell() {
   const viewContext = useStore((s) => s.viewContext);
   const exitDemoMode = useStore((s) => s.exitDemoMode);
   const accessibility = useStore((s) => s.currentUser.accessibility);
+  const unlinkAuthAccount = useStore((s) => s.unlinkAuthAccount);
+  const authStatus = useAuthStore((s) => s.status);
   const online = useOnlineStatus();
 
   useEffect(() => {
@@ -108,6 +112,14 @@ export function AppShell() {
             <div className="flex items-center gap-3 flex-wrap">
               <PatientSwitcher />
               {viewContext === "demo" && <ModeSwitcher />}
+              {viewContext === "live" && authStatus === "signed-in" && (
+                <SignOutButton
+                  variant="ghost"
+                  onSignOut={() => unlinkAuthAccount()}
+                >
+                  Sign out
+                </SignOutButton>
+              )}
             </div>
           </header>
           <main

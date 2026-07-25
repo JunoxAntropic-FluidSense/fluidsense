@@ -325,6 +325,12 @@ export interface PatientProfile {
   dailyWeightEnabled: boolean;
   reminders: Reminder[];
   contactInstructions?: string;
+  /** Captured when a clinician adds this patient, to send the one-off
+   * invitation email (see src/lib/patients/sendInvitation.ts). Local-only
+   * for now — not part of the profiles sync schema (0004_care_teams.sql /
+   * patientSync.ts), consistent with that file's own deferral of fields
+   * without a server column yet. */
+  patientEmail?: string;
   isDemo?: boolean;
   careTeamShareConsent?: boolean;
   careTeamContacts?: CareTeamContact[];

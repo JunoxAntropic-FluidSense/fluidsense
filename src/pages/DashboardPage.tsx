@@ -16,8 +16,17 @@ import {
 } from "../lib/calc";
 import { computeReliability } from "../lib/reliability";
 import { getPeriodRange } from "../lib/period";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, subDays } from "date-fns";
 import type { DeploymentMode } from "../types";
+import { sendPatientInvitation } from "../lib/patients/sendInvitation";
+import {
+  AttentionSection,
+  type AttentionCategory,
+} from "../components/dashboard/AttentionSection";
+import {
+  ReliabilityDistributionChart,
+  EntriesTrendChart,
+} from "../components/dashboard/DashboardCharts";
 
 const DEPLOYMENT_MODE_OPTIONS: { value: DeploymentMode; label: string }[] = [
   { value: "home_community", label: "Home & community" },
@@ -46,14 +55,18 @@ export function DashboardPage() {
   const patients = useStore((s) => s.patients);
   const events = useStore((s) => s.events);
   const weightEvents = useStore((s) => s.weightEvents);
+  const dialysisAppointments = useStore((s) => s.dialysisAppointments);
   const setActivePatient = useStore((s) => s.setActivePatient);
   const addPatient = useStore((s) => s.addPatient);
   const updatePatient = useStore((s) => s.updatePatient);
   const viewContext = useStore((s) => s.viewContext);
+  const currentUser = useStore((s) => s.currentUser);
   const [sortKey, setSortKey] = useState<SortKey>("reliability");
   const [showAddPatient, setShowAddPatient] = useState(false);
   const [newName, setNewName] = useState("");
   const [newSetting, setNewSetting] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [invitePending, setInvitePending] = useState(false);
 
   const now = useMemo(() => new Date(), []);
   const range = useMemo(() => getPeriodRange("24h", now), [now]);
@@ -130,8 +143,76 @@ export function DashboardPage() {
     navigate("/");
   };
 
+  // Each category flags a gap in the recorded data (or a logged missed
+  // appointment) — never a clinical judgment about the patient. See
+  // AttentionSection's own note and CLAUDE.md hard rule 2.
+  const attentionCategories: AttentionCategory[] = useMemo(() => {
+    const weekAgo = subDays(now, 7);
+    const missedDialysisPatientIds = new Set(
+      dialysisAppointments
+        .filter((d) => !d.attended && new Date(d.scheduledTime) >= weekAgo)
+        .map((d) => d.patientId)
+    );
+    return [
+      {
+        key: "low_reliability",
+        label: "Low data reliability",
+        description:
+          "Recorded data has significant gaps over the last 24 hours.",
+        patients: rows
+          .filter((r) => r.reliability.level === "Low")
+          .map((r) => r.patient),
+      },
+      {
+        key: "no_output",
+        label: "No output recorded recently",
+        description: "No output has been logged for an extended period.",
+        patients: rows
+          .filter((r) => r.outputGapMs > 10 * 60 * 60 * 1000)
+          .map((r) => r.patient),
+      },
+      {
+        key: "unresolved_warnings",
+        label: "Unresolved data warnings",
+        description:
+          "Possible duplicate or unusually large entries not yet resolved.",
+        patients: rows
+          .filter((r) => r.reliability.unresolvedWarnings.length > 0)
+          .map((r) => r.patient),
+      },
+      {
+        key: "missed_dialysis",
+        label: "Missed dialysis appointment recorded",
+        description:
+          "A dialysis session was logged as missed in the last 7 days.",
+        patients: rows
+          .filter((r) => missedDialysisPatientIds.has(r.patient.id))
+          .map((r) => r.patient),
+      },
+    ];
+  }, [rows, dialysisAppointments, now]);
+
+  const attentionPatientCount = useMemo(() => {
+    const ids = new Set<string>();
+    attentionCategories.forEach((c) =>
+      c.patients.forEach((p) => ids.add(p.id))
+    );
+    return ids.size;
+  }, [attentionCategories]);
+
+  const entriesToday = useMemo(
+    () =>
+      events.filter(
+        (e) =>
+          !e.deleted &&
+          patients.some((p) => p.id === e.patientId) &&
+          new Date(e.eventTime) >= range.start
+      ).length,
+    [events, patients, range]
+  );
+
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-8">
+    <div className="max-w-5xl mx-auto space-y-4 pb-8">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy-900">
@@ -150,6 +231,50 @@ export function DashboardPage() {
           </Button>
         )}
       </div>
+
+      {sorted.length > 0 && (
+        <>
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="p-4">
+              <p className="text-xs font-semibold text-fog-500">Patients</p>
+              <p className="text-2xl font-extrabold text-navy-900 mt-1">
+                {patients.length}
+              </p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs font-semibold text-fog-500">
+                Needs attention
+              </p>
+              <p className="text-2xl font-extrabold text-navy-900 mt-1">
+                {attentionPatientCount}
+              </p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs font-semibold text-fog-500">
+                Entries, last 24h
+              </p>
+              <p className="text-2xl font-extrabold text-navy-900 mt-1">
+                {entriesToday}
+              </p>
+            </Card>
+          </div>
+
+          <AttentionSection
+            categories={attentionCategories}
+            onOpenPatient={openPatient}
+          />
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <ReliabilityDistributionChart
+              levels={rows.map((r) => r.reliability.level)}
+            />
+            <EntriesTrendChart
+              events={events}
+              patientIds={patients.map((p) => p.id)}
+            />
+          </div>
+        </>
+      )}
 
       <div>
         <p className="text-sm font-semibold text-navy-700 mb-1.5">Sort by</p>
@@ -318,27 +443,49 @@ export function DashboardPage() {
                 placeholder="e.g. Ward 3B"
               />
             </Field>
+            <Field label="Email (optional)" className="mt-3">
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="Sends a one-off invitation email"
+              />
+            </Field>
             <div className="grid grid-cols-2 gap-3 mt-5">
               <Button
                 variant="secondary"
                 onClick={() => setShowAddPatient(false)}
+                disabled={invitePending}
               >
                 Cancel
               </Button>
               <Button
-                disabled={!newName.trim()}
-                onClick={() => {
-                  addPatient(
-                    newName.trim(),
+                disabled={!newName.trim() || invitePending}
+                onClick={async () => {
+                  const displayName = newName.trim();
+                  const email = newEmail.trim();
+                  const created = addPatient(
+                    displayName,
                     newSetting.trim() || "Not specified"
                   );
+                  if (email) {
+                    updatePatient(created.id, { patientEmail: email });
+                    setInvitePending(true);
+                    await sendPatientInvitation({
+                      patientEmail: email,
+                      patientDisplayName: displayName,
+                      invitedByName: currentUser.displayName,
+                    });
+                    setInvitePending(false);
+                  }
                   setShowAddPatient(false);
                   setNewName("");
                   setNewSetting("");
+                  setNewEmail("");
                   navigate("/");
                 }}
               >
-                Add patient
+                {invitePending ? "Sending invite…" : "Add patient"}
               </Button>
             </div>
           </div>
