@@ -63,6 +63,7 @@ export function DashboardPage() {
   const setActivePatient = useStore((s) => s.setActivePatient);
   const addPatient = useStore((s) => s.addPatient);
   const updatePatient = useStore((s) => s.updatePatient);
+  const setAllowance = useStore((s) => s.setAllowance);
   const viewContext = useStore((s) => s.viewContext);
   const currentUser = useStore((s) => s.currentUser);
   const [sortKey, setSortKey] = useState<SortKey>("reliability");
@@ -71,6 +72,9 @@ export function DashboardPage() {
   const [newSetting, setNewSetting] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [invitePending, setInvitePending] = useState(false);
+  const [allowanceDrafts, setAllowanceDrafts] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     if (searchParams.get("addPatient") === "true") {
@@ -431,6 +435,51 @@ export function DashboardPage() {
               </div>
 
               <div className="mt-3">
+                {patient.assignedClinicianId === currentUser.id ? (
+                  <div className="flex items-center justify-between gap-2 rounded-xl bg-intake-50 border border-intake-200 px-3 py-2">
+                    <span className="text-xs font-semibold text-intake-700">
+                      Checked in by you
+                    </span>
+                    <Button
+                      size="md"
+                      variant="secondary"
+                      onClick={() =>
+                        updatePatient(patient.id, {
+                          assignedClinicianId: undefined,
+                          assignedClinicianName: undefined,
+                          assignedAt: undefined,
+                        })
+                      }
+                    >
+                      Check out
+                    </Button>
+                  </div>
+                ) : patient.assignedClinicianId ? (
+                  <div className="flex items-center justify-between gap-2 rounded-xl bg-fog-50 px-3 py-2">
+                    <span className="text-xs text-fog-600">
+                      Checked in: {patient.assignedClinicianName}
+                    </span>
+                  </div>
+                ) : (
+                  <Button
+                    size="md"
+                    variant="secondary"
+                    fullWidth
+                    onClick={() =>
+                      updatePatient(patient.id, {
+                        assignedClinicianId: currentUser.id,
+                        assignedClinicianName:
+                          currentUser.displayName || "Team member",
+                        assignedAt: new Date().toISOString(),
+                      })
+                    }
+                  >
+                    Check in
+                  </Button>
+                )}
+              </div>
+
+              <div className="mt-3">
                 <p className="text-xs font-semibold text-navy-700 mb-1">
                   Monitoring mode
                 </p>
@@ -509,6 +558,46 @@ export function DashboardPage() {
                   />
                 )}
               </dl>
+
+              <div className="mt-3">
+                <Field label="Fluid allowance (mL/day)">
+                  <div className="flex gap-2">
+                    <Input
+                      inputMode="decimal"
+                      value={
+                        allowanceDrafts[patient.id] ??
+                        (patient.allowance
+                          ? String(patient.allowance.dailyMl)
+                          : "")
+                      }
+                      onChange={(e) =>
+                        setAllowanceDrafts((d) => ({
+                          ...d,
+                          [patient.id]: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g. 1500"
+                      className="flex-1"
+                    />
+                    <Button
+                      size="md"
+                      disabled={!allowanceDrafts[patient.id]?.trim()}
+                      onClick={() => {
+                        const value = parseFloat(allowanceDrafts[patient.id]);
+                        if (!Number.isFinite(value)) return;
+                        setAllowance(patient.id, {
+                          dailyMl: value,
+                          setByName: currentUser.displayName,
+                          setByRole: currentUser.role,
+                          setAt: new Date().toISOString(),
+                        });
+                      }}
+                    >
+                      Set
+                    </Button>
+                  </div>
+                </Field>
+              </div>
 
               <div className="flex gap-2 mt-4">
                 <Button

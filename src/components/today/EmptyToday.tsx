@@ -2,10 +2,10 @@ import { Drop } from "@phosphor-icons/react";
 import { Card } from "../ui/Card";
 
 /**
- * Deliberately has no buttons of its own — the hero "Speak an entry" button
- * and the Quick add grid right below it already cover every way to log an
- * entry. Repeating those actions a third time here is what made the empty
- * state feel like a wall of competing buttons with no clear next step.
+ * Deliberately has no buttons of its own — the "Speak an entry" FAB and the
+ * Quick add grid below already cover every way to log an entry. Repeating
+ * those actions a third time here is what made the empty state feel like a
+ * wall of competing buttons with no clear next step.
  */
 export function EmptyToday() {
   return (
@@ -21,7 +21,7 @@ export function EmptyToday() {
           No fluid events recorded yet
         </h2>
         <p className="text-sm text-fog-600 mt-1">
-          Tap a quick-add button below, or use Speak an entry above.
+          Tap Speak an entry or a quick-add button below.
         </p>
       </div>
     </Card>

@@ -92,6 +92,18 @@ import type { Role, Mode } from "../../types";
  */
 export async function pullUserRow(authUserId: string): Promise<void> {
   if (!canSyncNow()) return;
+  // Guard against switching accounts without an intervening "signed-out"
+  // event — e.g. signing in on /welcome while already signed in as someone
+  // else, which is reachable since /welcome isn't gated by RequireOnboarding.
+  // handleAuthChange's resetAccount() (on sign-out) only covers the
+  // explicit-logout path; this covers every other way pullUserRow gets
+  // called with an account that isn't the one currently linked, so the
+  // previous account's local patients/events can never leak into the next.
+  const state = useStore.getState();
+  if (state.authUserId !== authUserId) {
+    state.resetAccount();
+  }
+  useStore.getState().linkAuthAccount(authUserId);
   try {
     const { data: userRow } = await supabase!
       .from("users")

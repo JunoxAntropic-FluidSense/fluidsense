@@ -154,12 +154,28 @@ button {
 }
 
 .large-text {
-  font-size: 112.5%;
+  font-size: 125%;
 }
 
+/* --color-white and --color-fog-50 share the same hex (#fcf7f8) in the
+   default palette, so overriding fog-50 alone left every bg-white card
+   (the majority of surfaces) untouched — high contrast mode looked
+   identical to normal. Override both, plus the text/border ladder, so the
+   effect is visible on every surface, not just the page background. */
 .high-contrast {
+  --color-white: #ffffff;
   --color-fog-50: #ffffff;
+  --color-fog-100: #e0e0e0;
+  --color-fog-200: #000000;
+  --color-fog-300: #000000;
+  --color-navy-900: #000000;
+  --color-navy-800: #000000;
+  --color-navy-700: #000000;
+  --color-navy-600: #000000;
 }
 .high-contrast body {
   color: #000;
+}
+.high-contrast :focus-visible {
+  outline-width: 4px;
 }

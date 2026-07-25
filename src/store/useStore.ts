@@ -248,6 +248,22 @@ function newQuickButtons(sex?: Sex) {
     },
     {
       id: uuid(),
+      kind: "intake" as const,
+      category: "iv_fluid" as const,
+      label: "IV fluid",
+      order: 4.1,
+      enabled: true,
+    },
+    {
+      id: uuid(),
+      kind: "intake" as const,
+      category: "iv_medication" as const,
+      label: "IV medication",
+      order: 4.2,
+      enabled: true,
+    },
+    {
+      id: uuid(),
       kind: "output" as const,
       category: "urine" as const,
       label: "Measured urine",

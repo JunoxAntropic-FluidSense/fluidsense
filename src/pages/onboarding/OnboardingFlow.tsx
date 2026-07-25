@@ -62,8 +62,15 @@ function timezoneOptions(detected: string): string[] {
 }
 
 const HEALTHCARE_ROLES: Role[] = ["nurse", "healthcare_assistant", "clinician"];
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 const HEALTHCARE_ROLE_OPTIONS: { value: Role; label: string }[] =
-  HEALTHCARE_ROLES.map((r) => ({ value: r, label: r.replace("_", " ") }));
+  HEALTHCARE_ROLES.map((r) => ({
+    value: r,
+    label: capitalize(r.replace("_", " ")),
+  }));
 
 function SectionHeading({ children }: { children: string }) {
   return (

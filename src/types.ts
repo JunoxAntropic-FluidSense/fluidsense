@@ -338,6 +338,14 @@ export interface PatientProfile {
    * shared across every staff member in that organisation. Undefined for
    * patient-mode profiles, which stay single-owner (see 0004_care_teams.sql). */
   organisationId?: string;
+  /** Healthcare accounts only — which staff member currently has this patient
+   * checked in ("on my caseload right now"), for the team roster. Local-only,
+   * same as reminders/containers above — not part of the profiles sync
+   * schema yet, so this doesn't cross devices for a shared workspace patient
+   * until that's added. */
+  assignedClinicianId?: string;
+  assignedClinicianName?: string;
+  assignedAt?: string;
 }
 
 // --- Clinical notes (home & community mode) -------------------------------------

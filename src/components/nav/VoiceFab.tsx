@@ -25,11 +25,6 @@ export function VoiceFab() {
   const [successSummary, setSuccessSummary] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Hide floating voice widget when on the dedicated voice page
-  if (location.pathname === "/voice") {
-    return null;
-  }
-
   const handleOpen = () => {
     setIsOpen(true);
     setSuccessSummary(null);
@@ -124,6 +119,13 @@ export function VoiceFab() {
   const handleStopAndSave = () => {
     capture.stop();
   };
+
+  // Hide floating voice widget when on the dedicated voice page — checked
+  // after every hook above has run, never before, so hook count stays
+  // constant across renders regardless of route.
+  if (location.pathname === "/voice") {
+    return null;
+  }
 
   return (
     <>

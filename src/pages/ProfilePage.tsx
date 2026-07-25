@@ -266,15 +266,11 @@ export function ProfilePage() {
     (s) => s.setCheckInNotificationsEnabled
   );
   const updatePatient = useStore((s) => s.updatePatient);
-  const setAllowance = useStore((s) => s.setAllowance);
   const updateReminder = useStore((s) => s.updateReminder);
   const unlinkAuthAccount = useStore((s) => s.unlinkAuthAccount);
   const authStatus = useAuthStore((s) => s.status);
   const authUser = useAuthStore((s) => s.user);
 
-  const [allowanceInput, setAllowanceInput] = useState(
-    patient?.allowance ? String(patient.allowance.dailyMl) : ""
-  );
   const [checkInPending, setCheckInPending] = useState(false);
   const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
   const [contactNameInput, setContactNameInput] = useState("");
@@ -496,175 +492,158 @@ export function ProfilePage() {
         </label>
       </Card>
 
-      <Card className="p-5">
-        <CardHeading>Location</CardHeading>
-        <p className="text-sm text-fog-600 mb-3">
-          Lets your care team know whether you're recording from home or
-          currently admitted.
-        </p>
-        <SegmentedTabs
-          label="Location"
-          value={patient.deploymentMode ?? "home_community"}
-          onChange={(deploymentMode: DeploymentMode) =>
-            updatePatient(patient.id, { deploymentMode })
-          }
-          options={LOCATION_OPTIONS}
-        />
-      </Card>
+      {mode === "patient" && (
+        <Card className="p-5">
+          <CardHeading>Location</CardHeading>
+          <p className="text-sm text-fog-600 mb-3">
+            Lets your care team know whether you're recording from home or
+            currently admitted.
+          </p>
+          <SegmentedTabs
+            label="Location"
+            value={patient.deploymentMode ?? "home_community"}
+            onChange={(deploymentMode: DeploymentMode) =>
+              updatePatient(patient.id, { deploymentMode })
+            }
+            options={LOCATION_OPTIONS}
+          />
+        </Card>
+      )}
 
-      <Card className="p-5">
-        <CardHeading>Fluid allowance</CardHeading>
-        {patient.allowance ? (
-          <p className="text-xs text-fog-500 mb-2">
-            Currently set to {patient.allowance.dailyMl} mL by{" "}
-            {patient.allowance.setByName} on{" "}
-            {format(new Date(patient.allowance.setAt), "d MMM yyyy")}.
-          </p>
-        ) : (
-          <p className="text-xs text-fog-500 mb-2">
-            No allowance set.{" "}
-            {mode === "patient"
-              ? "This is usually set by the healthcare team."
-              : ""}
-          </p>
-        )}
-        {mode === "healthcare" ? (
-          <div className="flex gap-2">
-            <Input
-              inputMode="decimal"
-              value={allowanceInput}
-              onChange={(e) => setAllowanceInput(e.target.value)}
-              placeholder="Daily allowance (mL)"
-              className="flex-1"
-            />
-            <Button
-              size="md"
-              disabled={!allowanceInput}
-              onClick={() =>
-                setAllowance(patient.id, {
-                  dailyMl: parseFloat(allowanceInput),
-                  setByName: currentUser.displayName,
-                  setByRole: currentUser.role,
-                  setAt: new Date().toISOString(),
-                })
-              }
-            >
-              Set
-            </Button>
-          </div>
-        ) : (
+      {mode === "patient" && (
+        <Card className="p-5">
+          <CardHeading>Fluid allowance</CardHeading>
+          {patient.allowance ? (
+            <p className="text-xs text-fog-500 mb-2">
+              Currently set to {patient.allowance.dailyMl} mL by{" "}
+              {patient.allowance.setByName} on{" "}
+              {format(new Date(patient.allowance.setAt), "d MMM yyyy")}.
+            </p>
+          ) : (
+            <p className="text-xs text-fog-500 mb-2">
+              No allowance set. This is usually set by the healthcare team.
+            </p>
+          )}
           <p className="text-sm text-fog-600">
             Fluid allowances are set by the healthcare team, not the patient.
           </p>
-        )}
-      </Card>
+        </Card>
+      )}
 
-      <Card className="p-5">
-        <CardHeading>Reminders</CardHeading>
-        <p className="text-sm text-fog-600 mb-3">
-          Gentle nudges — never assumes a missing entry means nothing happened.
-        </p>
-        <ul className="space-y-2">
-          {patient.reminders.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
-            >
-              <span className="text-sm font-semibold text-navy-800">
-                {REMINDER_LABELS[r.kind] ?? r.kind}
-              </span>
-              <label className="flex items-center gap-2 text-sm">
-                <Switch
-                  checked={r.enabled}
-                  onChange={(e) =>
-                    updateReminder(patient.id, r.id, {
-                      enabled: e.target.checked,
-                    })
-                  }
-                />
-                Enabled
-              </label>
-            </li>
-          ))}
-        </ul>
-      </Card>
-
-      <Card className="p-5">
-        <CardHeading>Care team sharing</CardHeading>
-        <p className="text-sm text-fog-600 mb-3">
-          Choose who can receive a copy of your recorded fluid summary. Nothing
-          is sent unless you turn this on and add at least one contact.
-        </p>
-        <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
-          <Switch
-            checked={patient.careTeamShareConsent ?? false}
-            onChange={(e) =>
-              updatePatient(patient.id, {
-                careTeamShareConsent: e.target.checked,
-              })
-            }
-          />
-          Allow sharing my summary with the contacts below
-        </label>
-
-        <div
-          className={patient.careTeamShareConsent ? "mt-4" : "mt-4 opacity-60"}
-        >
-          {(patient.careTeamContacts ?? []).length > 0 && (
-            <ul className="space-y-2 mb-3">
-              {(patient.careTeamContacts ?? []).map((contact) => (
-                <li
-                  key={contact.id}
-                  className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-navy-800">
-                      {contact.name}
-                    </p>
-                    <p className="text-xs text-fog-500">{contact.email}</p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      updatePatient(patient.id, {
-                        careTeamContacts: (
-                          patient.careTeamContacts ?? []
-                        ).filter((c) => c.id !== contact.id),
+      {mode === "patient" && (
+        <Card className="p-5">
+          <CardHeading>Reminders</CardHeading>
+          <p className="text-sm text-fog-600 mb-3">
+            Gentle nudges — never assumes a missing entry means nothing
+            happened.
+          </p>
+          <ul className="space-y-2">
+            {patient.reminders.map((r) => (
+              <li
+                key={r.id}
+                className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
+              >
+                <span className="text-sm font-semibold text-navy-800">
+                  {REMINDER_LABELS[r.kind] ?? r.kind}
+                </span>
+                <label className="flex items-center gap-2 text-sm">
+                  <Switch
+                    checked={r.enabled}
+                    onChange={(e) =>
+                      updateReminder(patient.id, r.id, {
+                        enabled: e.target.checked,
                       })
                     }
-                    className="text-sm font-bold text-navy-500 hover:text-navy-700"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                  />
+                  Enabled
+                </label>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              value={contactNameInput}
-              onChange={(e) => setContactNameInput(e.target.value)}
-              placeholder="Contact name"
-              className="flex-1"
-            />
-            <Input
-              value={contactEmailInput}
-              onChange={(e) => setContactEmailInput(e.target.value)}
-              placeholder="Contact email"
-              className="flex-1"
-            />
-            <Button
-              size="md"
-              disabled={
-                !contactNameInput.trim() || !contactEmailInput.includes("@")
+      {mode === "patient" && (
+        <Card className="p-5">
+          <CardHeading>Care team sharing</CardHeading>
+          <p className="text-sm text-fog-600 mb-3">
+            Choose who can receive a copy of your recorded fluid summary.
+            Nothing is sent unless you turn this on and add at least one
+            contact.
+          </p>
+          <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+            <Switch
+              checked={patient.careTeamShareConsent ?? false}
+              onChange={(e) =>
+                updatePatient(patient.id, {
+                  careTeamShareConsent: e.target.checked,
+                })
               }
-              onClick={handleAddCareTeamContact}
-            >
-              Add
-            </Button>
+            />
+            Allow sharing my summary with the contacts below
+          </label>
+
+          <div
+            className={
+              patient.careTeamShareConsent ? "mt-4" : "mt-4 opacity-60"
+            }
+          >
+            {(patient.careTeamContacts ?? []).length > 0 && (
+              <ul className="space-y-2 mb-3">
+                {(patient.careTeamContacts ?? []).map((contact) => (
+                  <li
+                    key={contact.id}
+                    className="flex items-center justify-between rounded-xl bg-fog-50 px-3 py-2.5"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-navy-800">
+                        {contact.name}
+                      </p>
+                      <p className="text-xs text-fog-500">{contact.email}</p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        updatePatient(patient.id, {
+                          careTeamContacts: (
+                            patient.careTeamContacts ?? []
+                          ).filter((c) => c.id !== contact.id),
+                        })
+                      }
+                      className="text-sm font-bold text-navy-500 hover:text-navy-700"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={contactNameInput}
+                onChange={(e) => setContactNameInput(e.target.value)}
+                placeholder="Contact name"
+                className="flex-1"
+              />
+              <Input
+                value={contactEmailInput}
+                onChange={(e) => setContactEmailInput(e.target.value)}
+                placeholder="Contact email"
+                className="flex-1"
+              />
+              <Button
+                size="md"
+                disabled={
+                  !contactNameInput.trim() || !contactEmailInput.includes("@")
+                }
+                onClick={handleAddCareTeamContact}
+              >
+                Add
+              </Button>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       <Card className="p-5">
         <CardHeading>Check-in reminders</CardHeading>
