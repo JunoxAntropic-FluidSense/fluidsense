@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -55,6 +55,7 @@ const RELIABILITY_RANK = { Low: 0, Moderate: 1, High: 2 };
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const patients = useStore((s) => s.patients);
   const events = useStore((s) => s.events);
   const weightEvents = useStore((s) => s.weightEvents);
@@ -70,6 +71,14 @@ export function DashboardPage() {
   const [newSetting, setNewSetting] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [invitePending, setInvitePending] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("addPatient") === "true") {
+      setShowAddPatient(true);
+      searchParams.delete("addPatient");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const [offboardTarget, setOffboardTarget] = useState<{
     id: string;

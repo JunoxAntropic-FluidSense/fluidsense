@@ -26,7 +26,7 @@ export function BrandLogo({
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <img
-        src="/logo-removebg-preview.png"
+        src="/logo.png"
         alt="FluidSense Logo"
         className={`${iconSizes[size]} shrink-0 object-contain`}
       />
