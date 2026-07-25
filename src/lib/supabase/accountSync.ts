@@ -101,6 +101,33 @@ async function upsertUserRow(authUserId: string): Promise<void> {
   }
 }
 
+/**
+ * Upserts just `role`/`mode` for `authUserId`, bypassing the reactive
+ * store-subscription path above. `public.users.role` normally only gets
+ * written once `completeOnboarding()` runs and `currentUser` changes — too
+ * late for a role-gated RPC called *during* onboarding itself (e.g.
+ * create_organisation, which checks the caller's public.users.role; see
+ * 0004_care_teams.sql). Partial upsert is safe: every other column on
+ * public.users has a database default, so this either inserts a new row
+ * with those defaults or updates only role/mode on an existing one — it
+ * never blanks out fields a prior full sync already wrote. Returns whether
+ * the write is confirmed to have landed, so a caller gating a role-checked
+ * action can wait for `true` instead of racing a fire-and-forget sync.
+ */
+export async function syncAccountRoleNow(
+  authUserId: string,
+  role: string,
+  mode: string
+): Promise<boolean> {
+  if (!canSyncNow()) return false;
+  try {
+    await supabase!.from("users").upsert({ id: authUserId, role, mode });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 let lastLinkedAuthUserId: string | null = null;
 
 function handleAuthChange(): void {

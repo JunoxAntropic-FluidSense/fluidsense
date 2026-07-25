@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useStore } from "../../store/useStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -10,6 +10,7 @@ import { Field, Input, Select } from "../../components/ui/Field";
 import { Checkbox } from "../../components/ui/Checkbox";
 import { WorkspaceSetup } from "../../components/onboarding/WorkspaceSetup";
 import { enableCheckInPush } from "../../lib/push/subscribe";
+import { syncAccountRoleNow } from "../../lib/supabase/accountSync";
 import type { Mode, Role, Sex, Units } from "../../types";
 
 const UNITS_OPTIONS: { value: Units; label: string }[] = [
@@ -79,6 +80,7 @@ export function OnboardingFlow() {
   );
   const completeOnboarding = useStore((s) => s.completeOnboarding);
   const authStatus = useAuthStore((s) => s.status);
+  const authUser = useAuthStore((s) => s.user);
   const setCheckInNotificationsEnabled = useStore(
     (s) => s.setCheckInNotificationsEnabled
   );
@@ -109,7 +111,28 @@ export function OnboardingFlow() {
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
   const [joinedOrgName, setJoinedOrgName] = useState<string | null>(null);
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
+  const [roleSynced, setRoleSynced] = useState(false);
   const [finishing, setFinishing] = useState(false);
+
+  // WorkspaceSetup's create_organisation RPC checks the caller's
+  // public.users.role server-side (0004_care_teams.sql) — but that row only
+  // gets the role written to it once completeOnboarding() runs, at the very
+  // end of this flow. Without this, clicking "Create workspace" here (before
+  // completeOnboarding) always fails with "Only healthcare accounts can
+  // create a workspace," because the server still sees whatever role (or no
+  // row at all) existed before onboarding started. Push role/mode directly
+  // and wait for confirmation before rendering WorkspaceSetup at all.
+  useEffect(() => {
+    if (accountMode !== "healthcare" || !authUser) return;
+    let cancelled = false;
+    setRoleSynced(false);
+    void syncAccountRoleNow(authUser.id, role, "healthcare").then((ok) => {
+      if (!cancelled && ok) setRoleSynced(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [accountMode, authUser, role]);
 
   if (onboardingCompleted) return <Navigate to="/" replace />;
   // Onboarding assumes an authenticated user throughout (account creation
@@ -284,13 +307,17 @@ export function OnboardingFlow() {
                     {joinedOrgName ? `: ${joinedOrgName}` : ""} — continue
                     below.
                   </p>
-                ) : (
+                ) : roleSynced ? (
                   <WorkspaceSetup
                     onJoined={(id, name) => {
                       setJoinedOrgId(id);
                       setJoinedOrgName(name);
                     }}
                   />
+                ) : (
+                  <p className="text-xs text-fog-500">
+                    Setting up your account…
+                  </p>
                 )}
               </>
             )}
