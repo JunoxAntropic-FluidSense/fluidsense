@@ -1,53 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  /* Navy — headings, primary text */
-  --color-navy-950: #0b1220;
-  --color-navy-900: #101a2e;
-  --color-navy-800: #16233d;
-  --color-navy-700: #1f3153;
-  --color-navy-600: #2c4370;
+  /* Ink — headings, primary text */
+  --color-navy-950: #0a2029;
+  --color-navy-900: #0f3341;
+  --color-navy-800: #164e63;
+  --color-navy-700: #29677d;
+  --color-navy-600: #3d8098;
 
-  /* Teal — intake */
-  --color-intake-50: #eefbfa;
-  --color-intake-100: #d4f4f1;
-  --color-intake-200: #a9e8e3;
-  --color-intake-500: #0f9d94;
-  --color-intake-600: #0c8078;
-  --color-intake-700: #0a655f;
+  /* Cyan — intake */
+  --color-intake-50: #ecfeff;
+  --color-intake-100: #cffafe;
+  --color-intake-200: #a5f3fc;
+  --color-intake-500: #06b6d4;
+  --color-intake-600: #0891b2;
+  --color-intake-700: #0e7490;
 
-  /* Blue-grey / purple — output */
-  --color-output-50: #f1f0fb;
-  --color-output-100: #e0ddf5;
-  --color-output-200: #c3bdea;
-  --color-output-500: #6a5fb0;
-  --color-output-600: #574b98;
-  --color-output-700: #463c7c;
+  /* Violet — output (kept a distinct hue family from intake) */
+  --color-output-50: #f5f3ff;
+  --color-output-100: #ede9fe;
+  --color-output-200: #ddd6fe;
+  --color-output-500: #7c6cd9;
+  --color-output-600: #6952c4;
+  --color-output-700: #55429e;
 
   /* Amber — uncertainty / estimates */
-  --color-amber-50: #fef8ec;
-  --color-amber-100: #fcecc7;
-  --color-amber-200: #f8da8f;
-  --color-amber-500: #d9932a;
-  --color-amber-600: #b6771a;
-  --color-amber-700: #925f16;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-500: #d97706;
+  --color-amber-600: #b45309;
+  --color-amber-700: #92400e;
 
-  /* Grey — unmeasured */
-  --color-fog-50: #f6f6f8;
-  --color-fog-100: #ebeaef;
-  --color-fog-200: #d7d5e0;
-  --color-fog-400: #9793a8;
-  --color-fog-500: #7b778e;
-  --color-fog-600: #615d72;
-  --color-fog-700: #494659;
+  /* Fog — unmeasured, neutral surfaces */
+  --color-fog-50: #f3f7f8;
+  --color-fog-100: #e5ebed;
+  --color-fog-200: #d1dadd;
+  --color-fog-400: #90a3a9;
+  --color-fog-500: #6d8188;
+  --color-fog-600: #52646a;
+  --color-fog-700: #3b4a4f;
 
   /* Red — restrained, errors only */
-  --color-alert-50: #fdf1f0;
-  --color-alert-100: #f9dbd8;
-  --color-alert-500: #c94d43;
-  --color-alert-600: #ab3b32;
+  --color-alert-50: #fef2f2;
+  --color-alert-100: #fde2e1;
+  --color-alert-500: #dc2626;
+  --color-alert-600: #b91c1c;
 
-  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  /* Green — UI confirmations only (never used to imply fluid-balance status) */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #059669;
+  --color-success-600: #047857;
+
+  --font-sans: "Noto Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Figtree", "Noto Sans", system-ui, sans-serif;
 }
 
 :root {
@@ -64,6 +72,14 @@ body {
   color: var(--color-navy-900);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 #root {
