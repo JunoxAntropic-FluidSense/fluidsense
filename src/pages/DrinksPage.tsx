@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { Field, Input, Select } from "../components/ui/Field";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import {
   CategoryIcon,
   CATEGORY_LABEL,
@@ -34,7 +35,7 @@ export function DrinksPage() {
   const [showNewDrink, setShowNewDrink] = useState(false);
   const [showNewContainer, setShowNewContainer] = useState(false);
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">

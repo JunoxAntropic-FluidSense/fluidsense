@@ -6,6 +6,7 @@ import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ReliabilityPill } from "../components/ui/ReliabilityPill";
 import { Field, Select } from "../components/ui/Field";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { WeatherNote } from "../components/today/WeatherNote";
 import { PERIOD_OPTIONS } from "../lib/period";
 import { formatMl, formatMlPlain, describeUnmeasured } from "../lib/calc";
@@ -76,7 +77,7 @@ export function SummaryPage() {
     [dialysisAppointments, patient]
   );
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   const summaryText = buildSummaryText();
 

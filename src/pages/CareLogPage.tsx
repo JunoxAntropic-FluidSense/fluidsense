@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { Field, Input } from "../components/ui/Field";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { DIALYSIS_MODALITY_LABEL } from "../types";
 import type { DialysisModality } from "../types";
 
@@ -22,7 +23,7 @@ export function CareLogPage() {
   const [showMedForm, setShowMedForm] = useState(false);
   const [showDialysisForm, setShowDialysisForm] = useState(false);
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   const patientMeds = medicationEvents
     .filter((m) => m.patientId === patient.id)

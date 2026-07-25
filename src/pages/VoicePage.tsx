@@ -12,6 +12,7 @@ import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { Field, Input, Select } from "../components/ui/Field";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { PhotoCaptureField } from "../components/photo/PhotoCaptureField";
 import {
   CATEGORY_LABEL,
@@ -184,7 +185,7 @@ export function VoicePage() {
     navigate("/");
   };
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-8">

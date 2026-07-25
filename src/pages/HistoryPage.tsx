@@ -7,6 +7,7 @@ import { Button } from "../components/ui/Button";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
 import { Field, Input, Select } from "../components/ui/Field";
 import { DateRangePicker } from "../components/ui/DateRangePicker";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { EventRow } from "../components/EventRow";
 import { EditEventModal } from "../components/EditEventModal";
 import type { FluidEvent, PatientProfile } from "../types";
@@ -104,7 +105,7 @@ export function HistoryPage() {
     [patientEvents, direction, status, method, enteredBy, from, to]
   );
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   // Home & community mode: a clinician viewing this patient's record is
   // read-only on patient/carer-entered events — they can only add a

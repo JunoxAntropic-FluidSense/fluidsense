@@ -8,6 +8,7 @@ import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input, Select } from "../components/ui/Field";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { getPeriodRange } from "../lib/period";
 import type { MonitoringDayStartMode } from "../types";
 
@@ -49,7 +50,7 @@ export function DataSettingsPage() {
   );
   const [deleteAccountRequested, setDeleteAccountRequested] = useState(false);
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   const now = new Date();
   const monitoringDayRange = getPeriodRange("monitoring_day", now, {

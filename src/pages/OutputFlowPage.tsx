@@ -4,6 +4,7 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
 import { Field, Input } from "../components/ui/Field";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import type { MeasurementStatus, OutputCategory } from "../types";
@@ -37,7 +38,7 @@ export function OutputFlowPage() {
   const [note, setNote] = useState("");
   const [rawInput, setRawInput] = useState("");
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   const confirm = () => setStep(9);
 

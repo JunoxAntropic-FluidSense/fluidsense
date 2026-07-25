@@ -5,6 +5,7 @@ import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
 import { Field, Input } from "../components/ui/Field";
 import { SegmentedTabs } from "../components/ui/SegmentedTabs";
+import { NoActivePatientState } from "../components/ui/NoActivePatientState";
 import {
   PhotoCaptureField,
   type PhotoAttachHandle,
@@ -74,7 +75,7 @@ export function IntakeFlowPage() {
     null
   );
 
-  if (!patient) return null;
+  if (!patient) return <NoActivePatientState />;
 
   const reset = () => {
     setStep(1);
