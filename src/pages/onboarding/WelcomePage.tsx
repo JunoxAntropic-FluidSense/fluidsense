@@ -27,10 +27,14 @@ export function WelcomePage() {
   const [useMagicLink, setUseMagicLink] = useState(false);
 
   if (viewContext === "demo") return <Navigate to="/" replace />;
-  if (onboardingCompleted) {
-    // Still resolving the session — avoid flashing this page before we know.
-    if (authStatus === "loading") return null;
-    if (authStatus === "signed-in") return <Navigate to="/" replace />;
+  // Still resolving the session — avoid flashing this page before we know.
+  if (onboardingCompleted && authStatus === "loading") return null;
+  // Signed in already: never show the landing/sign-in screen again, even if
+  // local onboarding hasn't run yet on this browser — send them straight
+  // into onboarding (or the app, if it's already done) instead of a screen
+  // that looks identical to being signed out.
+  if (authStatus === "signed-in") {
+    return <Navigate to={onboardingCompleted ? "/" : "/onboarding"} replace />;
   }
 
   return (

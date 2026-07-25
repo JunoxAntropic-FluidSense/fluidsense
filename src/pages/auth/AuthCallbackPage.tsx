@@ -21,12 +21,14 @@ export function AuthCallbackPage() {
     (s) => s.currentUser.onboardingCompleted
   );
   const [ready, setReady] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     completeAuthFromUrl(window.location.href).then(({ session }) => {
       if (cancelled) return;
       setSession(session);
+      setSignedIn(session !== null);
       setReady(true);
     });
     return () => {
@@ -45,5 +47,12 @@ export function AuthCallbackPage() {
     );
   }
 
-  return <Navigate to={onboardingCompleted ? "/" : "/welcome"} replace />;
+  // Success: go straight to onboarding (or the app, if already done) —
+  // never back through /welcome, which would otherwise show the generic
+  // sign-in screen again and look like nothing happened. Failure: back to
+  // /welcome so they can retry.
+  if (signedIn) {
+    return <Navigate to={onboardingCompleted ? "/" : "/onboarding"} replace />;
+  }
+  return <Navigate to="/welcome" replace />;
 }

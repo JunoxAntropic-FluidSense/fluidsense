@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { SignOutButton } from "../components/auth";
 import type { Role, Units } from "../types";
 import { format } from "date-fns";
+import { enableCheckInPush, disableCheckInPush } from "../lib/push/subscribe";
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: "patient", label: "Patient" },
@@ -35,6 +36,9 @@ export function ProfilePage() {
   const setUserRole = useStore((s) => s.setUserRole);
   const setAccessibility = useStore((s) => s.setAccessibility);
   const setSaveVoiceTranscripts = useStore((s) => s.setSaveVoiceTranscripts);
+  const setCheckInNotificationsEnabled = useStore(
+    (s) => s.setCheckInNotificationsEnabled
+  );
   const updatePatient = useStore((s) => s.updatePatient);
   const setAllowance = useStore((s) => s.setAllowance);
   const updateReminder = useStore((s) => s.updateReminder);
@@ -45,8 +49,28 @@ export function ProfilePage() {
   const [allowanceInput, setAllowanceInput] = useState(
     patient?.allowance ? String(patient.allowance.dailyMl) : ""
   );
+  const [checkInPending, setCheckInPending] = useState(false);
+  const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
 
   if (!patient) return null;
+
+  const handleCheckInToggle = async (enabled: boolean) => {
+    setCheckInMessage(null);
+    if (!enabled) {
+      setCheckInNotificationsEnabled(false);
+      setCheckInPending(true);
+      await disableCheckInPush();
+      setCheckInPending(false);
+      return;
+    }
+    setCheckInPending(true);
+    const result = await enableCheckInPush(patient.id);
+    setCheckInPending(false);
+    setCheckInNotificationsEnabled(result.ok);
+    if (!result.ok && result.message) {
+      setCheckInMessage(result.message);
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-8">
@@ -301,6 +325,29 @@ export function ProfilePage() {
             </li>
           ))}
         </ul>
+      </Card>
+
+      <Card className="p-5">
+        <CardHeading>Check-in reminders</CardHeading>
+        <p className="text-sm text-fog-600 mb-3">
+          Get a reminder if you haven't logged anything in the morning,
+          afternoon, or evening window.
+        </p>
+        <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+          <input
+            type="checkbox"
+            checked={currentUser.checkInNotificationsEnabled}
+            disabled={checkInPending}
+            onChange={(e) => {
+              void handleCheckInToggle(e.target.checked);
+            }}
+            className="w-5 h-5"
+          />
+          Check-in reminders
+        </label>
+        {checkInMessage && (
+          <p className="text-xs text-fog-500 mt-2">{checkInMessage}</p>
+        )}
       </Card>
 
       {patient.contactInstructions && (
