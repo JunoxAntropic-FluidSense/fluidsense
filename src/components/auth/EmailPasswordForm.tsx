@@ -33,12 +33,18 @@ export function EmailPasswordForm({
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Distinct from `error`: sign-up with email confirmation enabled succeeds
+  // but returns no session yet — that's expected, not a failure, and must
+  // not render in the same red/alert styling as a genuine error or it reads
+  // as "sign-up is broken" instead of "you're almost done."
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   const busy = submitting || authStatus === "loading";
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setNeedsConfirmation(false);
     setSubmitting(true);
     try {
       const result =
@@ -53,12 +59,27 @@ export function EmailPasswordForm({
       if (result.session) {
         onSuccess?.(result.session);
       } else {
-        // Sign-up with email confirmation enabled returns no session yet.
-        setError("Check your email to confirm your account before signing in.");
+        setNeedsConfirmation(true);
       }
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (needsConfirmation) {
+    return (
+      <div
+        className={`rounded-xl border border-intake-200 bg-intake-50 p-4 space-y-1 ${className}`}
+      >
+        <p className="text-sm font-semibold text-intake-700">
+          Check your email
+        </p>
+        <p className="text-sm text-intake-700">
+          We've sent a confirmation link to {email}. Open it, then come back
+          here and sign in — you'll continue straight into setup.
+        </p>
+      </div>
+    );
   }
 
   return (
