@@ -31,7 +31,7 @@ export function SegmentedTabs<T extends string>({
       role="tablist"
       aria-label={label}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full bg-fog-100 py-1 px-2 pr-3 overflow-x-auto max-w-full",
+        "flex flex-wrap items-center gap-1.5 rounded-2xl bg-fog-100 py-1.5 px-2 max-w-full",
         className
       )}
     >

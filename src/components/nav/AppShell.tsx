@@ -17,7 +17,6 @@ const ROLLOVER_CHECK_INTERVAL_MS = 60_000;
 
 export function AppShell() {
   const navigate = useNavigate();
-  const mode = useStore((s) => s.mode);
   const viewContext = useStore((s) => s.viewContext);
   const exitDemoMode = useStore((s) => s.exitDemoMode);
   const accessibility = useStore((s) => s.currentUser.accessibility);
@@ -103,7 +102,7 @@ export function AppShell() {
         </div>
       )}
       <div className="flex flex-1 min-h-0">
-        {mode === "healthcare" && <Sidebar />}
+        <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-20 bg-fog-50/95 backdrop-blur border-b border-navy-900/5 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">

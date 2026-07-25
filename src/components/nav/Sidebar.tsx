@@ -66,11 +66,13 @@ function SidebarLink({
 }
 
 export function Sidebar() {
+  const mode = useStore((s) => s.mode);
   const organisationName = useStore((s) => s.currentUser.organisationName);
   const activePatientId = useStore((s) => s.activePatientId);
   const patients = useStore((s) => s.patients);
   const activePatient = patients.find((p) => p.id === activePatientId);
   const [collapsed, setCollapsed] = useState(false);
+  const isHealthcare = mode === "healthcare";
 
   return (
     <nav
@@ -89,7 +91,11 @@ export function Sidebar() {
         {!collapsed && (
           <BrandLogo
             size="md"
-            subtitle={organisationName || "Healthcare team"}
+            subtitle={
+              isHealthcare
+                ? organisationName || "Healthcare team"
+                : activePatient?.displayName
+            }
           />
         )}
         <button
@@ -105,26 +111,32 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-3">
-        <SectionLabel collapsed={collapsed}>Workspace</SectionLabel>
-        <div className="space-y-0.5">
-          <SidebarLink
-            to="/dashboard"
-            icon={Gauge}
-            label="Patient dashboard"
-            collapsed={collapsed}
-          />
-          <SidebarLink
-            to="/drinks"
-            icon={Flask}
-            label="Patient fluid library"
-            collapsed={collapsed}
-          />
-        </div>
+        {isHealthcare && (
+          <>
+            <SectionLabel collapsed={collapsed}>Workspace</SectionLabel>
+            <div className="space-y-0.5">
+              <SidebarLink
+                to="/dashboard"
+                icon={Gauge}
+                label="Patient dashboard"
+                collapsed={collapsed}
+              />
+              <SidebarLink
+                to="/drinks"
+                icon={Flask}
+                label="Patient fluid library"
+                collapsed={collapsed}
+              />
+            </div>
+          </>
+        )}
 
         <SectionLabel collapsed={collapsed}>
-          {activePatient
-            ? `Viewing: ${activePatient.displayName}`
-            : "Active patient"}
+          {isHealthcare
+            ? activePatient
+              ? `Viewing: ${activePatient.displayName}`
+              : "Active patient"
+            : "Menu"}
         </SectionLabel>
         <div className="space-y-0.5">
           {NAV_ITEMS.filter((item) => item.to !== "/profile").map((item) => (
