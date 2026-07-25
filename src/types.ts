@@ -24,6 +24,8 @@ export interface AppUser {
   onboardingCompleted: boolean;
   timezone: string;
   saveVoiceTranscripts: boolean;
+  /** Opt-in for morning/afternoon/evening check-in reminder push notifications. Defaults to false. */
+  checkInNotificationsEnabled: boolean;
 }
 
 // --- Measurement status -----------------------------------------------------
@@ -130,6 +132,8 @@ export interface FluidEvent {
   deletedAt?: string;
   monitoringPeriodId?: string;
   confidence?: number;
+  photoStoragePath?: string; // Supabase Storage object path, e.g. `<profileId>/<eventId>.jpg`
+  photoSource?: "attached" | "ai_estimate";
 }
 
 export interface EditRecord {

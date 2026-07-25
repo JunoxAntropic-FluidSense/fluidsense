@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
+import {
+  PhotoCaptureField,
+  type PhotoAttachHandle,
+} from "../components/photo/PhotoCaptureField";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import type {
@@ -51,6 +55,7 @@ export function IntakeFlowPage() {
   const navigate = useNavigate();
   const patient = useActivePatient();
   const addEvent = useStore((s) => s.addEvent);
+  const updateEvent = useStore((s) => s.updateEvent);
   const currentUser = useStore((s) => s.currentUser);
 
   const [step, setStep] = useState(1);
@@ -63,6 +68,9 @@ export function IntakeFlowPage() {
   const [note, setNote] = useState("");
   const [unitInput, setUnitInput] = useState<"mL" | "L">("mL");
   const [rawInput, setRawInput] = useState("");
+  const [photoHandle, setPhotoHandle] = useState<PhotoAttachHandle | null>(
+    null
+  );
 
   if (!patient) return null;
 
@@ -75,13 +83,14 @@ export function IntakeFlowPage() {
     setFraction(null);
     setNote("");
     setRawInput("");
+    setPhotoHandle(null);
   };
 
   const goConfirm = () => setStep(4);
 
-  const save = () => {
+  const save = async () => {
     if (!category) return;
-    addEvent({
+    const createdEvent = addEvent({
       patientId: patient.id,
       direction: "intake",
       category,
@@ -95,6 +104,24 @@ export function IntakeFlowPage() {
       inputMethod: "manual",
       note: note || undefined,
     });
+
+    if (photoHandle) {
+      try {
+        const result = await photoHandle.attach(patient.id, createdEvent.id);
+        if (result.path) {
+          updateEvent(
+            createdEvent.id,
+            { photoStoragePath: result.path },
+            currentUser.displayName,
+            "Attached photo"
+          );
+        }
+      } catch {
+        // Photo attach failure must not block or roll back the fluid entry
+        // itself — the event above is already saved either way.
+      }
+    }
+
     navigate("/");
   };
 
@@ -345,6 +372,13 @@ export function IntakeFlowPage() {
                 placeholder="Add a note (optional)"
               />
             </label>
+            <PhotoCaptureField
+              onAcceptEstimate={(estimatedMl) => {
+                setAmountMl(estimatedMl);
+                setStatus("approximate");
+              }}
+              onAttach={setPhotoHandle}
+            />
           </Card>
           <Button fullWidth size="xl" onClick={save}>
             Confirm and save

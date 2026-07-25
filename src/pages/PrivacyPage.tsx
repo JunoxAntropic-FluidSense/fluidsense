@@ -38,6 +38,18 @@ export function PrivacyPage() {
         </section>
 
         <section className="space-y-2">
+          <h2 className="font-bold text-navy-900">Photo data</h2>
+          <p className="text-sm text-fog-700">
+            If you attach a photo to a drink entry, it's stored in Supabase
+            Storage alongside your account data. If you ask for an amount
+            estimate from a photo, the image is sent to a third-party vision
+            provider for processing — it's read into memory for that single
+            request and discarded afterward, so FluidSense's own server does not
+            keep a copy.
+          </p>
+        </section>
+
+        <section className="space-y-2">
           <h2 className="font-bold text-navy-900">Demo mode</h2>
           <p className="text-sm text-fog-700">
             Demo mode uses entirely fictional patients and fictional data,

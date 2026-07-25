@@ -106,4 +106,18 @@ describe("computeBalance", () => {
     const balance = computeBalance(events);
     expect(balance.recordedBalanceMl).toBe(600);
   });
+
+  it("produces identical output for events differing only in photoStoragePath", () => {
+    const withoutPhoto = ev({
+      direction: "intake",
+      category: "water",
+      amountMl: 200,
+      status: "approximate",
+    });
+    const withPhoto = ev({
+      ...withoutPhoto,
+      photoStoragePath: "p1/e1.jpg",
+    });
+    expect(computeBalance([withPhoto])).toEqual(computeBalance([withoutPhoto]));
+  });
 });

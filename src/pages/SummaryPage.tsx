@@ -5,6 +5,7 @@ import { useStore } from "../store/useStore";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { ReliabilityPill } from "../components/ui/ReliabilityPill";
+import { WeatherNote } from "../components/today/WeatherNote";
 import { PERIOD_OPTIONS } from "../lib/period";
 import { formatMl, formatMlPlain, describeUnmeasured } from "../lib/calc";
 import { format } from "date-fns";
@@ -121,6 +122,8 @@ export function SummaryPage() {
           ))}
         </select>
       </label>
+
+      <WeatherNote />
 
       <Card className="p-5">
         <CardHeading action={<ReliabilityPill level={reliability.level} />}>

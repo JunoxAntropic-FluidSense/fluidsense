@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import type { FluidEvent } from "../types";
 import { StatusBadge } from "./ui/Badge";
+import { PhotoThumbnail } from "./PhotoThumbnail";
 import {
   CATEGORY_ICON,
   CATEGORY_LABEL,
@@ -66,6 +67,15 @@ export function EventRow({
         </p>
         {event.note && (
           <p className="text-xs text-fog-600 mt-1 italic">"{event.note}"</p>
+        )}
+        {event.photoStoragePath && (
+          <div className="mt-1.5">
+            <PhotoThumbnail
+              path={event.photoStoragePath}
+              size="sm"
+              alt={`Photo attached to ${CATEGORY_LABEL[event.category]} entry`}
+            />
+          </div>
         )}
       </div>
       {onEdit && (

@@ -53,6 +53,13 @@ interface StoreState {
   viewContext: "live" | "demo";
   _liveCache: LiveSnapshot | null;
 
+  // Supabase auth uid for the signed-in account, if any — distinct from
+  // currentUser.id (a locally-generated id used before/without cloud auth;
+  // see src/lib/supabase/accountSync.ts). Never swapped by enterDemoMode/
+  // exitDemoMode, same as currentUser: entering/exiting demo mode has no
+  // opinion on cloud sign-in state.
+  authUserId: string | null;
+
   // --- onboarding / account lifecycle ---------------------------------------
   completeOnboarding: (input: OnboardingInput) => void;
   resetAccount: () => void;
@@ -62,12 +69,17 @@ interface StoreState {
   enterDemoMode: () => void;
   exitDemoMode: () => void;
 
+  // --- auth account linking (Supabase) ----------------------------------------
+  linkAuthAccount: (authUserId: string) => void;
+  unlinkAuthAccount: () => void;
+
   // --- misc user/session --------------------------------------------------------
   setMode: (mode: Mode) => void;
   setActivePatient: (patientId: string) => void;
   setUserRole: (role: Role, displayName?: string) => void;
   setAccessibility: (changes: Partial<AccessibilityPrefs>) => void;
   setSaveVoiceTranscripts: (save: boolean) => void;
+  setCheckInNotificationsEnabled: (enabled: boolean) => void;
 
   // --- fluid events ------------------------------------------------------------
   addEvent: (
@@ -138,6 +150,7 @@ const emptyUser: AppUser = {
   onboardingCompleted: false,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   saveVoiceTranscripts: true,
+  checkInNotificationsEnabled: false,
 };
 
 const emptyLiveSnapshot: LiveSnapshot = {
@@ -250,6 +263,7 @@ export const useStore = create<StoreState>()(
 
       viewContext: "live",
       _liveCache: null,
+      authUserId: null,
 
       completeOnboarding: (input) => {
         const now = new Date().toISOString();
@@ -320,6 +334,7 @@ export const useStore = create<StoreState>()(
             onboardingCompleted: true,
             timezone: input.timezone,
             saveVoiceTranscripts: true,
+            checkInNotificationsEnabled: false,
           },
           mode: input.accountMode,
           patients: [profile],
@@ -389,6 +404,18 @@ export const useStore = create<StoreState>()(
         });
       },
 
+      linkAuthAccount: (authUserId) => {
+        const s = get();
+        if (s.authUserId === authUserId) return;
+        set({ authUserId });
+      },
+
+      unlinkAuthAccount: () => {
+        const s = get();
+        if (s.authUserId === null) return;
+        set({ authUserId: null });
+      },
+
       setMode: (mode) => {
         const state = get();
         set({
@@ -419,6 +446,14 @@ export const useStore = create<StoreState>()(
       setSaveVoiceTranscripts: (save) =>
         set((s) => ({
           currentUser: { ...s.currentUser, saveVoiceTranscripts: save },
+        })),
+
+      setCheckInNotificationsEnabled: (enabled) =>
+        set((s) => ({
+          currentUser: {
+            ...s.currentUser,
+            checkInNotificationsEnabled: enabled,
+          },
         })),
 
       addEvent: (e) => {
@@ -701,6 +736,7 @@ export const useStore = create<StoreState>()(
         return {
           currentUser: state.currentUser,
           mode: state.mode,
+          authUserId: state.authUserId,
           ...live,
         };
       },

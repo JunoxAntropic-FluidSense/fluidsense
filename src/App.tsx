@@ -15,6 +15,7 @@ import { DrinksPage } from "./pages/DrinksPage";
 import { DataSettingsPage } from "./pages/DataSettingsPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { TermsPage } from "./pages/TermsPage";
+import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route element={<RequireOnboarding />}>
           <Route path="/" element={<TodayPage />} />
           <Route path="/add" element={<AddPage />} />

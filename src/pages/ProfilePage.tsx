@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { useActivePatient } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
+import { SignOutButton } from "../components/auth";
 import type { Role, Units } from "../types";
 import { format } from "date-fns";
 
@@ -36,6 +38,9 @@ export function ProfilePage() {
   const updatePatient = useStore((s) => s.updatePatient);
   const setAllowance = useStore((s) => s.setAllowance);
   const updateReminder = useStore((s) => s.updateReminder);
+  const unlinkAuthAccount = useStore((s) => s.unlinkAuthAccount);
+  const authStatus = useAuthStore((s) => s.status);
+  const authUser = useAuthStore((s) => s.user);
 
   const [allowanceInput, setAllowanceInput] = useState(
     patient?.allowance ? String(patient.allowance.dailyMl) : ""
@@ -68,6 +73,31 @@ export function ProfilePage() {
           >
             Exit demo mode
           </Button>
+        </Card>
+      )}
+
+      {viewContext === "live" && (
+        <Card className="p-5">
+          <CardHeading>Account</CardHeading>
+          {authStatus === "signed-in" && authUser ? (
+            <>
+              <p className="text-sm text-fog-600 mb-3">
+                Signed in as{" "}
+                <span className="font-semibold text-navy-800">
+                  {authUser.email}
+                </span>
+                . Your data stays on this device either way — signing out only
+                stops cloud sync, it never deletes or blocks access to local
+                data.
+              </p>
+              <SignOutButton onSignOut={() => unlinkAuthAccount()} />
+            </>
+          ) : (
+            <p className="text-sm text-fog-600">
+              Not signed in. FluidSense works fully on this device without an
+              account.
+            </p>
+          )}
         </Card>
       )}
 

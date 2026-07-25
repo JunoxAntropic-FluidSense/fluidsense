@@ -4,6 +4,7 @@ import { useStore } from "../../store/useStore";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { PrototypeBanner } from "../../components/ui/PrototypeBanner";
+import { EmailPasswordForm, MagicLinkForm } from "../../components/auth";
 import type { Mode, Role, Units } from "../../types";
 
 const COMMON_TIMEZONES = [
@@ -62,6 +63,9 @@ export function OnboardingFlow() {
   const [allowanceMl, setAllowanceMl] = useState("");
   const [organisationName, setOrganisationName] = useState("");
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [signUpUseMagicLink, setSignUpUseMagicLink] = useState(false);
+  const [signUpDone, setSignUpDone] = useState(false);
 
   if (onboardingCompleted) return <Navigate to="/" replace />;
 
@@ -322,6 +326,50 @@ export function OnboardingFlow() {
                 <span className="font-semibold text-navy-800">Timezone:</span>{" "}
                 {timezone}
               </p>
+            </Card>
+            <Card className="p-5 space-y-3">
+              <button
+                type="button"
+                onClick={() => setShowSignUp((v) => !v)}
+                className="w-full text-left"
+              >
+                <p className="text-sm font-semibold text-navy-800">
+                  Create an account
+                </p>
+                <p className="text-xs text-fog-500 mt-1">
+                  FluidSense requires an account to continue. You can do this
+                  now, or skip ahead and sign in on the next screen.
+                </p>
+              </button>
+              {showSignUp && (
+                <div className="space-y-3 pt-2 border-t border-navy-900/10">
+                  {signUpDone ? (
+                    <p className="text-sm text-navy-700 font-semibold">
+                      Account created — continue below to finish setup.
+                    </p>
+                  ) : signUpUseMagicLink ? (
+                    <MagicLinkForm
+                      redirectTo={`${window.location.origin}/auth/callback`}
+                    />
+                  ) : (
+                    <EmailPasswordForm
+                      mode="sign-up"
+                      onSuccess={() => setSignUpDone(true)}
+                    />
+                  )}
+                  {!signUpDone && (
+                    <button
+                      type="button"
+                      onClick={() => setSignUpUseMagicLink((v) => !v)}
+                      className="text-xs text-fog-500 underline hover:no-underline"
+                    >
+                      {signUpUseMagicLink
+                        ? "Use a password instead"
+                        : "Use a magic link instead"}
+                    </button>
+                  )}
+                </div>
+              )}
             </Card>
             <Button fullWidth size="xl" onClick={finish}>
               Start using FluidSense

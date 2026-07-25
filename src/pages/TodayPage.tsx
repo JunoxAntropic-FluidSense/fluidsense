@@ -6,6 +6,7 @@ import { AllowanceCard } from "../components/today/AllowanceCard";
 import { QuickAddGrid } from "../components/today/QuickAddGrid";
 import { ActivityTimeline } from "../components/today/ActivityTimeline";
 import { ReminderBanner } from "../components/today/ReminderBanner";
+import { WeatherNote } from "../components/today/WeatherNote";
 import { EmptyToday } from "../components/today/EmptyToday";
 import { Button } from "../components/ui/Button";
 
@@ -44,6 +45,7 @@ export function TodayPage() {
       </Link>
 
       <ReminderBanner patient={patient} events={windowEvents} />
+      <WeatherNote />
 
       {hasAnyEvents ? (
         <BalanceCard

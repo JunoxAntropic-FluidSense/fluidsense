@@ -9,6 +9,7 @@ import { useActivePatient } from "../hooks/useFluidData";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/Badge";
+import { PhotoCaptureField } from "../components/photo/PhotoCaptureField";
 import {
   CATEGORY_LABEL,
   INTAKE_CATEGORIES,
@@ -29,6 +30,7 @@ export function VoicePage() {
   const navigate = useNavigate();
   const patient = useActivePatient();
   const addEvent = useStore((s) => s.addEvent);
+  const updateEvent = useStore((s) => s.updateEvent);
   const deleteEvent = useStore((s) => s.deleteEvent);
   const currentUser = useStore((s) => s.currentUser);
   const fluidProfiles = useStore((s) => s.fluidProfiles);
@@ -120,7 +122,7 @@ export function VoicePage() {
           "Replaced by a newer voice entry"
         );
       }
-      addEvent({
+      const created = addEvent({
         patientId: patient.id,
         direction: c.direction,
         category: c.category,
@@ -137,6 +139,27 @@ export function VoicePage() {
           ? c.originalTranscript
           : undefined,
       });
+
+      // Photo attachment is best-effort and happens only after the event is
+      // already saved — an upload failure must never block the save itself
+      // (hard rule 4: confirmation already happened via the button tap).
+      if (c.pendingPhotoAttach) {
+        c.pendingPhotoAttach(patient.id, created.id)
+          .then((result) => {
+            if (result.path && !result.error) {
+              updateEvent(
+                created.id,
+                { photoStoragePath: result.path },
+                currentUser.displayName,
+                "Photo attached via voice entry"
+              );
+            }
+          })
+          .catch(() => {
+            // Swallow — photo attach is best-effort and must not surface as
+            // a save failure for an already-confirmed event.
+          });
+      }
     }
     resetAll();
     navigate("/");
@@ -458,6 +481,21 @@ function EventCandidateCard({
           candidate={candidate}
           onChange={onChange}
           onDone={onToggleEdit}
+        />
+      )}
+
+      {!isAmbiguousDirection && candidate.direction === "intake" && (
+        <PhotoCaptureField
+          label="Add a photo of the drink"
+          onAcceptEstimate={(amountMl) =>
+            onChange({ amountMl, measurementStatus: "approximate" })
+          }
+          onAttach={(photo) =>
+            onChange({
+              pendingPhotoPreviewUrl: photo?.previewUrl,
+              pendingPhotoAttach: photo?.attach,
+            })
+          }
         />
       )}
 

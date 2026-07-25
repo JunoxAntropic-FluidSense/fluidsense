@@ -5,6 +5,7 @@ import type {
   MeasurementStatus,
   OutputCategory,
 } from "../../types";
+import type { UploadPhotoResult } from "../photo/storage";
 
 export type VoiceIntent =
   "add_event" | "request_summary" | "edit_event" | "unknown";
@@ -29,6 +30,16 @@ export interface StructuredVoiceEvent {
   duplicateOf?: FluidEvent;
   originalTranscript: string;
   clauseText: string;
+  // Transient in-memory-only photo attachment state, populated via
+  // PhotoCaptureField's onAttach on the Voice confirm screen (issue #0015).
+  // Never persisted directly into FluidEvent — confirmAll reads
+  // pendingPhotoAttach once, after addEvent() has already created and
+  // returned the event, then calls updateEvent(id, { photoStoragePath }).
+  pendingPhotoPreviewUrl?: string;
+  pendingPhotoAttach?: (
+    profileId: string,
+    eventId: string
+  ) => Promise<UploadPhotoResult>;
 }
 
 export interface VoiceParseResult {

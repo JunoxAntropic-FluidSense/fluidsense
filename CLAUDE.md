@@ -17,8 +17,11 @@ React 19 + TypeScript + Vite · Tailwind CSS v4 · React Router · Zustand (pers
 routed through `src/store/useStore.ts` as the only module that touches persistence) · Vitest.
 
 Voice: `MediaRecorder` → Supabase Edge Function → server-side STT, with the browser's built-in speech
-recognition as an automatic fallback when no server is configured. Backend (Supabase: auth, Postgres +
-RLS, the `transcribe` function) is optional — the app runs fully client-side without it.
+recognition as an automatic fallback when no server is configured.
+
+Auth (Supabase) is **required** to use the live app past onboarding — `RequireOnboarding` redirects to
+`/welcome` for sign-in if the account isn't authenticated. **Demo mode is the one exception**: it stays
+fully local, never touches Supabase, and never requires sign-in — see the demo-mode hard rule below.
 
 ## Structure
 

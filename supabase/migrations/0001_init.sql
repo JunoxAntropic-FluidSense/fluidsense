@@ -293,7 +293,9 @@ create policy "users can view their own deletion request" on public.account_dele
 -- updated_at maintenance for fluid_events.
 -- ---------------------------------------------------------------------------
 create or replace function public.set_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;

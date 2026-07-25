@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useStore } from "../../store/useStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { AppShell } from "./AppShell";
 
 export function RequireOnboarding() {
@@ -7,9 +8,22 @@ export function RequireOnboarding() {
     (s) => s.currentUser.onboardingCompleted
   );
   const viewContext = useStore((s) => s.viewContext);
+  const authStatus = useAuthStore((s) => s.status);
 
-  if (!onboardingCompleted && viewContext === "live") {
-    return <Navigate to="/welcome" replace />;
+  // Demo mode stays fully local and never requires an account.
+  if (viewContext === "live") {
+    if (!onboardingCompleted) {
+      return <Navigate to="/welcome" replace />;
+    }
+    // Auth session is still resolving (getSession() hasn't returned yet) —
+    // render nothing rather than flash a sign-in redirect that immediately
+    // reverses once the session is confirmed.
+    if (authStatus === "loading") {
+      return null;
+    }
+    if (authStatus !== "signed-in") {
+      return <Navigate to="/welcome" replace />;
+    }
   }
 
   return <AppShell />;

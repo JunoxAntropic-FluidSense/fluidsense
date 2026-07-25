@@ -3,6 +3,7 @@ import type { FluidEvent, MeasurementStatus } from "../types";
 import { useEscapeClose } from "../hooks/useEscapeClose";
 import { useStore } from "../store/useStore";
 import { Button } from "./ui/Button";
+import { PhotoThumbnail } from "./PhotoThumbnail";
 import { CATEGORY_LABEL } from "../lib/eventMeta";
 import { format } from "date-fns";
 
@@ -120,6 +121,33 @@ export function EditEventModal({
               className="mt-1 w-full rounded-xl border border-navy-900/15 px-3 py-2.5 font-normal"
             />
           </label>
+
+          {event.photoStoragePath && (
+            <div className="block text-sm font-semibold text-navy-700 space-y-2">
+              <span>Photo</span>
+              <div className="flex items-center gap-3">
+                <PhotoThumbnail
+                  path={event.photoStoragePath}
+                  size="md"
+                  alt="Attached photo for this entry"
+                />
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() =>
+                    updateEvent(
+                      event.id,
+                      { photoStoragePath: undefined },
+                      currentUser.displayName,
+                      reason || "Removed photo"
+                    )
+                  }
+                >
+                  Remove photo
+                </Button>
+              </div>
+            </div>
+          )}
 
           {event.editHistory && event.editHistory.length > 0 && (
             <div className="rounded-xl bg-fog-50 p-3 text-xs text-fog-600 space-y-1">

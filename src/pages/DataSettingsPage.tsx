@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { supabase } from "../lib/supabase";
 import { useActivePatient, useFluidData } from "../hooks/useFluidData";
 import { Card, CardHeading } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -18,12 +20,25 @@ export function DataSettingsPage() {
   const deleteAllFluidData = useStore((s) => s.deleteAllFluidData);
   const resetAccount = useStore((s) => s.resetAccount);
   const { range } = useFluidData("monitoring_day");
+  const authStatus = useAuthStore((s) => s.status);
+  const authUser = useAuthStore((s) => s.user);
 
   const [confirmStep, setConfirmStep] = useState<
-    null | "startDay" | "clearToday" | "deleteAll" | "resetAccount"
+    | null
+    | "startDay"
+    | "clearToday"
+    | "deleteAll"
+    | "resetAccount"
+    | "deleteAccount"
   >(null);
   const [deleteAllText, setDeleteAllText] = useState("");
   const [resetText, setResetText] = useState("");
+  const [deleteAccountText, setDeleteAccountText] = useState("");
+  const [deleteAccountPending, setDeleteAccountPending] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(
+    null
+  );
+  const [deleteAccountRequested, setDeleteAccountRequested] = useState(false);
 
   if (!patient) return null;
 
@@ -50,6 +65,8 @@ export function DataSettingsPage() {
     setConfirmStep(null);
     setDeleteAllText("");
     setResetText("");
+    setDeleteAccountText("");
+    setDeleteAccountError(null);
   };
 
   return (
@@ -190,14 +207,37 @@ export function DataSettingsPage() {
         </Button>
       </Card>
 
-      <Card className="p-5">
-        <CardHeading>Delete account</CardHeading>
-        <p className="text-sm text-fog-600">
-          Permanent account deletion will be available once sign-in is enabled
-          for {currentUser.displayName || "this account"}. For now, use "Reset
-          FluidSense account" above to remove all local data.
-        </p>
-      </Card>
+      {authStatus === "signed-in" ? (
+        <Card className="p-5 border-2 border-alert-100">
+          <CardHeading>Delete account</CardHeading>
+          <p className="text-sm text-fog-600 mb-3">
+            Submits a request to delete your account. This does not delete
+            anything immediately — your data stays as-is until the request is
+            processed separately, and you'll remain signed in until then.
+          </p>
+          {deleteAccountRequested ? (
+            <p className="text-sm font-semibold text-navy-700">
+              Deletion request submitted.
+            </p>
+          ) : (
+            <Button
+              variant="danger"
+              onClick={() => setConfirmStep("deleteAccount")}
+            >
+              Request account deletion
+            </Button>
+          )}
+        </Card>
+      ) : (
+        <Card className="p-5">
+          <CardHeading>Delete account</CardHeading>
+          <p className="text-sm text-fog-600">
+            Permanent account deletion will be available once sign-in is enabled
+            for {currentUser.displayName || "this account"}. For now, use "Reset
+            FluidSense account" above to remove all local data.
+          </p>
+        </Card>
+      )}
 
       {confirmStep === "startDay" && (
         <ConfirmModal
@@ -268,6 +308,41 @@ export function DataSettingsPage() {
           onCancel={closeConfirm}
         />
       )}
+
+      {confirmStep === "deleteAccount" && (
+        <ConfirmModal
+          title="Request account deletion?"
+          body={`This submits a request to delete your account. It does not delete anything immediately — your data stays as-is until the request is processed separately, and you'll remain signed in until then.${deleteAccountError ? `\n\n${deleteAccountError}` : ""} Type DELETE to confirm.`}
+          confirmLabel={
+            deleteAccountPending ? "Submitting..." : "Request deletion"
+          }
+          danger
+          requireText="DELETE"
+          textValue={deleteAccountText}
+          onTextChange={setDeleteAccountText}
+          confirmDisabled={deleteAccountPending}
+          onConfirm={() => {
+            if (!supabase || !authUser || deleteAccountPending) return;
+            setDeleteAccountPending(true);
+            setDeleteAccountError(null);
+            supabase
+              .from("account_deletion_requests")
+              .insert({ user_id: authUser.id })
+              .then(({ error }) => {
+                setDeleteAccountPending(false);
+                if (error) {
+                  setDeleteAccountError(
+                    "Couldn't submit the request. Please try again."
+                  );
+                  return;
+                }
+                setDeleteAccountRequested(true);
+                closeConfirm();
+              });
+          }}
+          onCancel={closeConfirm}
+        />
+      )}
     </div>
   );
 }
@@ -282,6 +357,7 @@ function ConfirmModal({
   requireText,
   textValue,
   onTextChange,
+  confirmDisabled,
 }: {
   title: string;
   body: string;
@@ -292,8 +368,10 @@ function ConfirmModal({
   requireText?: string;
   textValue?: string;
   onTextChange?: (v: string) => void;
+  confirmDisabled?: boolean;
 }) {
-  const locked = !!requireText && textValue !== requireText;
+  const locked =
+    (!!requireText && textValue !== requireText) || !!confirmDisabled;
   return (
     <div
       className="fixed inset-0 z-40 flex items-end md:items-center md:justify-center bg-navy-950/40"
