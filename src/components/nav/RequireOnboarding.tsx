@@ -18,6 +18,12 @@ export function RequireOnboarding() {
     if (authStatus === "loading") {
       return null;
     }
+    if (
+      authStatus === "signed-in" &&
+      !useAuthStore.getState().isProfileLoaded
+    ) {
+      return null;
+    }
     if (!onboardingCompleted) {
       return <Navigate to="/welcome" replace />;
     }

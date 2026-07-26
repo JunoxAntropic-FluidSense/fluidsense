@@ -33,6 +33,11 @@ export function TodayPage() {
   const hasAnyEvents = allEvents.some(
     (e) => !e.deleted && e.patientId === patient.id
   );
+  const checkInEvents = useStore((s) => s.checkInEvents);
+  const patientCheckInEvents = checkInEvents.filter(
+    (e) => e.patientId === patient.id
+  );
+  const hasAnyTimelineItems = hasAnyEvents || patientCheckInEvents.length > 0;
 
   return (
     <div className="space-y-4 max-w-lg md:max-w-3xl mx-auto">
@@ -70,7 +75,12 @@ export function TodayPage() {
         />
       </div>
 
-      {hasAnyEvents && <ActivityTimeline events={windowEvents} />}
+      {hasAnyTimelineItems && (
+        <ActivityTimeline
+          fluidEvents={windowEvents}
+          checkInEvents={patientCheckInEvents}
+        />
+      )}
     </div>
   );
 }

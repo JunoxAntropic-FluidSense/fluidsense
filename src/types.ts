@@ -162,6 +162,15 @@ export interface FluidEvent {
   verifiedAt?: string; // ISO
 }
 
+export interface CheckInEvent {
+  id: string;
+  patientId: string;
+  type: "check_in" | "check_out";
+  clinicianId: string;
+  clinicianName: string;
+  timestamp: string; // ISO
+}
+
 export interface EditRecord {
   time: string;
   field: string;

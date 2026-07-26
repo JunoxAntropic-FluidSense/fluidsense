@@ -14,17 +14,22 @@ interface AuthState {
   session: Session | null;
   user: User | null;
   status: AuthStatus;
+  isProfileLoaded: boolean;
   setSession: (session: Session | null) => void;
+  setProfileLoaded: (loaded: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()((set) => ({
   session: null,
   user: null,
   status: "loading",
+  isProfileLoaded: false,
   setSession: (session) =>
     set({
       session,
       user: session?.user ?? null,
       status: session ? "signed-in" : "signed-out",
+      isProfileLoaded: session ? false : true, // If signed out, profile is loaded (empty). If signed in, we wait for pullUserRow.
     }),
+  setProfileLoaded: (isProfileLoaded) => set({ isProfileLoaded }),
 }));

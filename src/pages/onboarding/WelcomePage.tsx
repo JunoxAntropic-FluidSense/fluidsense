@@ -30,6 +30,9 @@ export function WelcomePage() {
   if (viewContext === "demo") return <Navigate to="/" replace />;
   if (authStatus === "loading") return null;
   if (authStatus === "signed-in") {
+    if (!useAuthStore.getState().isProfileLoaded) {
+      return null;
+    }
     const target = onboardingCompleted
       ? mode === "healthcare"
         ? "/dashboard"

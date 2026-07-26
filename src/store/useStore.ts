@@ -22,6 +22,7 @@ import type {
   Sex,
   ClinicalNote,
   VerificationStatus,
+  CheckInEvent,
 } from "../types";
 import { generateDemoData } from "../lib/demoData";
 import {
@@ -47,6 +48,7 @@ interface LiveSnapshot {
   dialysisAppointments: DialysisAppointmentEvent[];
   monitoringPeriods: MonitoringPeriod[];
   clinicalNotes: ClinicalNote[];
+  checkInEvents: CheckInEvent[];
   activePatientId: string;
 }
 
@@ -63,6 +65,7 @@ interface StoreState {
   dialysisAppointments: DialysisAppointmentEvent[];
   monitoringPeriods: MonitoringPeriod[];
   clinicalNotes: ClinicalNote[];
+  checkInEvents: CheckInEvent[];
 
   viewContext: "live" | "demo";
   _liveCache: LiveSnapshot | null;
@@ -129,6 +132,9 @@ interface StoreState {
   addClinicalNote: (
     note: Omit<ClinicalNote, "id" | "time"> & { time?: string }
   ) => ClinicalNote;
+  addCheckInEvent: (
+    event: Omit<CheckInEvent, "id" | "timestamp"> & { timestamp?: string }
+  ) => CheckInEvent;
 
   // --- fluid profiles & containers -----------------------------------------------
   addFluidProfile: (fp: Omit<FluidProfile, "id">) => FluidProfile;
@@ -201,6 +207,7 @@ const emptyLiveSnapshot: LiveSnapshot = {
   dialysisAppointments: [],
   monitoringPeriods: [],
   clinicalNotes: [],
+  checkInEvents: [],
   activePatientId: "",
 };
 
@@ -332,6 +339,7 @@ export const useStore = create<StoreState>()(
       dialysisAppointments: [],
       monitoringPeriods: [],
       clinicalNotes: [],
+      checkInEvents: [],
 
       viewContext: "live",
       _liveCache: null,
@@ -448,6 +456,7 @@ export const useStore = create<StoreState>()(
           symptomEvents: [],
           medicationEvents: [],
           dialysisAppointments: [],
+          checkInEvents: [],
         }),
 
       enterDemoMode: () => {
@@ -455,6 +464,41 @@ export const useStore = create<StoreState>()(
         const s = get();
         if (s.viewContext === "demo") return;
         const demo = generateDemoData(new Date());
+        const demoCheckInEvents: CheckInEvent[] =
+          demo.patients.length >= 2
+            ? [
+                {
+                  id: "demo-chk-1",
+                  patientId: demo.patients[0].id,
+                  type: "check_in",
+                  clinicianId: "demo-nurse-1",
+                  clinicianName: "Nurse J. Patel",
+                  timestamp: new Date(
+                    Date.now() - 4 * 60 * 60 * 1000
+                  ).toISOString(),
+                },
+                {
+                  id: "demo-chk-2",
+                  patientId: demo.patients[0].id,
+                  type: "check_out",
+                  clinicianId: "demo-nurse-1",
+                  clinicianName: "Nurse J. Patel",
+                  timestamp: new Date(
+                    Date.now() - 2 * 60 * 60 * 1000
+                  ).toISOString(),
+                },
+                {
+                  id: "demo-chk-3",
+                  patientId: demo.patients[1].id,
+                  type: "check_in",
+                  clinicianId: "demo-nurse-2",
+                  clinicianName: "Staff Nurse Sarah",
+                  timestamp: new Date(
+                    Date.now() - 6 * 60 * 60 * 1000
+                  ).toISOString(),
+                },
+              ]
+            : [];
         set({
           viewContext: "demo",
           _liveCache: {
@@ -467,6 +511,7 @@ export const useStore = create<StoreState>()(
             dialysisAppointments: s.dialysisAppointments,
             monitoringPeriods: s.monitoringPeriods,
             clinicalNotes: s.clinicalNotes,
+            checkInEvents: s.checkInEvents,
             activePatientId: s.activePatientId,
           },
           patients: demo.patients,
@@ -478,6 +523,7 @@ export const useStore = create<StoreState>()(
           dialysisAppointments: [],
           monitoringPeriods: demo.monitoringPeriods,
           clinicalNotes: [],
+          checkInEvents: demoCheckInEvents,
           activePatientId: demo.patients[demo.patients.length - 1].id,
           mode: "patient",
         });
@@ -649,6 +695,16 @@ export const useStore = create<StoreState>()(
         };
         set((s) => ({ clinicalNotes: [note, ...s.clinicalNotes] }));
         return note;
+      },
+
+      addCheckInEvent: (e) => {
+        const event: CheckInEvent = {
+          ...e,
+          id: uuid(),
+          timestamp: e.timestamp ?? new Date().toISOString(),
+        };
+        set((s) => ({ checkInEvents: [event, ...s.checkInEvents] }));
+        return event;
       },
 
       addFluidProfile: (fp) => {

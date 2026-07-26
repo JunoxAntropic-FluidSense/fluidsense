@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Gauge, Flask, UserCircle, SidebarSimple } from "@phosphor-icons/react";
+import {
+  Gauge,
+  Drop,
+  User,
+  SidebarSimple,
+  Database,
+} from "@phosphor-icons/react";
 import { NAV_ITEMS } from "./navConfig";
 import { useStore } from "../../store/useStore";
 import { BrandLogo } from "../ui/BrandLogo";
@@ -84,11 +90,15 @@ export function Sidebar() {
     >
       <div
         className={cn(
-          "flex items-center gap-2 pb-5",
-          collapsed ? "px-3 justify-center" : "px-6 justify-between"
+          "flex items-center pb-5",
+          collapsed
+            ? "px-3 flex-col gap-4 justify-center"
+            : "px-6 justify-between gap-2"
         )}
       >
-        {!collapsed && (
+        {collapsed ? (
+          <BrandLogo size="md" showText={false} />
+        ) : (
           <BrandLogo
             size="md"
             subtitle={
@@ -104,9 +114,13 @@ export function Sidebar() {
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-pressed={collapsed}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-fog-500 hover:bg-fog-50 hover:text-navy-700"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-fog-500 hover:bg-fog-50 hover:text-navy-700 transition-colors"
         >
-          <SidebarSimple size={20} aria-hidden="true" />
+          <SidebarSimple
+            size={20}
+            aria-hidden="true"
+            className={cn(collapsed && "rotate-180")}
+          />
         </button>
       </div>
 
@@ -123,8 +137,14 @@ export function Sidebar() {
               />
               <SidebarLink
                 to="/drinks"
-                icon={Flask}
+                icon={Drop}
                 label="Patient fluid library"
+                collapsed={collapsed}
+              />
+              <SidebarLink
+                to="/epic-sandbox"
+                icon={Database}
+                label="Epic sandbox data"
                 collapsed={collapsed}
               />
             </div>
@@ -155,7 +175,7 @@ export function Sidebar() {
       <div className="px-3 pt-3 border-t border-navy-900/10">
         <SidebarLink
           to="/profile"
-          icon={UserCircle}
+          icon={User}
           label="Account"
           collapsed={collapsed}
         />

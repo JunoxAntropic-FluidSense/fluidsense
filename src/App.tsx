@@ -17,11 +17,14 @@ import { DataSettingsPage } from "./pages/DataSettingsPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { TermsPage } from "./pages/TermsPage";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
+import { EpicSandboxPage } from "./pages/EpicSandboxPage";
+import { LandingPage } from "./pages/LandingPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/onboarding" element={<OnboardingFlow />} />
         <Route path="/privacy" element={<PrivacyPage />} />
@@ -40,6 +43,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/drinks" element={<DrinksPage />} />
           <Route path="/care-log" element={<CareLogPage />} />
+          <Route path="/epic-sandbox" element={<EpicSandboxPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

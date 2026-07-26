@@ -91,7 +91,10 @@ import type { Role, Mode } from "../../types";
  * Restores onboardingCompleted, displayName, role, mode, timezone, and workspace organisation.
  */
 export async function pullUserRow(authUserId: string): Promise<void> {
-  if (!canSyncNow()) return;
+  if (!canSyncNow()) {
+    useAuthStore.getState().setProfileLoaded(true);
+    return;
+  }
   // Guard against switching accounts without an intervening "signed-out"
   // event — e.g. signing in on /welcome while already signed in as someone
   // else, which is reachable since /welcome isn't gated by RequireOnboarding.
@@ -160,6 +163,8 @@ export async function pullUserRow(authUserId: string): Promise<void> {
     }
   } catch {
     // Best-effort only — swallow errors
+  } finally {
+    useAuthStore.getState().setProfileLoaded(true);
   }
 }
 

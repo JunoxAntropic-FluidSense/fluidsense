@@ -136,11 +136,11 @@ export function VoiceFab() {
         <button
           onClick={handleOpen}
           aria-label="Speak an entry"
-          className="fixed bottom-20 right-5 md:bottom-8 md:right-8 z-40 flex items-center gap-2.5 bg-navy-900 text-white px-4.5 py-3.5 rounded-full shadow-xl hover:bg-navy-800 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer border border-white/20"
+          className="fixed bottom-20 right-5 md:bottom-8 md:right-8 z-40 flex items-center gap-2.5 bg-fern-500 text-white px-4.5 py-3.5 rounded-full shadow-xl hover:bg-fern-600 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer border border-white/20"
         >
           <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-intake-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-intake-400"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fern-100 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-fern-100"></span>
           </span>
           <Microphone
             size={22}
@@ -257,7 +257,7 @@ export function VoiceFab() {
             {capture.status === "listening" ? (
               <button
                 onClick={handleStopAndSave}
-                className="flex-1 bg-navy-900 hover:bg-navy-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                className="flex-1 bg-fern-500 hover:bg-fern-600 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
                 Save Entry
               </button>

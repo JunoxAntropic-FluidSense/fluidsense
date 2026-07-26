@@ -1,11 +1,11 @@
 import type { Icon } from "@phosphor-icons/react";
 import {
-  HouseLine,
-  PlusCircle,
+  Calendar,
+  Plus,
   Microphone,
-  ClockCounterClockwise,
-  ChartBar,
-  UserCircle,
+  Clock,
+  Pulse,
+  User,
 } from "@phosphor-icons/react";
 
 export interface NavItem {
@@ -15,10 +15,10 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Today", icon: HouseLine },
-  { to: "/add", label: "Add", icon: PlusCircle },
+  { to: "/", label: "Today", icon: Calendar },
+  { to: "/add", label: "Add", icon: Plus },
   { to: "/voice", label: "Voice", icon: Microphone },
-  { to: "/history", label: "History", icon: ClockCounterClockwise },
-  { to: "/summary", label: "Summary", icon: ChartBar },
-  { to: "/profile", label: "Profile", icon: UserCircle },
+  { to: "/history", label: "History", icon: Clock },
+  { to: "/summary", label: "Summary", icon: Pulse },
+  { to: "/profile", label: "Profile", icon: User },
 ];

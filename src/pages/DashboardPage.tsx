@@ -66,6 +66,7 @@ export function DashboardPage() {
   const setAllowance = useStore((s) => s.setAllowance);
   const viewContext = useStore((s) => s.viewContext);
   const currentUser = useStore((s) => s.currentUser);
+  const addCheckInEvent = useStore((s) => s.addCheckInEvent);
   const [sortKey, setSortKey] = useState<SortKey>("reliability");
   const [showAddPatient, setShowAddPatient] = useState(false);
   const [newName, setNewName] = useState("");
@@ -443,13 +444,20 @@ export function DashboardPage() {
                     <Button
                       size="md"
                       variant="secondary"
-                      onClick={() =>
+                      onClick={() => {
                         updatePatient(patient.id, {
                           assignedClinicianId: undefined,
                           assignedClinicianName: undefined,
                           assignedAt: undefined,
-                        })
-                      }
+                        });
+                        addCheckInEvent({
+                          patientId: patient.id,
+                          type: "check_out",
+                          clinicianId: currentUser.id,
+                          clinicianName:
+                            currentUser.displayName || "Staff member",
+                        });
+                      }}
                     >
                       Check out
                     </Button>
@@ -465,14 +473,22 @@ export function DashboardPage() {
                     size="md"
                     variant="secondary"
                     fullWidth
-                    onClick={() =>
+                    onClick={() => {
+                      const nowIso = new Date().toISOString();
                       updatePatient(patient.id, {
                         assignedClinicianId: currentUser.id,
                         assignedClinicianName:
                           currentUser.displayName || "Team member",
-                        assignedAt: new Date().toISOString(),
-                      })
-                    }
+                        assignedAt: nowIso,
+                      });
+                      addCheckInEvent({
+                        patientId: patient.id,
+                        type: "check_in",
+                        clinicianId: currentUser.id,
+                        clinicianName: currentUser.displayName || "Team member",
+                        timestamp: nowIso,
+                      });
+                    }}
                   >
                     Check in
                   </Button>

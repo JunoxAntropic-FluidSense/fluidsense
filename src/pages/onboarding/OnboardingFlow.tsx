@@ -144,6 +144,34 @@ export function OnboardingFlow() {
     };
   }, [accountMode, authUser, role]);
 
+  useEffect(() => {
+    if (!authUser) return;
+    const meta = authUser.user_metadata || {};
+    const metaInviteCode = meta.clinicInviteCode || meta.invite_code;
+    const metaOrgName = meta.organisationName;
+    const isColleague = meta.inviteType === "colleague";
+
+    if (metaInviteCode && !joinedOrgId && !joiningClinic) {
+      setJoiningClinic(true);
+      redeemOrganisationInvite(metaInviteCode).then((result) => {
+        setJoiningClinic(false);
+        if (result.organisationId) {
+          setJoinedOrgId(result.organisationId);
+          if (metaOrgName) setJoinedOrgName(metaOrgName);
+          if (isColleague) {
+            setAccountMode("healthcare");
+            setRole("nurse");
+            setStep(2);
+          } else {
+            setAccountMode("patient");
+            setRole("patient");
+            setStep(2);
+          }
+        }
+      });
+    }
+  }, [authUser, joinedOrgId, joiningClinic]);
+
   // Patient/carer accounts always get a profile from completeOnboarding —
   // onboardingCompleted true with zero patients means a previous
   // account's stale local state (same browser, different login), not a
