@@ -89,6 +89,9 @@ export function OnboardingFlow() {
   );
   const currentMode = useStore((s) => s.mode);
   const hasAnyPatient = useStore((s) => s.patients.length > 0);
+  const hasOrganisation = useStore((s) =>
+    Boolean(s.currentUser.organisationId)
+  );
   const completeOnboarding = useStore((s) => s.completeOnboarding);
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
@@ -191,7 +194,12 @@ export function OnboardingFlow() {
   // account's stale local state (same browser, different login), not a
   // real "done" state. Let this run again rather than bouncing to "/"
   // and back here forever (TodayPage redirects here on the same check).
-  if (onboardingCompleted && (currentMode === "healthcare" || hasAnyPatient)) {
+  // Healthcare accounts don't get a patient profile at all — a workspace
+  // (organisationId) is their equivalent "this is real, not stale" signal,
+  // not patient count, which is always zero for them regardless.
+  const hasCompletedForMode =
+    currentMode === "healthcare" ? hasOrganisation : hasAnyPatient;
+  if (onboardingCompleted && hasCompletedForMode) {
     return <Navigate to="/" replace />;
   }
 
