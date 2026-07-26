@@ -93,6 +93,7 @@ export function OnboardingFlow() {
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
   const authUser = useAuthStore((s) => s.user);
+  const isProfileLoaded = useAuthStore((s) => s.isProfileLoaded);
   const setCheckInNotificationsEnabled = useStore(
     (s) => s.setCheckInNotificationsEnabled
   );
@@ -172,6 +173,19 @@ export function OnboardingFlow() {
     }
   }, [authUser, joinedOrgId, joiningClinic]);
 
+  if (authStatus === "loading") return null;
+  if (authStatus !== "signed-in") return <Navigate to="/welcome" replace />;
+  // The real onboardingCompleted value only exists once pullUserRow's
+  // server restore has landed (see accountSync.ts) — before that,
+  // onboardingCompleted is still whatever resetAccount() left it (false).
+  // Deciding the redirect below on that stale value is exactly what made
+  // an already-onboarded account flash the onboarding wizard on every
+  // sign-in: this render would see onboardingCompleted=false, show the
+  // form, then only redirect away once the real value arrived a moment
+  // later. Wait for the real value first, same guard WelcomePage already
+  // uses for the identical race.
+  if (!isProfileLoaded) return null;
+
   // Patient/carer accounts always get a profile from completeOnboarding —
   // onboardingCompleted true with zero patients means a previous
   // account's stale local state (same browser, different login), not a
@@ -180,8 +194,6 @@ export function OnboardingFlow() {
   if (onboardingCompleted && (currentMode === "healthcare" || hasAnyPatient)) {
     return <Navigate to="/" replace />;
   }
-  if (authStatus === "loading") return null;
-  if (authStatus !== "signed-in") return <Navigate to="/welcome" replace />;
 
   const tzOptions = timezoneOptions(detectedTz);
   const isPatient = accountMode === "patient";

@@ -20,6 +20,7 @@ export function WelcomePage() {
   const viewContext = useStore((s) => s.viewContext);
   const enterDemoMode = useStore((s) => s.enterDemoMode);
   const authStatus = useAuthStore((s) => s.status);
+  const isProfileLoaded = useAuthStore((s) => s.isProfileLoaded);
   const [authPanel, setAuthPanel] = useState<"sign-up" | "sign-in" | null>(
     null
   );
@@ -30,7 +31,7 @@ export function WelcomePage() {
   if (viewContext === "demo") return <Navigate to="/" replace />;
   if (authStatus === "loading") return null;
   if (authStatus === "signed-in") {
-    if (!useAuthStore.getState().isProfileLoaded) {
+    if (!isProfileLoaded) {
       return null;
     }
     const target = onboardingCompleted

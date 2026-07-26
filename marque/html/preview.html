@@ -1,0 +1,2060 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Marque — Editorial Brand Handbook</title>
+    <link rel="stylesheet" href="../css/system.css" />
+    <style>
+      :root {
+        --edge: 56px;
+        --rule: 1px solid var(--color-hairline);
+      }
+
+      body {
+        background: var(--color-paper);
+        background-image:
+          radial-gradient(
+            1200px 600px at 92% -10%,
+            rgba(139, 114, 240, 0.07) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 500px at -10% 30%,
+            rgba(71, 39, 181, 0.05) 0%,
+            transparent 65%
+          );
+      }
+
+      /* Frame & topbar -------------------------------------------- */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(250, 250, 252, 0.85);
+        backdrop-filter: saturate(160%) blur(12px);
+        -webkit-backdrop-filter: saturate(160%) blur(12px);
+        border-bottom: var(--rule);
+      }
+      .topbar__inner {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: 18px var(--edge);
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: var(--space-7);
+      }
+      .topbar__meta {
+        display: flex;
+        gap: var(--space-7);
+        justify-content: center;
+        align-items: center;
+      }
+      .topbar__meta .label {
+        font-size: 11px;
+      }
+      .topbar .nav__links {
+        gap: var(--space-7);
+      }
+      .topbar__cta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      /* Hero ------------------------------------------------------ */
+      .opening {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-10) var(--edge) var(--space-11);
+      }
+      .opening__inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        gap: var(--space-9);
+        align-items: end;
+      }
+      .opening__main {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-7);
+      }
+      .opening__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(64px, 7.6vw, 128px);
+        line-height: 0.92;
+        letter-spacing: -0.035em;
+        color: var(--color-ink);
+        margin: 0;
+        max-width: 12ch;
+      }
+      .opening__title em {
+        font-style: normal;
+        color: var(--color-indigo);
+        font-weight: 800;
+      }
+      .opening__lead {
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        max-width: 50ch;
+        margin: 0;
+      }
+      .opening__cta {
+        display: flex;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+      .opening__visual {
+        position: relative;
+        margin: 0;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        aspect-ratio: 4 / 5;
+        background: var(--color-veil);
+        border: 1px solid var(--color-hairline);
+      }
+      .opening__visual img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .opening__visual::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          transparent 55%,
+          rgba(20, 12, 50, 0.55)
+        );
+        pointer-events: none;
+      }
+      .opening__caption {
+        position: absolute;
+        left: 22px;
+        bottom: 22px;
+        right: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-3);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.92);
+        z-index: 2;
+      }
+      .opening__caption .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: var(--color-halo);
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+      .opening__strip {
+        margin-top: var(--space-10);
+        padding-top: var(--space-7);
+        border-top: var(--rule);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-7);
+      }
+      .opening__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .opening__stat b {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 56px;
+        line-height: 1;
+        letter-spacing: -0.028em;
+        color: var(--color-ink);
+      }
+      .opening__stat b em {
+        font-style: normal;
+        font-size: 22px;
+        color: var(--color-indigo);
+        margin-left: 4px;
+      }
+      .opening__stat span {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+      }
+
+      /* Big stripe / chapter rule --------------------------------- */
+      .chapter {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 0 var(--edge);
+      }
+      .chapter__rule {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: var(--space-6);
+        padding-block: var(--space-6);
+        border-top: var(--rule);
+        border-bottom: var(--rule);
+        color: var(--color-whisper);
+      }
+      .chapter__rule .label {
+        font-size: 12px;
+      }
+      .chapter__rule .marker {
+        font-family: var(--font-display);
+        font-weight: 800;
+        color: var(--color-ink);
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+
+      /* Photo gallery / spread ------------------------------------ */
+      .spread {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-11) var(--edge);
+      }
+      .spread__head {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-9);
+        align-items: end;
+        padding-bottom: var(--space-9);
+      }
+      .spread__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(48px, 5.5vw, 84px);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .spread__title .accent {
+        color: var(--color-indigo);
+      }
+      .spread__sub {
+        color: var(--color-ink-soft);
+        max-width: 44ch;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      .spread__grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--space-6);
+      }
+      .photo {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        background: var(--color-veil);
+        border: 1px solid rgba(71, 39, 181, 0.08);
+      }
+      .photo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .photo__caption {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: var(--space-3);
+        color: var(--color-white);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-shadow: 0 1px 6px rgba(20, 12, 50, 0.4);
+      }
+      .photo__caption span {
+        background: rgba(20, 12, 50, 0.36);
+        backdrop-filter: blur(8px);
+        padding: 6px 10px;
+        border-radius: var(--radius-pill);
+      }
+      .photo--tall {
+        grid-column: span 4;
+        aspect-ratio: 3 / 4;
+      }
+      .photo--wide {
+        grid-column: span 8;
+        aspect-ratio: 4 / 3;
+      }
+      .photo--mid {
+        grid-column: span 6;
+        aspect-ratio: 4 / 3;
+      }
+      .photo-card {
+        grid-column: span 6;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        background: var(--color-paper);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-hairline);
+        overflow: hidden;
+      }
+      .photo-card__body {
+        padding: var(--space-7);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+      .photo-card__tag {
+        align-self: flex-start;
+      }
+
+      /* Royal hero ------------------------------------------------ */
+      .royal {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding-inline: var(--edge);
+      }
+      .royal__inner {
+        background: var(--color-royal);
+        color: var(--color-white);
+        border-radius: var(--radius-3xl);
+        padding: 96px 80px;
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+        gap: var(--space-9);
+        align-items: end;
+        isolation: isolate;
+      }
+      .royal__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(64px, 7.4vw, 116px);
+        line-height: 0.94;
+        letter-spacing: -0.03em;
+        color: var(--color-white);
+        margin: 0;
+        position: relative;
+        z-index: 2;
+        max-width: 11ch;
+      }
+      .royal__body {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        padding-bottom: 6px;
+      }
+      .royal__body .lead {
+        color: rgba(255, 255, 255, 0.82);
+        max-width: 42ch;
+        font-size: 17px;
+        line-height: 1.6;
+      }
+      .royal__cta {
+        display: flex;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+      .royal__stats {
+        position: relative;
+        z-index: 2;
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-7);
+        padding-top: var(--space-9);
+        border-top: 1px solid rgba(255, 255, 255, 0.16);
+        margin-top: var(--space-7);
+      }
+      .royal__stats .stat__value {
+        color: var(--color-white);
+        font-size: 56px;
+      }
+      .royal__stats .stat__label {
+        color: rgba(255, 255, 255, 0.62);
+      }
+      .royal__orb {
+        position: absolute;
+        right: -120px;
+        top: -90px;
+        width: 620px;
+        height: 620px;
+        color: rgba(255, 255, 255, 0.07);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .royal__orb svg {
+        width: 100%;
+        height: 100%;
+      }
+      .royal__stripes {
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 120px;
+        background: repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.07) 0 2px,
+          transparent 2px 12px
+        );
+        pointer-events: none;
+        opacity: 0.7;
+        mask: linear-gradient(180deg, transparent, black);
+        -webkit-mask: linear-gradient(180deg, transparent, black);
+      }
+      .royal__brand {
+        position: absolute;
+        top: 40px;
+        left: 80px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255, 255, 255, 0.78);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        z-index: 2;
+      }
+      .royal__brand .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--color-halo);
+        border-radius: 50%;
+      }
+
+      /* Type specimen --------------------------------------------- */
+      .type-specimen {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-11) var(--edge);
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: var(--space-9);
+        align-items: start;
+      }
+      .type-side {
+        position: sticky;
+        top: 96px;
+        align-self: start;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+      }
+      .type-side h2 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(40px, 4.4vw, 68px);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .type-side .lead {
+        color: var(--color-ink-soft);
+        max-width: 36ch;
+      }
+      .type-rows {
+        display: grid;
+        gap: 0;
+        border-top: var(--rule);
+      }
+      .type-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 80px;
+        align-items: baseline;
+        gap: var(--space-5);
+        padding: var(--space-6) 0;
+        border-bottom: var(--rule);
+      }
+      .type-row__meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        line-height: 1.45;
+      }
+      .type-row__meta b {
+        display: block;
+        color: var(--color-ink);
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .type-row__sample {
+        font-family: var(--font-display);
+        font-weight: 800;
+        color: var(--color-ink);
+        letter-spacing: -0.025em;
+        line-height: 0.95;
+      }
+      .type-row__size {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-whisper);
+        text-align: right;
+      }
+      .type-row--xxl .type-row__sample {
+        font-size: 96px;
+      }
+      .type-row--xl .type-row__sample {
+        font-size: 64px;
+      }
+      .type-row--lg .type-row__sample {
+        font-size: 44px;
+      }
+      .type-row--md .type-row__sample {
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .type-row--body .type-row__sample {
+        font-family: var(--font-body);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.55;
+        max-width: 56ch;
+      }
+      .type-row--mono .type-row__sample {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        letter-spacing: 0.04em;
+        font-weight: 500;
+        line-height: 1.5;
+        text-transform: none;
+      }
+
+      /* Color system + palette ------------------------------------ */
+      .palette-block {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-11) var(--edge);
+      }
+      .palette-head {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-9);
+        align-items: end;
+        padding-bottom: var(--space-8);
+      }
+      .palette-head h2 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(48px, 5.5vw, 80px);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0;
+      }
+      .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-6);
+      }
+      .swatch--lg .swatch__chip {
+        height: 160px;
+      }
+      .swatch--lg {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-hairline);
+        background: var(--color-paper);
+        display: grid;
+        grid-template-rows: 1fr auto;
+        overflow: hidden;
+      }
+      .swatch--lg .swatch__chip {
+        position: relative;
+      }
+      .swatch--lg .swatch__chip::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+      }
+      .swatch--lg .swatch__meta {
+        padding: var(--space-5) var(--space-5) var(--space-5);
+        gap: 6px;
+      }
+      .swatch__name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-ink);
+      }
+      .swatch__role {
+        font-size: 12px;
+        color: var(--color-whisper);
+        line-height: 1.45;
+        max-width: 24ch;
+      }
+      .swatch__value {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        color: var(--color-whisper);
+      }
+
+      /* Components workshop --------------------------------------- */
+      .workshop {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-11) var(--edge);
+      }
+      .workshop__head {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-9);
+        align-items: end;
+        padding-bottom: var(--space-8);
+      }
+      .workshop__head h2 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(48px, 5.5vw, 80px);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0;
+      }
+      .workshop__grid {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-6);
+      }
+      .spec-card {
+        background: var(--color-paper);
+        border: var(--rule);
+        border-radius: var(--radius-lg);
+        padding: var(--space-7);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        position: relative;
+      }
+      .spec-card--veil {
+        background: var(--color-veil);
+        border-color: rgba(71, 39, 181, 0.1);
+      }
+      .spec-card__title {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .spec-card__title b {
+        color: var(--color-ink);
+        font-weight: 600;
+      }
+      .spec-card__heading {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 32px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .spec-card__sub {
+        color: var(--color-ink-soft);
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 42ch;
+      }
+      .spec-card__row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        align-items: center;
+      }
+
+      /* Checkout / form ------------------------------------------- */
+      .product-card {
+        grid-column: span 7;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        background: var(--color-paper);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--color-hairline);
+        box-shadow: var(--shadow-card);
+      }
+      .product-card__photo {
+        background: var(--color-veil);
+        position: relative;
+        overflow: hidden;
+        min-height: 540px;
+      }
+      .product-card__photo img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .product-card__photo .badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+      }
+      .product-card__body {
+        padding: var(--space-7);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+      }
+      .product-card__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 34px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .product-card__price {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+      }
+      .product-card__price .now {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 28px;
+        color: var(--color-indigo);
+      }
+      .product-card__price .was {
+        text-decoration: line-through;
+        color: var(--color-whisper);
+        font-family: var(--font-mono);
+        font-size: 14px;
+      }
+      .product-card__row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+      .swatches-mini {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .swatch-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        position: relative;
+      }
+      .swatch-dot::after {
+        content: "";
+        position: absolute;
+        inset: 2px;
+        border-radius: 50%;
+        background: var(--c, var(--color-indigo));
+      }
+      .swatch-dot[aria-checked="true"] {
+        border-color: var(--color-indigo);
+      }
+      .product-card__cta {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: auto;
+      }
+      .product-card__cta .btn {
+        flex: 1;
+        justify-content: center;
+      }
+      .product-card__notes {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px 12px;
+        padding-top: var(--space-5);
+        border-top: var(--rule);
+        align-items: start;
+      }
+      .product-card__notes .icon {
+        color: var(--color-indigo);
+        margin-top: 2px;
+      }
+      .product-card__notes .note-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-ink);
+      }
+      .product-card__notes .note-sub {
+        font-size: 12px;
+        color: var(--color-whisper);
+        grid-column: 2;
+      }
+
+      /* Right column stacks --------------------------------------- */
+      .ws-right {
+        grid-column: span 5;
+        display: grid;
+        gap: var(--space-6);
+      }
+
+      /* Input field group ----------------------------------------- */
+      .form-card {
+        display: grid;
+        gap: var(--space-5);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+      }
+      .input-with-icon {
+        position: relative;
+      }
+      .input-with-icon .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-whisper);
+      }
+      .input-with-icon .input {
+        padding-left: 42px;
+      }
+
+      /* Tabs panel ------------------------------------------------ */
+      .tab-panel {
+        display: grid;
+        gap: var(--space-4);
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .data-table th,
+      .data-table td {
+        text-align: left;
+        padding: 14px 4px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--color-hairline);
+      }
+      .data-table th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        font-weight: 500;
+        padding-bottom: 10px;
+      }
+      .data-table td .row {
+        gap: 10px;
+      }
+      .data-table .avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--color-veil);
+        display: inline-grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--color-indigo);
+      }
+      .data-table .pillstat {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: var(--radius-pill);
+        background: var(--color-veil);
+        color: var(--color-indigo);
+      }
+      .data-table .pillstat.is-warn {
+        background: #fbe9e5;
+        color: var(--color-warn);
+      }
+      .data-table .pillstat.is-ok {
+        background: #ddeee3;
+        color: var(--color-success);
+      }
+
+      /* Photography wide -------------------------------- */
+      .editorial-row {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: 0 var(--edge) var(--space-11);
+      }
+      .editorial-row__grid {
+        display: grid;
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-7);
+        align-items: stretch;
+      }
+      .principle {
+        background: var(--color-veil);
+        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        position: relative;
+        overflow: hidden;
+      }
+      .principle__num {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 18px;
+        color: var(--color-indigo);
+        letter-spacing: 0.1em;
+      }
+      .principle__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 40px;
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin: 0;
+        color: var(--color-ink);
+        max-width: 14ch;
+      }
+      .principle__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: var(--space-3);
+      }
+      .principle__list li {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 12px;
+        align-items: start;
+        font-size: 14px;
+        color: var(--color-ink-soft);
+        line-height: 1.55;
+      }
+      .principle__list .icon {
+        color: var(--color-indigo);
+        margin-top: 2px;
+      }
+
+      .signature-card {
+        background: var(--color-paper);
+        border: var(--rule);
+        border-radius: var(--radius-lg);
+        padding: var(--space-8);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+        position: relative;
+        overflow: hidden;
+      }
+      .signature-card .mark {
+        width: 96px;
+        height: 96px;
+        color: var(--color-indigo);
+      }
+      .signature-card h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 36px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin: 0;
+        color: var(--color-ink);
+        max-width: 16ch;
+      }
+      .signature-card p {
+        margin: 0;
+        font-size: 15px;
+        color: var(--color-ink-soft);
+        line-height: 1.6;
+      }
+
+      /* Index / footer -------------------------------------------- */
+      .index-band {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-10) var(--edge);
+        border-top: var(--rule);
+        display: grid;
+        grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+        gap: var(--space-9);
+        align-items: end;
+      }
+      .index-band h2 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(56px, 6vw, 88px);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .index-list {
+        display: grid;
+        gap: 6px;
+        font-family: var(--font-display);
+        font-weight: 700;
+      }
+      .index-list li {
+        display: grid;
+        grid-template-columns: 64px 1fr auto;
+        align-items: baseline;
+        padding: 14px 0;
+        border-top: var(--rule);
+        font-size: 22px;
+        color: var(--color-ink);
+        gap: var(--space-5);
+      }
+      .index-list li:last-child {
+        border-bottom: var(--rule);
+      }
+      .index-list .idx-num {
+        font-family: var(--font-mono);
+        font-weight: 500;
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        color: var(--color-whisper);
+      }
+      .index-list .idx-meta {
+        font-family: var(--font-mono);
+        font-weight: 500;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        color: var(--color-whisper);
+      }
+
+      .colophon {
+        background: var(--color-ink);
+        color: var(--color-white);
+      }
+      .colophon__inner {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-11) var(--edge) var(--space-9);
+        display: grid;
+        grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+        gap: var(--space-9);
+        align-items: end;
+      }
+      .colophon__title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(72px, 8vw, 140px);
+        line-height: 0.94;
+        letter-spacing: -0.03em;
+        margin: 0;
+        color: var(--color-white);
+      }
+      .colophon__title em {
+        font-style: normal;
+        color: var(--color-halo);
+      }
+      .colophon__col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-7);
+      }
+      .colophon__col .label {
+        color: rgba(255, 255, 255, 0.55);
+        margin-bottom: var(--space-3);
+        display: block;
+      }
+      .colophon__col a {
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 14px;
+        display: block;
+        padding: 6px 0;
+      }
+      .colophon__col a:hover {
+        color: var(--color-halo);
+      }
+      .colophon__base {
+        max-width: 1320px;
+        margin-inline: auto;
+        padding: var(--space-6) var(--edge);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-6);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+      }
+      .colophon .brand__name {
+        color: var(--color-white);
+      }
+      .colophon .brand__mark {
+        color: var(--color-white);
+      }
+
+      /* Logo lockup helper ------------------------ */
+      .brand .brand__mark {
+        width: 28px;
+        height: 28px;
+      }
+      .brand--lg .brand__mark {
+        width: 40px;
+        height: 40px;
+      }
+      .brand--lg .brand__name {
+        font-size: 28px;
+      }
+
+      /* Responsive ------------------------------------------------ */
+      @media (max-width: 1080px) {
+        :root {
+          --edge: 32px;
+        }
+        .opening__inner,
+        .spread__head,
+        .palette-head,
+        .workshop__head,
+        .editorial-row__grid,
+        .type-specimen,
+        .workshop__grid,
+        .index-band,
+        .colophon__inner {
+          grid-template-columns: 1fr;
+          gap: var(--space-7);
+        }
+        .opening__strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .royal__inner {
+          grid-template-columns: 1fr;
+          padding: 64px 40px;
+        }
+        .royal__stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .product-card {
+          grid-template-columns: 1fr;
+        }
+        .product-card__photo {
+          min-height: 360px;
+        }
+        .palette-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================================================
+         Top bar
+         ============================================================ -->
+    <header class="topbar" role="banner">
+      <div class="topbar__inner">
+        <a class="brand" href="#" aria-label="Marque home">
+          <span class="brand__mark" aria-hidden="true">
+            <svg
+              viewBox="0 0 337.67 337.68"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M137.65 2.89L6.47 122.39c-2.25 7.86-3.93 15.97-5.02 24.25L162.27.14c-8.38.32-16.6 1.25-24.62 2.75Z"
+              />
+              <path
+                d="M15.4 98.32L112.89 9.51C69.62 24.7 34.42 57.01 15.4 98.32Z"
+              />
+              <path
+                d="M180.88.43L.05 165.17c-.03 1.22-.05 2.44-.05 3.67 0 5.2.25 10.34.71 15.41L199.83 2.85c-6.21-1.15-12.53-1.96-18.95-2.42Z"
+              />
+              <path
+                d="M214.9 6.36L2.8 199.59c1.01 5.5 2.29 10.9 3.82 16.2L230.67 11.68c-5.14-2.02-10.4-3.8-15.77-5.32Z"
+              />
+              <path
+                d="M243.4 17.33L11.05 229c1.83 4.81 3.88 9.51 6.13 14.1L256.87 24.74c-4.36-2.67-8.85-5.14-13.46-7.42Z"
+              />
+              <path
+                d="M267.79 32.04L23.42 254.66c2.51 4.24 5.19 8.36 8.05 12.35L279.35 41.19c-3.71-3.22-7.57-6.27-11.56-9.15Z"
+              />
+              <path
+                d="M288.69 49.93L39.3 277.12c3.11 3.72 6.38 7.31 9.8 10.75L298.48 60.69c-3.11-3.73-6.38-7.32-9.79-10.76Z"
+              />
+              <path
+                d="M306.31 70.8L58.46 296.6c3.72 3.21 7.58 6.26 11.57 9.14l244.32-222.58c-2.5-4.24-5.18-8.37-8.03-12.36Z"
+              />
+              <path
+                d="M320.58 94.73l-239.61 218.29c4.37 2.67 8.86 5.13 13.48 7.4l232.25-211.59c-1.83-4.81-3.87-9.52-6.12-14.11Z"
+              />
+              <path
+                d="M331.11 122.07l-223.92 203.99c5.14 2.02 10.41 3.79 15.78 5.3l211.94-193.08c-1.01-5.5-2.28-10.91-3.8-16.22Z"
+              />
+              <path
+                d="M337.67 168.84c0-5.12-.24-10.19-.69-15.2l-198.93 181.23c6.21 1.14 12.55 1.95 18.98 2.39l180.59-164.52c.03-1.3.05-2.6.05-3.9Z"
+              />
+              <path
+                d="M331.11 215.61c2.27-7.88 3.97-16 5.08-24.31l-160.51 146.22c8.4-.33 16.64-1.28 24.68-2.8l130.75-119.12Z"
+              />
+              <path
+                d="M320.9 242.29l-93.06 84.78c40.85-15.24 74.21-45.84 93.06-84.78Z"
+              />
+            </svg>
+          </span>
+          <span class="brand__name">Marque</span>
+        </a>
+        <nav class="nav__links" aria-label="Primary">
+          <a class="nav__link" href="#identity" aria-current="page">Identity</a>
+          <a class="nav__link" href="#typography">Typography</a>
+          <a class="nav__link" href="#colour">Colour</a>
+          <a class="nav__link" href="#components">Components</a>
+          <a class="nav__link" href="#photography">Photography</a>
+        </nav>
+        <div class="topbar__cta">
+          <a href="#" class="btn btn-ghost btn-sm">
+            <i data-lucide="book-open" class="icon icon-sm"></i> Read
+          </a>
+          <a href="#" class="btn btn-sm">
+            <i data-lucide="download" class="icon icon-sm"></i> Get the kit
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         Hero
+         ============================================================ -->
+    <section class="opening" id="identity">
+      <div class="opening__inner">
+        <div class="opening__main">
+          <h1 class="opening__title">
+            A brand should read like a <em>publication</em>.
+          </h1>
+          <p class="opening__lead">
+            Type leads. Surfaces breathe. One deep violet thread carries the
+            system end to end.
+          </p>
+          <div class="opening__cta">
+            <a href="#" class="btn">
+              Start the handbook
+              <i data-lucide="arrow-right" class="icon icon-sm"></i>
+            </a>
+            <a href="#typography" class="btn btn-secondary">
+              <i data-lucide="type" class="icon icon-sm"></i>
+              View type specimen
+            </a>
+          </div>
+        </div>
+        <figure class="opening__visual">
+          <img
+            src="../images/marque-riso-plate.png"
+            style="object-position: 22% 50%"
+            alt="Layered risograph art plate — concentric violet forms dissolving into a dark indigo vortex"
+          />
+          <figcaption class="opening__caption">
+            <span
+              ><span class="dot" aria-hidden="true"></span>Marque · Vol 01</span
+            >
+            <span>Spring 2026</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="opening__strip">
+        <div class="opening__stat">
+          <b>14<em>plates</em></b>
+          <span>Editorial system</span>
+        </div>
+        <div class="opening__stat">
+          <b>3<em>families</em></b>
+          <span>Type voice</span>
+        </div>
+        <div class="opening__stat">
+          <b>8<em>tones</em></b>
+          <span>Violet palette</span>
+        </div>
+        <div class="opening__stat">
+          <b>6<em>parts</em></b>
+          <span>Component set</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="spread" id="photography">
+      <header class="spread__head">
+        <h2 class="spread__title">
+          Imagery sits inside the system,
+          <span class="accent">never on top of it.</span>
+        </h2>
+        <p class="spread__sub">
+          Abstract risograph plates — layered organic forms, coarse print grain
+          and overlapping ink, framed at 14 px clipping. No stock photography.
+          The palette stays violet so the forms can do the talking.
+        </p>
+      </header>
+
+      <div class="spread__grid">
+        <div class="photo-card">
+          <figure class="photo" style="aspect-ratio: 4 / 3; border-radius: 0">
+            <img
+              src="../images/marque-riso-plate.png"
+              style="object-position: 52% 46%"
+              alt="Risograph art plate detail — overlapping periwinkle and blush ribbons with grain texture"
+            />
+          </figure>
+          <div class="photo-card__body">
+            <span class="tag photo-card__tag">
+              <i data-lucide="bookmark" class="icon icon-sm"></i>
+              Cover edition
+            </span>
+            <h3 class="headline-sm">Welcome to the Marque field notes.</h3>
+            <p class="body-sm muted">
+              The cover plate sets the temperature of the brand. A single
+              risograph composition — layered violet ink, coarse grain, present
+              and unhurried.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="photo-card spec-card spec-card--veil"
+          style="grid-column: span 6; padding: 0"
+        >
+          <div
+            style="
+              padding: var(--space-7);
+              display: grid;
+              gap: var(--space-5);
+              height: 100%;
+            "
+          >
+            <h3 class="spec-card__heading">Abstract forms on a cool canvas.</h3>
+            <ul class="principle__list">
+              <li>
+                <i data-lucide="palette" class="icon"></i>
+                Risograph and screenprint only. No stock or 3D photography.
+              </li>
+              <li>
+                <i data-lucide="layers" class="icon"></i>
+                Layer organic forms; let overlapping ink mix new violet tones.
+              </li>
+              <li>
+                <i data-lucide="square-dashed" class="icon"></i>
+                Crop tight at 14 px, keep the coarse print grain visible.
+              </li>
+              <li>
+                <i data-lucide="ban" class="icon"></i>
+                Never composite the orb mark into an art plate.
+              </li>
+            </ul>
+            <div class="row" style="margin-top: auto; gap: var(--space-3)">
+              <a href="#" class="btn btn-secondary btn-sm">Photo guidelines</a>
+              <a href="#" class="btn btn-ghost btn-sm">
+                <i data-lucide="external-link" class="icon icon-sm"></i>
+                Library
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Royal hero — signature voice block
+         ============================================================ -->
+    <section class="royal">
+      <div class="royal__inner">
+        <svg class="royal__orb" viewBox="0 0 337.67 337.68" aria-hidden="true">
+          <use href="#orb-symbol" />
+        </svg>
+        <div class="royal__stripes" aria-hidden="true"></div>
+
+        <h2 class="royal__title">Set in violet. Bound in restraint.</h2>
+        <div class="royal__body">
+          <p class="lead">
+            One deep block per page carries the voice of the brand — oversized
+            headline, a single short paragraph, one action. The block is never
+            decorated; the depth of the colour does the work.
+          </p>
+          <div class="royal__cta">
+            <a href="#" class="btn btn-on-royal">
+              <i data-lucide="play" class="icon icon-sm"></i>
+              Watch the film
+            </a>
+            <a href="#" class="btn btn-on-royal-outline">
+              Read the manifesto
+            </a>
+          </div>
+        </div>
+
+        <div class="royal__stats">
+          <div class="stat">
+            <span class="stat__value"
+              >14<span style="font-size: 28px; color: var(--color-halo)"
+                >pt</span
+              ></span
+            >
+            <span class="stat__label">Card clipping radius</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value">12%</span>
+            <span class="stat__label">Orb ornament opacity</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value"
+              >1<span style="font-size: 28px; color: var(--color-halo)"
+                >/page</span
+              ></span
+            >
+            <span class="stat__label">Royal block budget</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value"
+              >96<span style="font-size: 28px; color: var(--color-halo)"
+                >px</span
+              ></span
+            >
+            <span class="stat__label">Display headline base</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Type specimen
+         ============================================================ -->
+    <section class="type-specimen" id="typography">
+      <aside class="type-side">
+        <h2>The voice is the type.</h2>
+        <p class="lead">
+          Plus Jakarta Sans does the talking — oversized, confident, slightly
+          compressed. Inter holds the line for reading. JetBrains Mono is the
+          brand book's metadata.
+        </p>
+        <div class="row" style="gap: var(--space-3)">
+          <span class="tag">
+            <i data-lucide="type" class="icon icon-sm"></i>
+            3 families
+          </span>
+          <span class="tag tag-outline">11 styles</span>
+        </div>
+      </aside>
+
+      <div class="type-rows">
+        <div class="type-row type-row--xxl">
+          <div class="type-row__meta">
+            <b>Display</b>
+            Plus Jakarta · 800
+          </div>
+          <div class="type-row__sample">Marque</div>
+          <div class="type-row__size">96 / 92</div>
+        </div>
+        <div class="type-row type-row--xl">
+          <div class="type-row__meta">
+            <b>Headline</b>
+            Plus Jakarta · 700
+          </div>
+          <div class="type-row__sample">Hand-set on lavender paper.</div>
+          <div class="type-row__size">64 / 68</div>
+        </div>
+        <div class="type-row type-row--lg">
+          <div class="type-row__meta">
+            <b>Section</b>
+            Plus Jakarta · 700
+          </div>
+          <div class="type-row__sample">
+            A house style for warm photography.
+          </div>
+          <div class="type-row__size">44 / 48</div>
+        </div>
+        <div class="type-row type-row--md">
+          <div class="type-row__meta">
+            <b>Sub-title</b>
+            Plus Jakarta · 700
+          </div>
+          <div class="type-row__sample">
+            Photography sits inside the system.
+          </div>
+          <div class="type-row__size">28 / 32</div>
+        </div>
+        <div class="type-row type-row--body">
+          <div class="type-row__meta">
+            <b>Body</b>
+            Inter · 400
+          </div>
+          <div class="type-row__sample">
+            Marque reads like a printed brand book. Pages alternate between airy
+            lavender-tinted whites and a single deep-violet hero block that
+            anchors the brand voice.
+          </div>
+          <div class="type-row__size">18 / 1.55</div>
+        </div>
+        <div class="type-row type-row--mono">
+          <div class="type-row__meta">
+            <b>Mono</b>
+            JetBrains · 500
+          </div>
+          <div class="type-row__sample">
+            volume — 01 · edition — spring · ref — mq-25-01
+          </div>
+          <div class="type-row__size">14 / 1.50</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Editorial row — principle + signature card
+         ============================================================ -->
+    <section class="editorial-row">
+      <div class="editorial-row__grid">
+        <article class="principle">
+          <h3 class="principle__title">
+            Lead with the heading.<br />Earn the silence.
+          </h3>
+          <ul class="principle__list">
+            <li>
+              <i data-lucide="check" class="icon"></i>
+              Every section opens with its own headline. No eyebrows, no
+              all-caps lead-ins above an H1 or H2.
+            </li>
+            <li>
+              <i data-lucide="check" class="icon"></i>
+              Mix paper and veil surfaces for rhythm. Reach for a second hue
+              only when a status genuinely demands one.
+            </li>
+            <li>
+              <i data-lucide="check" class="icon"></i>
+              Reserve depth — a soft 24 px violet shadow — for the cards that
+              actually carry weight.
+            </li>
+            <li>
+              <i
+                data-lucide="x"
+                class="icon"
+                style="color: var(--color-warn)"
+              ></i>
+              Never drop in stock or glossy 3D imagery. The grain is the
+              argument.
+            </li>
+          </ul>
+        </article>
+
+        <article class="signature-card">
+          <svg class="mark" viewBox="0 0 337.67 337.68" aria-hidden="true">
+            <use href="#orb-symbol" />
+          </svg>
+          <h3>The orb is the second voice of Marque.</h3>
+          <p>
+            A half-cut sphere, drawn in concentric indigo lines. It marks
+            chapter heads at 32 px, returns at 96 px on signature cards, and
+            fades into the royal block at 12 % white. Never used as wallpaper,
+            never tinted off-brand.
+          </p>
+          <div class="row" style="gap: var(--space-3)">
+            <span class="tag tag-solid">Signature element</span>
+            <span class="tag">3 placements max</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Palette — colour plates
+         ============================================================ -->
+    <section class="palette-block" id="colour">
+      <header class="palette-head">
+        <h2>Colour. Eight tones, one voice.</h2>
+        <p class="lead">
+          The palette is intentionally narrow. The deep violet block reads as a
+          brand statement, not just another surface — restraint is the design.
+        </p>
+      </header>
+
+      <div class="palette-grid">
+        <div class="swatch swatch--lg">
+          <div
+            class="swatch__chip"
+            style="
+              background: var(--color-paper);
+              border-bottom: 1px solid var(--color-hairline);
+            "
+          ></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Paper</span>
+            <span class="swatch__role"
+              >The canvas. Warm white with a faint lavender cast.</span
+            >
+            <span class="swatch__value">#FAFAFC</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div class="swatch__chip" style="background: var(--color-veil)"></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Veil</span>
+            <span class="swatch__role"
+              >Lavender surface for cards, swatches, and quote blocks.</span
+            >
+            <span class="swatch__value">#EEE9FB</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div
+            class="swatch__chip"
+            style="background: var(--color-indigo)"
+          ></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Indigo</span>
+            <span class="swatch__role"
+              >Primary brand violet. Marks, primary buttons, focused
+              state.</span
+            >
+            <span class="swatch__value">#4727B5</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div
+            class="swatch__chip"
+            style="
+              background: var(--color-royal);
+              position: relative;
+              overflow: hidden;
+            "
+          >
+            <span
+              style="
+                position: absolute;
+                inset: 0;
+                background: repeating-linear-gradient(
+                  90deg,
+                  rgba(255, 255, 255, 0.08) 0 2px,
+                  transparent 2px 12px
+                );
+                opacity: 0.7;
+              "
+            ></span>
+          </div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Royal</span>
+            <span class="swatch__role"
+              >Deep signature block. One per page, white type only.</span
+            >
+            <span class="swatch__value">#2A1574</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div class="swatch__chip" style="background: var(--color-halo)"></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Halo</span>
+            <span class="swatch__role"
+              >Focus ring and accents on both paper and royal.</span
+            >
+            <span class="swatch__value">#8B72F0</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div class="swatch__chip" style="background: var(--color-ink)"></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Ink</span>
+            <span class="swatch__role"
+              >Body type and high-contrast foreground.</span
+            >
+            <span class="swatch__value">#1A1A2E</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div
+            class="swatch__chip"
+            style="background: var(--color-whisper)"
+          ></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Whisper</span>
+            <span class="swatch__role"
+              >Captions, metadata, and inactive labels.</span
+            >
+            <span class="swatch__value">#6B6680</span>
+          </div>
+        </div>
+        <div class="swatch swatch--lg">
+          <div
+            class="swatch__chip"
+            style="background: var(--color-hairline)"
+          ></div>
+          <div class="swatch__meta">
+            <span class="swatch__name">Hairline</span>
+            <span class="swatch__role"
+              >1 px rules, dividers, and quiet card outlines.</span
+            >
+            <span class="swatch__value">#E5E1EF</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Components — workshop
+         ============================================================ -->
+    <section class="workshop" id="components">
+      <header class="workshop__head">
+        <h2>The working set, hand-trimmed.</h2>
+        <p class="lead">
+          Marque ships six core components and a small chorus of supporting
+          ones. They share a single radius vocabulary and one pill-shaped button
+          language.
+        </p>
+      </header>
+
+      <div class="workshop__grid">
+        <!-- Product / Editorial card -->
+        <article class="product-card">
+          <div class="product-card__photo">
+            <span class="tag tag-solid badge">
+              <i data-lucide="bookmark" class="icon icon-sm"></i>
+              Edition 01
+            </span>
+            <img
+              src="../images/marque-riso-plate.png"
+              style="object-position: 88% 40%"
+              alt="Risograph art plate detail — nested violet and slate rings on a warm cream field"
+            />
+          </div>
+          <div class="product-card__body">
+            <h3 class="product-card__title">Field Notes — Spring Edition</h3>
+            <p class="body-sm muted" style="max-width: 32ch">
+              160-page softcover, lavender Munken paper, deep violet thread
+              binding. Includes the full type and colour specimen.
+            </p>
+            <div class="product-card__price">
+              <span class="now">€48</span>
+              <span class="was">€64</span>
+              <span class="tag" style="margin-left: auto">
+                <i data-lucide="package" class="icon icon-sm"></i>
+                Ships in 2 days
+              </span>
+            </div>
+
+            <div class="product-card__row">
+              <span class="label" style="min-width: 64px">Cover</span>
+              <div
+                class="swatches-mini"
+                role="radiogroup"
+                aria-label="Cover finish"
+              >
+                <span
+                  class="swatch-dot"
+                  aria-checked="true"
+                  role="radio"
+                  style="--c: #2a1574"
+                ></span>
+                <span
+                  class="swatch-dot"
+                  role="radio"
+                  style="--c: #8b72f0"
+                ></span>
+                <span
+                  class="swatch-dot"
+                  role="radio"
+                  style="--c: #eee9fb"
+                ></span>
+                <span
+                  class="swatch-dot"
+                  role="radio"
+                  style="--c: #1a1a2e"
+                ></span>
+              </div>
+            </div>
+
+            <label class="checkbox">
+              <input type="checkbox" checked />
+              Include the wall specimen sheet (+€6)
+            </label>
+
+            <div class="product-card__cta">
+              <button class="btn">
+                <i data-lucide="shopping-bag" class="icon icon-sm"></i>
+                Add to cart
+              </button>
+              <button class="btn btn-secondary">
+                <i data-lucide="heart" class="icon icon-sm"></i>
+              </button>
+            </div>
+
+            <div class="product-card__notes">
+              <i data-lucide="truck" class="icon icon-sm"></i>
+              <span class="note-title">Free shipping across the EU</span>
+              <span class="note-sub"
+                >3-day delivery — printed and bound in Porto.</span
+              >
+            </div>
+          </div>
+        </article>
+
+        <!-- Right column -->
+        <div class="ws-right">
+          <!-- Sign-up form -->
+          <article class="spec-card">
+            <h3 class="spec-card__heading">Subscribe to the quarterly.</h3>
+            <p class="spec-card__sub">
+              One printed edition each season. No email digest, no newsletter,
+              no algorithm — just paper.
+            </p>
+            <form class="form-card" onsubmit="event.preventDefault()">
+              <div class="field">
+                <label class="field-label" for="name">Full name</label>
+                <div class="input-with-icon">
+                  <i data-lucide="user" class="icon icon-sm"></i>
+                  <input
+                    id="name"
+                    class="input"
+                    type="text"
+                    value="Hannah Lindgren"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="email">Address</label>
+                <div class="input-with-icon">
+                  <i data-lucide="mail" class="icon icon-sm"></i>
+                  <input
+                    id="email"
+                    class="input"
+                    type="email"
+                    placeholder="you@studio.com"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label class="field-label" for="city">City</label>
+                  <input id="city" class="input" type="text" value="Lisbon" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="postal">Postal</label>
+                  <input
+                    id="postal"
+                    class="input"
+                    type="text"
+                    value="1200-109"
+                  />
+                </div>
+              </div>
+              <label class="checkbox">
+                <input type="checkbox" checked />
+                Send the orb sticker with my first edition
+              </label>
+              <button class="btn" type="submit" style="justify-content: center">
+                Subscribe
+                <i data-lucide="arrow-up-right" class="icon icon-sm"></i>
+              </button>
+            </form>
+          </article>
+
+          <!-- Tabs + table -->
+          <article class="spec-card spec-card--veil">
+            <div role="tablist" class="tabs">
+              <button class="tab" aria-selected="true" role="tab">
+                <i data-lucide="layers" class="icon icon-sm"></i>
+                Plates
+              </button>
+              <button class="tab" role="tab">
+                <i data-lucide="users" class="icon icon-sm"></i>
+                Editors
+              </button>
+              <button class="tab" role="tab">Archive</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Plate</th>
+                  <th>Editor</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="row">
+                      <span class="avatar">09</span>
+                      <b style="color: var(--color-ink); font-weight: 600"
+                        >Royal voice block</b
+                      >
+                    </div>
+                  </td>
+                  <td>Anouk V.</td>
+                  <td><span class="pillstat is-ok">Printed</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="row">
+                      <span class="avatar">11</span>
+                      <b style="color: var(--color-ink); font-weight: 600"
+                        >Photo spread</b
+                      >
+                    </div>
+                  </td>
+                  <td>Mira S.</td>
+                  <td><span class="pillstat">In edit</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="row">
+                      <span class="avatar">14</span>
+                      <b style="color: var(--color-ink); font-weight: 600"
+                        >Component sheet</b
+                      >
+                    </div>
+                  </td>
+                  <td>Jonas P.</td>
+                  <td><span class="pillstat is-warn">Held</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Index band — chapter ToC
+         ============================================================ -->
+    <section class="index-band" id="index">
+      <h2>Index of the handbook.</h2>
+      <ol class="index-list" reversed start="06">
+        <li>
+          <span class="idx-num">01</span>
+          <span>Identity, mark and lockup</span>
+          <span class="idx-meta">P. 04 → 11</span>
+        </li>
+        <li>
+          <span class="idx-num">02</span>
+          <span>Typography &amp; voice</span>
+          <span class="idx-meta">P. 12 → 27</span>
+        </li>
+        <li>
+          <span class="idx-num">03</span>
+          <span>Photography house style</span>
+          <span class="idx-meta">P. 28 → 44</span>
+        </li>
+        <li>
+          <span class="idx-num">04</span>
+          <span>Colour &amp; surfaces</span>
+          <span class="idx-meta">P. 45 → 60</span>
+        </li>
+        <li>
+          <span class="idx-num">05</span>
+          <span>The signature block</span>
+          <span class="idx-meta">P. 61 → 72</span>
+        </li>
+        <li>
+          <span class="idx-num">06</span>
+          <span>Components &amp; product</span>
+          <span class="idx-meta">P. 73 → 96</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============================================================
+         Footer / Colophon
+         ============================================================ -->
+    <footer class="colophon">
+      <div class="colophon__inner">
+        <h2 class="colophon__title">Bound in <em>violet.</em></h2>
+        <div class="colophon__col">
+          <div>
+            <span class="label">Handbook</span>
+            <a href="#">Identity</a>
+            <a href="#">Typography</a>
+            <a href="#">Photography</a>
+            <a href="#">Components</a>
+          </div>
+          <div>
+            <span class="label">Studio</span>
+            <a href="#">About Marque</a>
+            <a href="#">Editions</a>
+            <a href="#">Press</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </div>
+      <div class="colophon__base">
+        <span class="brand">
+          <span class="brand__mark" aria-hidden="true">
+            <svg
+              viewBox="0 0 337.67 337.68"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+            >
+              <use href="#orb-symbol" />
+            </svg>
+          </span>
+          <span class="brand__name">Marque</span>
+        </span>
+        <span>© 2026 · Volume 01 · Set in Plus Jakarta &amp; Inter</span>
+        <span>Edition · MQ-25-01</span>
+      </div>
+    </footer>
+
+    <!-- Reusable symbol for the orb mark -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <symbol id="orb-symbol" viewBox="0 0 337.67 337.68">
+          <path
+            d="M137.65 2.89L6.47 122.39c-2.25 7.86-3.93 15.97-5.02 24.25L162.27.14c-8.38.32-16.6 1.25-24.62 2.75Z"
+          />
+          <path
+            d="M15.4 98.32L112.89 9.51C69.62 24.7 34.42 57.01 15.4 98.32Z"
+          />
+          <path
+            d="M180.88.43L.05 165.17c-.03 1.22-.05 2.44-.05 3.67 0 5.2.25 10.34.71 15.41L199.83 2.85c-6.21-1.15-12.53-1.96-18.95-2.42Z"
+          />
+          <path
+            d="M214.9 6.36L2.8 199.59c1.01 5.5 2.29 10.9 3.82 16.2L230.67 11.68c-5.14-2.02-10.4-3.8-15.77-5.32Z"
+          />
+          <path
+            d="M243.4 17.33L11.05 229c1.83 4.81 3.88 9.51 6.13 14.1L256.87 24.74c-4.36-2.67-8.85-5.14-13.46-7.42Z"
+          />
+          <path
+            d="M267.79 32.04L23.42 254.66c2.51 4.24 5.19 8.36 8.05 12.35L279.35 41.19c-3.71-3.22-7.57-6.27-11.56-9.15Z"
+          />
+          <path
+            d="M288.69 49.93L39.3 277.12c3.11 3.72 6.38 7.31 9.8 10.75L298.48 60.69c-3.11-3.73-6.38-7.32-9.79-10.76Z"
+          />
+          <path
+            d="M306.31 70.8L58.46 296.6c3.72 3.21 7.58 6.26 11.57 9.14l244.32-222.58c-2.5-4.24-5.18-8.37-8.03-12.36Z"
+          />
+          <path
+            d="M320.58 94.73l-239.61 218.29c4.37 2.67 8.86 5.13 13.48 7.4l232.25-211.59c-1.83-4.81-3.87-9.52-6.12-14.11Z"
+          />
+          <path
+            d="M331.11 122.07l-223.92 203.99c5.14 2.02 10.41 3.79 15.78 5.3l211.94-193.08c-1.01-5.5-2.28-10.91-3.8-16.22Z"
+          />
+          <path
+            d="M337.67 168.84c0-5.12-.24-10.19-.69-15.2l-198.93 181.23c6.21 1.14 12.55 1.95 18.98 2.39l180.59-164.52c.03-1.3.05-2.6.05-3.9Z"
+          />
+          <path
+            d="M331.11 215.61c2.27-7.88 3.97-16 5.08-24.31l-160.51 146.22c8.4-.33 16.64-1.28 24.68-2.8l130.75-119.12Z"
+          />
+          <path
+            d="M320.9 242.29l-93.06 84.78c40.85-15.24 74.21-45.84 93.06-84.78Z"
+          />
+        </symbol>
+      </defs>
+    </svg>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

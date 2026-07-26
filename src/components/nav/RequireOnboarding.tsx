@@ -9,6 +9,7 @@ export function RequireOnboarding() {
   );
   const viewContext = useStore((s) => s.viewContext);
   const authStatus = useAuthStore((s) => s.status);
+  const isProfileLoaded = useAuthStore((s) => s.isProfileLoaded);
 
   // Demo mode stays fully local and never requires an account.
   if (viewContext === "live") {
@@ -18,10 +19,7 @@ export function RequireOnboarding() {
     if (authStatus === "loading") {
       return null;
     }
-    if (
-      authStatus === "signed-in" &&
-      !useAuthStore.getState().isProfileLoaded
-    ) {
+    if (authStatus === "signed-in" && !isProfileLoaded) {
       return null;
     }
     if (!onboardingCompleted) {

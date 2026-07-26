@@ -25,11 +25,31 @@ export const useAuthStore = create<AuthState>()((set) => ({
   status: "loading",
   isProfileLoaded: false,
   setSession: (session) =>
-    set({
-      session,
-      user: session?.user ?? null,
-      status: session ? "signed-in" : "signed-out",
-      isProfileLoaded: session ? false : true, // If signed out, profile is loaded (empty). If signed in, we wait for pullUserRow.
+    set((state) => {
+      const newUser = session?.user ?? null;
+      // useAuthBootstrap.ts calls setSession from two independent places on
+      // load (getSession() and the onAuthStateChange subscription) — both
+      // can fire for the *same* already-linked user. Resetting
+      // isProfileLoaded to false on every call, unconditionally, meant the
+      // second of those two calls could stomp it back to false right after
+      // pullUserRow had already set it true — and since accountSync.ts's
+      // own dedup guard (lastLinkedAuthUserId) sees the same user id and
+      // skips calling pullUserRow again, nothing would ever flip it back,
+      // leaving every gated page (OnboardingFlow, WelcomePage) rendering
+      // null forever. Only reset it when the signed-in user actually
+      // changes — a redundant re-set of the same user keeps whatever
+      // load-state is already true.
+      const sameUser = Boolean(newUser && state.user?.id === newUser.id);
+      return {
+        session,
+        user: newUser,
+        status: session ? "signed-in" : "signed-out",
+        isProfileLoaded: session
+          ? sameUser
+            ? state.isProfileLoaded
+            : false
+          : true,
+      };
     }),
   setProfileLoaded: (isProfileLoaded) => set({ isProfileLoaded }),
 }));

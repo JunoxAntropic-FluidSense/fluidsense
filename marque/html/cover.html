@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1200, initial-scale=1" />
+    <title>Marque — Cover</title>
+    <link rel="stylesheet" href="../css/system.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--color-paper);
+      }
+      .artboard {
+        width: 1200px;
+        height: 800px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            900px 400px at 92% -10%,
+            rgba(139, 114, 240, 0.1) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            700px 500px at -10% 100%,
+            rgba(71, 39, 181, 0.06) 0%,
+            transparent 65%
+          ),
+          var(--color-paper);
+        font-family: var(--font-body);
+        color: var(--color-ink);
+        display: grid;
+        grid-template-columns: 720px 480px;
+        grid-template-rows: 1fr;
+      }
+
+      /* Left — paper plate ---------------------------------------- */
+      .plate {
+        padding: 52px 40px 76px 56px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 24px;
+        position: relative;
+      }
+
+      .plate__meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--color-hairline);
+      }
+      .plate__meta .label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        line-height: 1;
+      }
+      .plate__meta .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-indigo);
+        box-shadow: 0 0 0 4px rgba(71, 39, 181, 0.12);
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      .plate__core {
+        display: grid;
+        gap: 24px;
+        align-content: end;
+        padding-bottom: 8px;
+      }
+      .plate__num {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .plate__num::before {
+        content: "";
+        width: 28px;
+        height: 1px;
+        background: var(--color-hairline-strong);
+      }
+      .plate__name {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 148px;
+        line-height: 0.86;
+        letter-spacing: -0.04em;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .plate__name em {
+        font-style: normal;
+        color: var(--color-indigo);
+      }
+      .plate__sub {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 26px;
+        line-height: 1.1;
+        letter-spacing: -0.018em;
+        max-width: 18ch;
+        color: var(--color-ink);
+        margin: 0;
+      }
+
+      .plate__type {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 28px;
+        align-items: end;
+      }
+      .specimen {
+        display: grid;
+        gap: 6px;
+      }
+      .specimen__sample {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 64px;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        color: var(--color-ink);
+        display: flex;
+        gap: 18px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .specimen__sample .light {
+        font-weight: 500;
+        color: var(--color-whisper);
+      }
+      .specimen__sample .reg {
+        font-weight: 600;
+      }
+      .specimen__sample .med {
+        font-weight: 700;
+      }
+      .specimen__sample .bold {
+        font-weight: 800;
+        color: var(--color-indigo);
+      }
+      .specimen__meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+      }
+
+      .palette-bar {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+        height: 56px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--color-hairline);
+      }
+      .palette-bar > span {
+        display: grid;
+        align-items: end;
+        padding: 8px 10px;
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+      }
+      .palette-bar > span.on-dark {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      /* Right — royal block --------------------------------------- */
+      .royal-plate {
+        background: var(--color-royal);
+        color: var(--color-white);
+        padding: 56px 56px;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 28px;
+      }
+      .royal-plate::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.04) 0 2px,
+          transparent 2px 14px
+        );
+        opacity: 0.55;
+        mask: linear-gradient(180deg, transparent, black 45%);
+        -webkit-mask: linear-gradient(180deg, transparent, black 45%);
+      }
+      .royal-plate__orb {
+        position: absolute;
+        right: -160px;
+        top: -120px;
+        width: 640px;
+        height: 640px;
+        color: rgba(255, 255, 255, 0.1);
+        z-index: 0;
+      }
+      .royal-plate__orb svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .royal-plate__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.62);
+        position: relative;
+        z-index: 2;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .royal-plate__head .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: var(--color-halo);
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      .royal-plate__body {
+        position: relative;
+        z-index: 2;
+        align-self: end;
+        display: grid;
+        gap: 22px;
+      }
+      .royal-plate__pull {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 58px;
+        line-height: 0.96;
+        letter-spacing: -0.028em;
+        color: var(--color-white);
+        margin: 0;
+        max-width: 12ch;
+      }
+      .royal-plate__pull em {
+        font-style: normal;
+        color: var(--color-halo);
+      }
+      .royal-plate__lead {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 30ch;
+        margin: 0;
+      }
+
+      .royal-plate__stats {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 14px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .royal-stat__value {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 28px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--color-white);
+        margin: 0 0 4px;
+      }
+      .royal-stat__value .unit {
+        font-size: 14px;
+        color: var(--color-halo);
+        margin-left: 4px;
+      }
+      .royal-stat__label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+      }
+
+      /* Edition mark in corner ------------------------------------ */
+      .edition-rule {
+        position: absolute;
+        bottom: 22px;
+        left: 56px;
+        width: 624px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-whisper);
+        pointer-events: none;
+        z-index: 5;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="artboard"
+      role="img"
+      aria-label="Marque editorial brand handbook cover"
+    >
+      <!-- Left plate (paper) -->
+      <section class="plate">
+        <header class="plate__meta">
+          <span class="label"
+            ><span class="dot" aria-hidden="true"></span>Volume 01 · Spring
+            2026</span
+          >
+          <span class="label">Editorial Brand Handbook</span>
+        </header>
+
+        <div class="plate__core">
+          <h1 class="plate__name">Marqu<em>e</em>.</h1>
+          <p class="plate__sub">
+            A brand should read like a publication, not a kit of parts.
+          </p>
+        </div>
+
+        <div class="plate__type">
+          <div class="specimen">
+            <span class="specimen__meta">Plus Jakarta · 56 / 64</span>
+            <span class="specimen__sample">
+              <span class="light">Aa</span>
+              <span class="reg">Aa</span>
+              <span class="med">Aa</span>
+              <span class="bold">Aa</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="palette-bar" aria-hidden="true">
+          <span style="background: var(--color-veil)">VEIL</span>
+          <span style="background: var(--color-indigo)" class="on-dark"
+            >INDIGO</span
+          >
+          <span
+            style="
+              background: var(--color-royal);
+              position: relative;
+              overflow: hidden;
+            "
+            class="on-dark"
+          >
+            <span
+              style="
+                position: absolute;
+                inset: 0;
+                background: repeating-linear-gradient(
+                  90deg,
+                  rgba(255, 255, 255, 0.1) 0 2px,
+                  transparent 2px 10px
+                );
+                opacity: 0.7;
+              "
+            ></span>
+            <span style="position: relative">ROYAL</span>
+          </span>
+          <span style="background: var(--color-halo)" class="on-dark"
+            >HALO</span
+          >
+          <span style="background: var(--color-ink)" class="on-dark">INK</span>
+        </div>
+      </section>
+
+      <!-- Right plate (royal) -->
+      <section class="royal-plate">
+        <svg
+          class="royal-plate__orb"
+          viewBox="0 0 337.67 337.68"
+          aria-hidden="true"
+        >
+          <path
+            d="M137.65 2.89L6.47 122.39c-2.25 7.86-3.93 15.97-5.02 24.25L162.27.14c-8.38.32-16.6 1.25-24.62 2.75Z"
+            fill="currentColor"
+          />
+          <path
+            d="M15.4 98.32L112.89 9.51C69.62 24.7 34.42 57.01 15.4 98.32Z"
+            fill="currentColor"
+          />
+          <path
+            d="M180.88.43L.05 165.17c-.03 1.22-.05 2.44-.05 3.67 0 5.2.25 10.34.71 15.41L199.83 2.85c-6.21-1.15-12.53-1.96-18.95-2.42Z"
+            fill="currentColor"
+          />
+          <path
+            d="M214.9 6.36L2.8 199.59c1.01 5.5 2.29 10.9 3.82 16.2L230.67 11.68c-5.14-2.02-10.4-3.8-15.77-5.32Z"
+            fill="currentColor"
+          />
+          <path
+            d="M243.4 17.33L11.05 229c1.83 4.81 3.88 9.51 6.13 14.1L256.87 24.74c-4.36-2.67-8.85-5.14-13.46-7.42Z"
+            fill="currentColor"
+          />
+          <path
+            d="M267.79 32.04L23.42 254.66c2.51 4.24 5.19 8.36 8.05 12.35L279.35 41.19c-3.71-3.22-7.57-6.27-11.56-9.15Z"
+            fill="currentColor"
+          />
+          <path
+            d="M288.69 49.93L39.3 277.12c3.11 3.72 6.38 7.31 9.8 10.75L298.48 60.69c-3.11-3.73-6.38-7.32-9.79-10.76Z"
+            fill="currentColor"
+          />
+          <path
+            d="M306.31 70.8L58.46 296.6c3.72 3.21 7.58 6.26 11.57 9.14l244.32-222.58c-2.5-4.24-5.18-8.37-8.03-12.36Z"
+            fill="currentColor"
+          />
+          <path
+            d="M320.58 94.73l-239.61 218.29c4.37 2.67 8.86 5.13 13.48 7.4l232.25-211.59c-1.83-4.81-3.87-9.52-6.12-14.11Z"
+            fill="currentColor"
+          />
+          <path
+            d="M331.11 122.07l-223.92 203.99c5.14 2.02 10.41 3.79 15.78 5.3l211.94-193.08c-1.01-5.5-2.28-10.91-3.8-16.22Z"
+            fill="currentColor"
+          />
+          <path
+            d="M337.67 168.84c0-5.12-.24-10.19-.69-15.2l-198.93 181.23c6.21 1.14 12.55 1.95 18.98 2.39l180.59-164.52c.03-1.3.05-2.6.05-3.9Z"
+            fill="currentColor"
+          />
+          <path
+            d="M331.11 215.61c2.27-7.88 3.97-16 5.08-24.31l-160.51 146.22c8.4-.33 16.64-1.28 24.68-2.8l130.75-119.12Z"
+            fill="currentColor"
+          />
+          <path
+            d="M320.9 242.29l-93.06 84.78c40.85-15.24 74.21-45.84 93.06-84.78Z"
+            fill="currentColor"
+          />
+        </svg>
+
+        <header class="royal-plate__head">
+          <span
+            ><span class="dot" aria-hidden="true"></span>The signature
+            block</span
+          >
+          <span>Marque · MQ-25-01</span>
+        </header>
+
+        <div class="royal-plate__body">
+          <h2 class="royal-plate__pull">
+            Set in violet.<br />Bound in <em>restraint.</em>
+          </h2>
+          <p class="royal-plate__lead">
+            One deep block per page carries the brand voice — oversized
+            headline, one short paragraph, one action. The colour does the work.
+          </p>
+        </div>
+
+        <div class="royal-plate__stats">
+          <div>
+            <p class="royal-stat__value">14<span class="unit">pt</span></p>
+            <span class="royal-stat__label">Card clipping</span>
+          </div>
+          <div>
+            <p class="royal-stat__value">12<span class="unit">%</span></p>
+            <span class="royal-stat__label">Orb opacity</span>
+          </div>
+          <div>
+            <p class="royal-stat__value">1<span class="unit">/page</span></p>
+            <span class="royal-stat__label">Royal budget</span>
+          </div>
+          <div>
+            <p class="royal-stat__value">3<span class="unit">families</span></p>
+            <span class="royal-stat__label">Type system</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

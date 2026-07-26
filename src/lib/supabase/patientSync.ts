@@ -296,28 +296,24 @@ function mergeById<T extends { id: string }>(local: T[], remote: T[]): T[] {
 }
 
 /**
- * Fetches the current workspace's full roster + event set and merges it
- * into the local store. Best-effort and silent on failure — a stale local
- * copy (or an empty one, pre-first-sync) is a normal, expected state, not
- * an error condition worth surfacing mid-session.
+ * Shared implementation behind pullOrganisationData/pullOwnedPatientData:
+ * fetches profiles matching one column/value pair, plus their fluid_events,
+ * and merges both into the local store. Best-effort and silent on failure —
+ * a stale local copy (or an empty one, pre-first-sync) is a normal, expected
+ * state, not an error condition worth surfacing mid-session.
  */
-export async function pullOrganisationData(): Promise<void> {
-  if (!canSyncNow() || !supabase) return;
-  const state = useStore.getState();
-  const activePatient = state.patients.find(
-    (p) => p.id === state.activePatientId
-  );
-  const organisationId =
-    state.currentUser.organisationId || activePatient?.organisationId;
-  if (!organisationId) return;
-
+async function pullProfilesMatching(
+  column: "organisation_id" | "owner_user_id",
+  value: string
+): Promise<void> {
+  if (!supabase) return;
   try {
     const { data: profileRows, error: profilesError } = await supabase
       .from("profiles")
       .select(
         "id, owner_user_id, organisation_id, display_name, care_setting, monitoring_reason, units, monitoring_day_start_mode, monitoring_day_custom_hour, daily_allowance_ml, allowance_set_by_name, allowance_set_by_role, allowance_set_at, daily_weight_enabled, contact_instructions, is_demo"
       )
-      .eq("organisation_id", organisationId);
+      .eq(column, value);
     if (profilesError || !profileRows) return;
 
     const localPatientsById = new Map(
@@ -358,6 +354,40 @@ export async function pullOrganisationData(): Promise<void> {
   } catch {
     // Best-effort only — see pushPatients.
   }
+}
+
+/**
+ * Fetches the current workspace's full roster + event set and merges it
+ * into the local store.
+ */
+export async function pullOrganisationData(): Promise<void> {
+  if (!canSyncNow() || !supabase) return;
+  const state = useStore.getState();
+  const activePatient = state.patients.find(
+    (p) => p.id === state.activePatientId
+  );
+  const organisationId =
+    state.currentUser.organisationId || activePatient?.organisationId;
+  if (!organisationId) return;
+  await pullProfilesMatching("organisation_id", organisationId);
+}
+
+/**
+ * Fetches every profile this account directly owns (owner_user_id) and
+ * merges it into the local store. Unlike pullOrganisationData, this isn't
+ * gated on the account already being in a healthcare workspace — it's how a
+ * patient/carer account's own patient(s) come back after a fresh sign-in on
+ * a new device/browser, where the local store starts with zero patients and
+ * so has no organisationId to key an org-roster pull off of. Without this,
+ * such an account would restore onboardingCompleted=true but patients=[]
+ * forever, which OnboardingFlow reads as "stale state" and re-shows the
+ * onboarding wizard on every sign-in.
+ */
+export async function pullOwnedPatientData(ownerUserId: string): Promise<void> {
+  if (!isSupabaseConfigured() || useStore.getState().viewContext !== "live") {
+    return;
+  }
+  await pullProfilesMatching("owner_user_id", ownerUserId);
 }
 
 // --- subscriptions / lifecycle ----------------------------------------------

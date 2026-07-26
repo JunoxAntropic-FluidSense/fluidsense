@@ -1,0 +1,124 @@
+{
+  "name": "Marque",
+  "description": "An editorial brand identity and design system handbook with deep violet ink, layered lavender surfaces, and confident geometric typography.",
+  "theme": "light",
+  "concept": "Marque treats a product as a published brand book: oversized display type leading every page, generous lavender margins, and a striped indigo signature mark that ties identity, photography, typography, and components into one premium grammar.",
+  "palette": [
+    {
+      "name": "Paper",
+      "value": "#FAFAFC",
+      "role": "Primary page background — warm white with the faintest lavender cast"
+    },
+    {
+      "name": "Veil",
+      "value": "#EEE9FB",
+      "role": "Lavender surface for cards, swatches, and editorial blocks"
+    },
+    {
+      "name": "Ink",
+      "value": "#1A1A2E",
+      "role": "Primary text and high-contrast foreground"
+    },
+    {
+      "name": "Indigo",
+      "value": "#4727B5",
+      "role": "Primary brand violet for marks, links, and key actions"
+    },
+    {
+      "name": "Royal",
+      "value": "#2A1574",
+      "role": "Deep brand block used for hero panels and signature surfaces"
+    },
+    {
+      "name": "Halo",
+      "value": "#8B72F0",
+      "role": "Secondary accent for highlights, focus, and chart strokes"
+    },
+    {
+      "name": "Whisper",
+      "value": "#6B6680",
+      "role": "Muted prose, captions, and metadata"
+    },
+    {
+      "name": "Hairline",
+      "value": "#E5E1EF",
+      "role": "Borders, dividers, and quiet rule lines"
+    }
+  ],
+  "fonts": [
+    {
+      "name": "Plus Jakarta Sans",
+      "provider": "Google Fonts",
+      "usage": "Display headings, oversized editorial type, and prominent labels",
+      "cssImport": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    },
+    {
+      "name": "Inter",
+      "provider": "Google Fonts",
+      "usage": "Body copy, supporting text, controls, and metadata",
+      "cssImport": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    },
+    {
+      "name": "JetBrains Mono",
+      "provider": "Google Fonts",
+      "usage": "Token codes, hex values, and specimen captions",
+      "cssImport": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+    }
+  ],
+  "iconPack": {
+    "name": "Lucide",
+    "url": "https://lucide.dev/",
+    "license": "ISC",
+    "usage": "Used for interface, action, and feature icons throughout the brand handbook.",
+    "examples": [
+      {
+        "name": "Search",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-search\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" /> </svg>"
+      },
+      {
+        "name": "Sun",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-sun\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" /> </svg>"
+      },
+      {
+        "name": "Moon",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-moon\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401\" /> </svg>"
+      },
+      {
+        "name": "Layers",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-layers\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\" /> <path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\" /> <path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\" /> </svg>"
+      },
+      {
+        "name": "Zap",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-zap\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\" /> </svg>"
+      },
+      {
+        "name": "Check",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-check\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M20 6 9 17l-5-5\" /> </svg>"
+      },
+      {
+        "name": "Bell",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-bell\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" /> </svg>"
+      },
+      {
+        "name": "Settings",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-settings\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" /> </svg>"
+      },
+      {
+        "name": "User",
+        "svg": "<!-- @license lucide-static v1.14.0 - ISC --> <svg class=\"lucide lucide-user\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" > <path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /> <circle cx=\"12\" cy=\"7\" r=\"4\" /> </svg>"
+      }
+    ]
+  },
+  "logo": {
+    "name": "Striped Orb",
+    "svg": "<svg viewBox=\"0 0 337.67 337.68\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M137.65 2.89L6.47 122.39c-2.25 7.86-3.93 15.97-5.02 24.25L162.27.14c-8.38.32-16.6 1.25-24.62 2.75Z\"/><path d=\"M15.4 98.32L112.89 9.51C69.62 24.7 34.42 57.01 15.4 98.32Z\"/><path d=\"M180.88.43L.05 165.17c-.03 1.22-.05 2.44-.05 3.67 0 5.2.25 10.34.71 15.41L199.83 2.85c-6.21-1.15-12.53-1.96-18.95-2.42Z\"/><path d=\"M214.9 6.36L2.8 199.59c1.01 5.5 2.29 10.9 3.82 16.2L230.67 11.68c-5.14-2.02-10.4-3.8-15.77-5.32Z\"/><path d=\"M243.4 17.33L11.05 229c1.83 4.81 3.88 9.51 6.13 14.1L256.87 24.74c-4.36-2.67-8.85-5.14-13.46-7.42Z\"/><path d=\"M267.79 32.04L23.42 254.66c2.51 4.24 5.19 8.36 8.05 12.35L279.35 41.19c-3.71-3.22-7.57-6.27-11.56-9.15Z\"/><path d=\"M288.69 49.93L39.3 277.12c3.11 3.72 6.38 7.31 9.8 10.75L298.48 60.69c-3.11-3.73-6.38-7.32-9.79-10.76Z\"/><path d=\"M306.31 70.8L58.46 296.6c3.72 3.21 7.58 6.26 11.57 9.14l244.32-222.58c-2.5-4.24-5.18-8.37-8.03-12.36Z\"/><path d=\"M320.58 94.73l-239.61 218.29c4.37 2.67 8.86 5.13 13.48 7.4l232.25-211.59c-1.83-4.81-3.87-9.52-6.12-14.11Z\"/><path d=\"M331.11 122.07l-223.92 203.99c5.14 2.02 10.41 3.79 15.78 5.3l211.94-193.08c-1.01-5.5-2.28-10.91-3.8-16.22Z\"/><path d=\"M337.67 168.84c0-5.12-.24-10.19-.69-15.2l-198.93 181.23c6.21 1.14 12.55 1.95 18.98 2.39l180.59-164.52c.03-1.3.05-2.6.05-3.9Z\"/><path d=\"M331.11 215.61c2.27-7.88 3.97-16 5.08-24.31l-160.51 146.22c8.4-.33 16.64-1.28 24.68-2.8l130.75-119.12Z\"/><path d=\"M320.9 242.29l-93.06 84.78c40.85-15.24 74.21-45.84 93.06-84.78Z\"/></svg>"
+  },
+  "tags": [
+    "Editorial",
+    "Brand System",
+    "Violet",
+    "Premium",
+    "Geometric",
+    "Light"
+  ]
+}

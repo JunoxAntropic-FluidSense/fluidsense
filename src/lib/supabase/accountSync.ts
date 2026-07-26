@@ -82,7 +82,7 @@ function toUsersRowUpsert(
  * is a background convenience sync, not a critical path, and must never
  * block or surface errors in the local-first UI.
  */
-import { pullOrganisationData } from "./patientSync";
+import { pullOrganisationData, pullOwnedPatientData } from "./patientSync";
 import { getMyOrganisation } from "./organisations";
 import type { Role, Mode } from "../../types";
 
@@ -159,7 +159,17 @@ export async function pullUserRow(authUserId: string): Promise<void> {
         // affecting the account restore above.
       }
 
-      void pullOrganisationData();
+      try {
+        await pullOwnedPatientData(authUserId);
+      } catch {
+        // Best-effort only
+      }
+
+      try {
+        await pullOrganisationData();
+      } catch {
+        // Best-effort only
+      }
     }
   } catch {
     // Best-effort only — swallow errors
