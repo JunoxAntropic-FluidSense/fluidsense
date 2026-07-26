@@ -24,7 +24,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: "/favicon.svg",
+      icon: "/logo.png",
       data: { url },
     })
   );

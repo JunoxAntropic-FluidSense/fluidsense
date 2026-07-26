@@ -10,7 +10,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle,
-  Drop,
   FileCode,
   Folder,
   Microphone,
@@ -188,11 +187,7 @@ export function LandingPage() {
       <header className="topbar">
         <div className="topbar__inner">
           <a href="#" className="logo-section flex items-center gap-2">
-            <Drop
-              size={22}
-              weight="fill"
-              className="text-[var(--color-indigo)]"
-            />
+            <img src="/logo.png" alt="" className="h-6 w-6 object-contain" />
             <span className="font-extrabold text-lg tracking-tight text-[var(--color-ink)]">
               FluidSense
             </span>
@@ -237,12 +232,12 @@ export function LandingPage() {
               Voice-First Clinical Tracking
             </span>
             <h1 className="opening__title">
-              Say what you drank. Know what's <em>real</em>.
+              Every fluid tracked. Nothing <em>guessed</em>.
             </h1>
             <p className="opening__lead">
-              FluidSense logs intake and output the moment you speak it, then
-              holds every entry to one honest line: measured, estimated, or
-              unmeasured.
+              Log a drink or a urine output by voice in seconds. FluidSense
+              records it instantly and always tells you whether that number was
+              measured, estimated, or never recorded at all.
             </p>
             <div className="opening__cta">
               <button onClick={goToSignIn} className="btn">
@@ -285,21 +280,21 @@ export function LandingPage() {
           </div>
           <div className="opening__stat">
             <b>
-              1<em>confirmation</em>
+              1<em>tap</em>
             </b>
-            <span>You in control</span>
+            <span>Confirms every voice entry</span>
           </div>
           <div className="opening__stat">
             <b>
               Epic<em>ready</em>
             </b>
-            <span>FHIR sandbox integration</span>
+            <span>FHIR sandbox included</span>
           </div>
           <div className="opening__stat">
             <b>
-              70<em>specs</em>
+              0<em>account</em>
             </b>
-            <span>Tested precision</span>
+            <span>Try the demo instantly</span>
           </div>
         </div>
       </section>
@@ -308,13 +303,13 @@ export function LandingPage() {
       <section className="spread" id="who">
         <header className="spread__head">
           <h2 className="spread__title scroll-animate">
-            Caseload balance is a clinical task,
-            <span className="accent"> built on patient honesty.</span>
+            One record, read the same way
+            <span className="accent"> by everyone who sees it.</span>
           </h2>
           <p className="spread__sub scroll-animate">
             Patient mode and healthcare mode share one data model. A clinician
-            reviewing a chart sees the exact same measurement-status
-            distinctions a patient logged at home.
+            reviewing a chart sees the exact same measured, estimated, or
+            unmeasured status a patient logged at home.
           </p>
         </header>
 
@@ -347,29 +342,30 @@ export function LandingPage() {
                     size={18}
                     className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                   />
-                  RLS-secured patient profile data on Supabase.
+                  Patient data is access-controlled and only ever shared with
+                  the people you allow.
                 </li>
                 <li className="flex items-start gap-2 text-sm text-[var(--color-ink-soft)]">
                   <CheckCircle
                     size={18}
                     className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                   />
-                  Honest balance calculations (Never blend measured and
-                  guessed).
+                  Balance totals never blend a measured number with a guess.
                 </li>
                 <li className="flex items-start gap-2 text-sm text-[var(--color-ink-soft)]">
                   <CheckCircle
                     size={18}
                     className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                   />
-                  EHR Sandboxing for sandbox/production clinical validation.
+                  Tested against Epic's real FHIR sandbox, not a mock.
                 </li>
                 <li className="flex items-start gap-2 text-sm text-[var(--color-ink-soft)]">
                   <CheckCircle
                     size={18}
                     className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                   />
-                  No automated diagnostic or clinical-decision copy.
+                  Never tells you what your numbers mean medically — that's for
+                  your care team.
                 </li>
               </ul>
             </div>
@@ -441,13 +437,14 @@ export function LandingPage() {
           <div className="royal__stripes" aria-hidden="true"></div>
 
           <h2 className="royal__title scroll-animate">
-            Set in Steel Blue. Bound in integrity.
+            Every number comes with its own honesty rating.
           </h2>
           <div className="royal__body scroll-animate">
             <p className="lead">
               One shared timeline connects the ward round to the kitchen table.
-              Fluid balance totals are displayed alongside a real-time data
-              reliability readout, giving clinicians confidence they can trust.
+              Every balance total comes with a reliability readout, so
+              clinicians know how complete the picture is — not just what the
+              number says.
             </p>
             <div className="royal__cta">
               <button onClick={goToSignIn} className="btn btn-on-royal">
@@ -461,20 +458,22 @@ export function LandingPage() {
 
           <div className="royal__stats">
             <div className="stat">
-              <span className="stat__value">100%</span>
-              <span className="stat__label">Offline-first demo mode</span>
+              <span className="stat__value">Offline</span>
+              <span className="stat__label">Demo mode needs no connection</span>
             </div>
             <div className="stat">
-              <span className="stat__value">4</span>
-              <span className="stat__label">Fluid event categories</span>
+              <span className="stat__value">Real-time</span>
+              <span className="stat__label">
+                Care teams see updates instantly
+              </span>
             </div>
             <div className="stat">
-              <span className="stat__value">1-click</span>
-              <span className="stat__label">Collapsible navigation</span>
+              <span className="stat__value">4-way</span>
+              <span className="stat__label">Honesty status on every entry</span>
             </div>
             <div className="stat">
-              <span className="stat__value">EHR</span>
-              <span className="stat__label">Sandbox FHIR support</span>
+              <span className="stat__value">Epic</span>
+              <span className="stat__label">FHIR sandbox integration</span>
             </div>
           </div>
         </div>
@@ -495,32 +494,32 @@ export function LandingPage() {
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                No account required to try: Tap Explore Demo to experience the
-                caseload interface immediately.
+                No account needed to try it — tap Explore demo to see the real
+                interface with fictional data.
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                Offline-first sync: Local cache holds records safely, syncing to
-                Supabase once connectivity is restored.
+                Offline-first: entries save on your device first, and sync
+                automatically once you're back online.
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                Patient autonomy: Standalone patients can back up and restore
-                their profiles independently.
+                You're in control of your data — back up or restore your own
+                records any time, with or without a care team.
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                Audit trail logging: Staff check-in/out events and edits are
-                logged chronologically.
+                Every check-in, check-out, and edit is timestamped — a full
+                audit trail for the team.
               </li>
             </ul>
           </article>
@@ -532,9 +531,9 @@ export function LandingPage() {
             </span>
             <h3>Real-time team coordination.</h3>
             <p>
-              Nurses check in to patients to add notes, verify inputs, and sign
-              off sheets. Checking in generates a timeline log, ensuring staff
-              activities are fully coordinated and visible to the clinical team.
+              Nurses check in to a patient to add notes and verify entries.
+              Every check-in creates a timestamped log entry, so the whole team
+              can see who did what, and when.
             </p>
             <div className="row flex items-center gap-3 mt-4">
               <span className="tag tag-solid">Clinical audit trail</span>
@@ -547,10 +546,9 @@ export function LandingPage() {
       {/* Workshop */}
       <section className="workshop" id="identity">
         <header className="workshop__head">
-          <h2 className="scroll-animate">The working set, hand-trimmed.</h2>
+          <h2 className="scroll-animate">See it before you sign in.</h2>
           <p className="lead scroll-animate">
-            FluidSense ships three core pages and supporting sub-systems. They
-            share a single radius vocabulary and clinical aesthetics.
+            Three real screens from the actual product — not mockups.
           </p>
         </header>
 
@@ -570,8 +568,8 @@ export function LandingPage() {
             <div className="product-card__body">
               <h3 className="product-card__title">Clinician Dashboard</h3>
               <p className="body-sm muted max-w-[32ch] mt-1">
-                Caseload roster, check-in timelines, and active fluid balance
-                readouts in one view.
+                Caseload roster, check-in timeline, and each patient's fluid
+                balance in one view.
               </p>
             </div>
           </article>
@@ -591,8 +589,8 @@ export function LandingPage() {
             <div className="product-card__body">
               <h3 className="product-card__title">Voice Capture Dialog</h3>
               <p className="body-sm muted max-w-[32ch] mt-1">
-                Hands-free fluid tracking. Confirms quantity, type, and source
-                categories before saving.
+                Speak an entry, then confirm the amount and category before
+                anything saves.
               </p>
             </div>
           </article>
@@ -612,8 +610,8 @@ export function LandingPage() {
             <div className="product-card__body">
               <h3 className="product-card__title">Epic EHR Integration</h3>
               <p className="body-sm muted max-w-[32ch] mt-1">
-                Simulated FHIR server integration sandbox to test and validate
-                real-time patient rosters.
+                Pulls real patient data from Epic's public FHIR sandbox —
+                vitals, medications, and encounters, alongside recorded fluids.
               </p>
             </div>
           </article>
@@ -625,6 +623,7 @@ export function LandingPage() {
         <div className="colophon__inner">
           <div className="colophon__brand-col">
             <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="" className="h-7 w-7 object-contain" />
               <span className="font-display font-black text-xl tracking-tight text-white">
                 FluidSense
               </span>
@@ -644,26 +643,26 @@ export function LandingPage() {
                   <a onClick={() => navigate("/landing")}>Home</a>
                 </li>
                 <li>
-                  <a onClick={goToSignIn}>Sign In</a>
+                  <a onClick={goToSignIn}>Sign in</a>
                 </li>
                 <li>
-                  <a onClick={() => navigate("/onboarding")}>Onboarding</a>
+                  <a onClick={goToSignIn}>Get started</a>
                 </li>
               </ul>
             </div>
             <div className="colophon__column">
-              <h4>Resources</h4>
+              <h4>Explore (sign-in required)</h4>
               <ul>
                 <li>
                   <a onClick={() => navigate("/epic-sandbox")}>
-                    Epic FHIR Sandbox
+                    Epic integration
                   </a>
                 </li>
                 <li>
-                  <a onClick={() => navigate("/drinks")}>Fluid Presets</a>
+                  <a onClick={() => navigate("/drinks")}>Drink presets</a>
                 </li>
                 <li>
-                  <a onClick={() => navigate("/")}>Active Client</a>
+                  <a onClick={() => navigate("/")}>Today view</a>
                 </li>
               </ul>
             </div>
