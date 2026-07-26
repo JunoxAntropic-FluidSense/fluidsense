@@ -1,26 +1,31 @@
-// Bidirectional sync of patients (profiles) and fluid_events for healthcare
-// (workspace/organisation-linked) accounts.
+// Bidirectional sync of patients (profiles) and fluid_events between this
+// device and Supabase.
 //
-// Why this file exists: 0004_care_teams.sql's RLS changes only grant
-// *permission* for org members to see each other's patients — permission is
-// meaningless if nothing ever leaves the device that recorded it. Before
-// this file, patients/events lived only in this browser's localStorage
-// (persisted via zustand's `persist` middleware in useStore.ts) with no
-// server round-trip at all. This is the piece that actually makes "which
-// patients show up" work across a team, not just RLS-permitted in theory.
+// Why this file exists: 0001_init.sql's RLS already grants an account
+// permission to see its own rows (and 0004_care_teams.sql extends that to
+// org members), but permission is meaningless if nothing ever leaves the
+// device that recorded it. Before this file, patients/events lived only in
+// this browser's localStorage (persisted via zustand's `persist` middleware
+// in useStore.ts) with no server round-trip at all.
 //
 // Scope: profiles + fluid_events only — the two tables that determine
-// whether a patient and their record are visible to a colleague. weight/
-// symptom/medication/dialysis events, reminders, containers, and saved
-// fluids stay local-only for now; extending sync to those is a mechanical
-// repeat of the same push/pull/realtime pattern below, deferred rather than
-// built here to keep this change reviewable.
+// whether a patient and their record are visible anywhere but this device.
+// weight/symptom/medication/dialysis events, reminders, containers, and
+// saved fluids stay local-only for now; extending sync to those is a
+// mechanical repeat of the same push/pull/realtime pattern below, deferred
+// rather than built here to keep this change reviewable.
 //
-// Only ever engages for a healthcare account that has joined/created a
-// workspace (currentUser.mode === "healthcare" && currentUser.organisationId
-// is set). Patient-mode accounts, and healthcare accounts that haven't
-// joined a workspace yet, are completely untouched by this file — the
-// "backend optional, fully local-first" guarantee stays intact for them.
+// Two independent sync scopes live here, gated separately:
+//  - Owned sync (canSyncNow): any signed-in "live" account pushes/pulls its
+//    OWN patients/events (profiles.owner_user_id = this account), regardless
+//    of workspace membership. This is what makes a solo patient's own record
+//    exist server-side at all — without it, an "independent" patient profile
+//    is purely local and can never be linked to a clinic later (nothing to
+//    point an invite-redeemed organisation_id at).
+//  - Org sync (canSyncOrgNow): additionally, once an account has joined/
+//    created a healthcare workspace, the whole org roster + its events pull
+//    down and stay live via realtime — this is what makes "which patients
+//    show up" work across a team, not just RLS-permitted in theory.
 //
 // Push: on any local patients/events change, diff by object reference
 // against the previous state (zustand always produces a new array/object on
@@ -28,12 +33,11 @@
 // reference inequality per id is a reliable "this one changed" signal) and
 // upsert just the rows that changed.
 //
-// Pull: once on joining/starting a workspace session, then again whenever a
-// realtime postgres_changes notification fires for profiles/fluid_events —
-// refetches the whole org roster + event set and merges it into the local
-// store (remote authoritative for anything it has; any local patient/event
-// not yet represented remotely is kept as-is, since it may simply not have
-// pushed yet).
+// Pull: once on sign-in, then again whenever a realtime postgres_changes
+// notification fires for profiles/fluid_events (org sync only) — refetches
+// and merges into the local store (remote authoritative for anything it
+// has; any local patient/event not yet represented remotely is kept as-is,
+// since it may simply not have pushed yet).
 
 import { supabase, isSupabaseConfigured } from "./client";
 import { useStore } from "../../store/useStore";
@@ -43,9 +47,12 @@ type StoreSnapshot = ReturnType<typeof useStore.getState>;
 type RealtimeChannel = ReturnType<NonNullable<typeof supabase>["channel"]>;
 
 function canSyncNow(): boolean {
-  if (!isSupabaseConfigured() || useStore.getState().viewContext !== "live") {
-    return false;
-  }
+  return isSupabaseConfigured() && useStore.getState().viewContext === "live";
+}
+
+/** Additionally gated on the account actually belonging to a workspace. */
+function canSyncOrgNow(): boolean {
+  if (!canSyncNow()) return false;
   const state = useStore.getState();
   const { currentUser, patients, activePatientId } = state;
   const activePatient = patients.find((p) => p.id === activePatientId);
@@ -80,7 +87,7 @@ interface ProfileRow {
 function toProfileRow(
   p: PatientProfile,
   ownerUserId: string,
-  organisationId: string
+  organisationId: string | null
 ): ProfileRow {
   return {
     id: p.id,
@@ -256,15 +263,18 @@ async function pushPatients(changed: PatientProfile[]): Promise<void> {
   const { currentUser, authUserId } = useStore.getState();
   if (!authUserId) return;
   try {
-    const rows = changed
-      .filter((p) => Boolean(currentUser.organisationId || p.organisationId))
-      .map((p) =>
-        toProfileRow(
-          p,
-          authUserId,
-          (p.organisationId || currentUser.organisationId)!
-        )
-      );
+    // Every changed patient this account owns gets pushed, org or no org —
+    // an "independent" patient still needs a real server-side row (so it
+    // can later be linked to a clinic via invite code, see
+    // PatientClinicSharingCard.tsx). organisation_id is nullable on the
+    // profiles table precisely for this case.
+    const rows = changed.map((p) =>
+      toProfileRow(
+        p,
+        authUserId,
+        p.organisationId || currentUser.organisationId || null
+      )
+    );
     if (rows.length > 0) {
       await supabase.from("profiles").upsert(rows);
     }
@@ -361,7 +371,7 @@ async function pullProfilesMatching(
  * into the local store.
  */
 export async function pullOrganisationData(): Promise<void> {
-  if (!canSyncNow() || !supabase) return;
+  if (!canSyncOrgNow() || !supabase) return;
   const state = useStore.getState();
   const activePatient = state.patients.find(
     (p) => p.id === state.activePatientId
@@ -384,9 +394,7 @@ export async function pullOrganisationData(): Promise<void> {
  * onboarding wizard on every sign-in.
  */
 export async function pullOwnedPatientData(ownerUserId: string): Promise<void> {
-  if (!isSupabaseConfigured() || useStore.getState().viewContext !== "live") {
-    return;
-  }
+  if (!canSyncNow()) return;
   await pullProfilesMatching("owner_user_id", ownerUserId);
 }
 
@@ -417,7 +425,7 @@ let subscribedOrgId: string | null = null;
  * same org, or if sync isn't currently applicable.
  */
 function ensureRealtimeSubscription(): void {
-  if (!canSyncNow() || !supabase) return;
+  if (!canSyncOrgNow() || !supabase) return;
   const organisationId = useStore.getState().currentUser.organisationId!;
   if (subscribedOrgId === organisationId && realtimeChannel) return;
 
@@ -465,13 +473,18 @@ export function startPatientSync(): void {
   if (started) return;
   started = true;
   unsubscribeStore = useStore.subscribe(handleStoreChange);
+  // Flush once on start, not just on future changes — a patient created
+  // before this device ever had owned-sync (or before this feature existed)
+  // otherwise sits local-only forever, since handleStoreChange only pushes
+  // on a subsequent mutation, never on load.
+  if (canSyncNow()) void pushPatients(useStore.getState().patients);
   void pullOrganisationData();
   ensureRealtimeSubscription();
   // Re-evaluate on every store change too, cheaply — covers "just joined a
   // workspace" (organisationId went from unset to set) and "workspace
   // changed" without a separate auth-style event stream to hook into.
   useStore.subscribe(() => {
-    if (canSyncNow()) ensureRealtimeSubscription();
+    if (canSyncOrgNow()) ensureRealtimeSubscription();
   });
 }
 
