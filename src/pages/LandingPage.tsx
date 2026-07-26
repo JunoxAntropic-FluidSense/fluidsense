@@ -138,7 +138,6 @@ export function LandingPage() {
         .ls-root h1, .ls-root h2, .ls-root h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
         .ls-root p { margin: 0; }
         .ls-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-        .ls-root a { color: inherit; }
         .ls-root :focus-visible { outline: 2px solid var(--accent-intake); outline-offset: 3px; border-radius: 4px; }
         @media (prefers-reduced-motion: reduce) {
           .ls-root *, .ls-root *::before, .ls-root *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
