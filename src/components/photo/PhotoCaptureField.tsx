@@ -126,7 +126,6 @@ export function PhotoCaptureField({
         id={inputId}
         type="file"
         accept="image/*"
-        capture="environment"
         aria-label={label}
         onChange={handleFileChange}
         className="sr-only"

@@ -1,13 +1,19 @@
 // Supabase Edge Function: proxies a drink-container photo to a vision-capable
-// chat-completion provider so the provider API key never touches the browser.
+// chat-completion model on Azure AI Foundry so the provider key never
+// touches the browser.
 //
 // Deploy with:  supabase functions deploy estimate-volume
-// Configure the key with:  supabase secrets set OPENAI_API_KEY=sk-...
+// Configure with:
+//   supabase secrets set AZURE_AI_ENDPOINT=https://<your-resource>.services.ai.azure.com/openai/v1
+//   supabase secrets set AZURE_AI_DEPLOYMENT=<your deployment name, e.g. gpt-5.6-sol>
+//   supabase secrets set AZURE_AI_API_KEY=<key>
 //
 // The function never persists the uploaded image — it is read into memory,
 // forwarded to the provider, and discarded once the response is returned.
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const AZURE_AI_ENDPOINT = Deno.env.get("AZURE_AI_ENDPOINT");
+const AZURE_AI_DEPLOYMENT = Deno.env.get("AZURE_AI_DEPLOYMENT");
+const AZURE_AI_API_KEY = Deno.env.get("AZURE_AI_API_KEY");
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "*";
 
 const corsHeaders = {
@@ -59,7 +65,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  if (!OPENAI_API_KEY) {
+  if (!AZURE_AI_ENDPOINT || !AZURE_AI_DEPLOYMENT || !AZURE_AI_API_KEY) {
     return new Response(
       JSON.stringify({
         error: "Volume estimation is not configured on the server.",
@@ -93,35 +99,38 @@ Deno.serve(async (req: Request) => {
     const mimeType = image.type || "image/jpeg";
     const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-    const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text:
-                  "Estimate the liquid volume visible in this photo of a " +
-                  "drink container.",
-              },
-              { type: "image_url", image_url: { url: dataUrl } },
-            ],
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: RESPONSE_JSON_SCHEMA,
+    const upstream = await fetch(
+      `${AZURE_AI_ENDPOINT.replace(/\/$/, "")}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${AZURE_AI_API_KEY}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          model: AZURE_AI_DEPLOYMENT,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text:
+                    "Estimate the liquid volume visible in this photo of a " +
+                    "drink container.",
+                },
+                { type: "image_url", image_url: { url: dataUrl } },
+              ],
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: RESPONSE_JSON_SCHEMA,
+          },
+        }),
+      }
+    );
 
     if (!upstream.ok) {
       const detail = await upstream.text();

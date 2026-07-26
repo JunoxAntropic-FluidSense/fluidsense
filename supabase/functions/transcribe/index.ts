@@ -2,11 +2,14 @@
 // provider API key never touches the browser.
 //
 // Deploy with:  supabase functions deploy transcribe
-// Configure the key with:  supabase secrets set OPENAI_API_KEY=sk-...
+// Configure a key with ONE of:
+//   supabase secrets set ELEVENLABS_API_KEY=sk_...   (preferred if both set)
+//   supabase secrets set OPENAI_API_KEY=sk-...
 //
 // The function never persists the uploaded audio — it is read into memory,
 // forwarded to the provider, and discarded once the response is returned.
 
+const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "*";
 
@@ -16,6 +19,46 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function transcribeWithElevenLabs(audio: File): Promise<string> {
+  const upstreamForm = new FormData();
+  upstreamForm.append("file", audio, "recording.webm");
+  upstreamForm.append("model_id", "scribe_v1");
+
+  const upstream = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+    method: "POST",
+    headers: { "xi-api-key": ELEVENLABS_API_KEY! },
+    body: upstreamForm,
+  });
+
+  if (!upstream.ok) {
+    throw new Error(await upstream.text());
+  }
+  const result = await upstream.json();
+  return result.text ?? "";
+}
+
+async function transcribeWithOpenAI(audio: File): Promise<string> {
+  const upstreamForm = new FormData();
+  upstreamForm.append("file", audio, "recording.webm");
+  upstreamForm.append("model", "gpt-4o-transcribe");
+  upstreamForm.append("response_format", "json");
+
+  const upstream = await fetch(
+    "https://api.openai.com/v1/audio/transcriptions",
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+      body: upstreamForm,
+    }
+  );
+
+  if (!upstream.ok) {
+    throw new Error(await upstream.text());
+  }
+  const result = await upstream.json();
+  return result.text ?? "";
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -29,7 +72,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  if (!OPENAI_API_KEY) {
+  if (!ELEVENLABS_API_KEY && !OPENAI_API_KEY) {
     return new Response(
       JSON.stringify({
         error: "Transcription provider is not configured on the server.",
@@ -54,43 +97,21 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const upstreamForm = new FormData();
-    upstreamForm.append("file", audio, "recording.webm");
-    upstreamForm.append("model", "gpt-4o-transcribe");
-    upstreamForm.append("response_format", "json");
+    const transcript = ELEVENLABS_API_KEY
+      ? await transcribeWithElevenLabs(audio)
+      : await transcribeWithOpenAI(audio);
 
-    const upstream = await fetch(
-      "https://api.openai.com/v1/audio/transcriptions",
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-        body: upstreamForm,
-      }
-    );
-
-    if (!upstream.ok) {
-      const detail = await upstream.text();
-      return new Response(
-        JSON.stringify({ error: "Transcription provider error.", detail }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const result = await upstream.json();
-    return new Response(JSON.stringify({ transcript: result.text ?? "" }), {
+    return new Response(JSON.stringify({ transcript }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     return new Response(
       JSON.stringify({
-        error: "Unexpected server error.",
+        error: "Transcription provider error.",
         detail: String(err),
       }),
       {
-        status: 500,
+        status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );

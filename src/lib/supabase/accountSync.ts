@@ -114,8 +114,15 @@ export async function pullUserRow(authUserId: string): Promise<void> {
     if (userRow) {
       const userMode = (userRow.mode as Mode) || "patient";
       const userRole = (userRow.role as Role) || "patient";
-      const orgResult = await getMyOrganisation();
 
+      // Restore the core account fields (mode, role, onboardingCompleted)
+      // from userRow immediately — this is what makes a clinician land back
+      // on their real account instead of onboarding after re-signing in.
+      // The org lookup below is best-effort and must never gate this: if it
+      // throws (network blip, RLS not yet warm right after sign-in), the
+      // catch below used to swallow the error before this setState ever
+      // ran, silently leaving the account stuck at its post-sign-out reset
+      // state (mode "patient", onboardingCompleted false) forever.
       useStore.setState((state) => ({
         mode: userMode,
         currentUser: {
@@ -130,12 +137,25 @@ export async function pullUserRow(authUserId: string): Promise<void> {
           saveVoiceTranscripts:
             userRow.save_voice_transcripts ??
             state.currentUser.saveVoiceTranscripts,
-          organisationId:
-            orgResult.organisationId ?? state.currentUser.organisationId,
-          organisationName:
-            orgResult.organisationName ?? state.currentUser.organisationName,
         },
       }));
+
+      try {
+        const orgResult = await getMyOrganisation();
+        useStore.setState((state) => ({
+          currentUser: {
+            ...state.currentUser,
+            organisationId:
+              orgResult.organisationId ?? state.currentUser.organisationId,
+            organisationName:
+              orgResult.organisationName ?? state.currentUser.organisationName,
+          },
+        }));
+      } catch {
+        // Best-effort only — workspace info can lag or fail without
+        // affecting the account restore above.
+      }
+
       void pullOrganisationData();
     }
   } catch {

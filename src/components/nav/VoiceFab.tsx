@@ -11,6 +11,7 @@ import { useVoiceCapture } from "../../hooks/useVoiceCapture";
 import { useActivePatient } from "../../hooks/useFluidData";
 import { useStore } from "../../store/useStore";
 import { extractVoiceEvents } from "../../lib/voice/extractEvents";
+import { speakConfirmation } from "../../lib/voice/speak";
 
 export function VoiceFab() {
   const location = useLocation();
@@ -105,6 +106,7 @@ export function VoiceFab() {
 
     if (savedLogs.length > 0) {
       setSuccessSummary(`Saved: ${savedLogs.join(", ")}`);
+      void speakConfirmation(`Logged ${savedLogs.join(", and ")}.`);
       setTimeout(() => {
         setIsOpen(false);
         capture.reset();

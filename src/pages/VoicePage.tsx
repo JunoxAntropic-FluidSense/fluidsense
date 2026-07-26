@@ -4,6 +4,7 @@ import { Microphone } from "@phosphor-icons/react";
 import { useVoiceCapture } from "../hooks/useVoiceCapture";
 import { extractVoiceEvents } from "../lib/voice/extractEvents";
 import { SERVER_STT_CONFIGURED } from "../lib/voice/transcribe";
+import { speakConfirmation } from "../lib/voice/speak";
 import type { StructuredVoiceEvent } from "../lib/voice/types";
 import { useStore } from "../store/useStore";
 import { useActivePatient } from "../hooks/useFluidData";
@@ -130,6 +131,7 @@ export function VoicePage() {
 
   const confirmAll = () => {
     if (!patient) return;
+    const savedLogs: string[] = [];
     for (const { c, i } of activeCandidates) {
       if (c.direction === "unknown" || !c.category) continue;
       const resolution = duplicateResolutions[i];
@@ -141,6 +143,11 @@ export function VoicePage() {
           "Replaced by a newer voice entry"
         );
       }
+      savedLogs.push(
+        c.amountMl
+          ? `${Math.round(c.amountMl)} mL of ${CATEGORY_LABEL[c.category].toLowerCase()}`
+          : CATEGORY_LABEL[c.category].toLowerCase()
+      );
       const created = addEvent({
         patientId: patient.id,
         direction: c.direction,
@@ -180,6 +187,9 @@ export function VoicePage() {
             // a save failure for an already-confirmed event.
           });
       }
+    }
+    if (savedLogs.length > 0) {
+      void speakConfirmation(`Logged ${savedLogs.join(", and ")}.`);
     }
     resetAll();
     navigate("/");
