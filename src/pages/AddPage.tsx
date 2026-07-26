@@ -15,8 +15,10 @@ export function AddPage() {
         className="block rounded-3xl bg-intake-600 text-white p-6 hover:bg-intake-700"
       >
         <Drop size={32} weight="fill" aria-hidden="true" />
-        <h2 className="text-xl font-extrabold mt-2">Record intake</h2>
-        <p className="text-sm text-intake-50/90">
+        <h2 className="text-xl font-extrabold mt-2 text-white">
+          Record intake
+        </h2>
+        <p className="text-sm text-white/90">
           Drinks, IV fluids, feeds and more
         </p>
       </Link>
@@ -26,8 +28,10 @@ export function AddPage() {
         className="block rounded-3xl bg-output-600 text-white p-6 hover:bg-output-700"
       >
         <Toilet size={32} weight="fill" aria-hidden="true" />
-        <h2 className="text-xl font-extrabold mt-2">Record output or loss</h2>
-        <p className="text-sm text-output-50/90">
+        <h2 className="text-xl font-extrabold mt-2 text-white">
+          Record output or loss
+        </h2>
+        <p className="text-sm text-white/90">
           Urine, vomiting, diarrhoea, sweating and more
         </p>
       </Link>

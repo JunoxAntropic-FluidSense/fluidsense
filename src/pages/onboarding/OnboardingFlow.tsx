@@ -130,6 +130,7 @@ export function OnboardingFlow() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [careTeamShareConsent, setCareTeamShareConsent] = useState(false);
   const [wantsCheckInReminders, setWantsCheckInReminders] = useState(false);
+  const [wantsMedicationDialysis, setWantsMedicationDialysis] = useState(false);
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
   const [joinedOrgName, setJoinedOrgName] = useState<string | null>(null);
   const [isTestWorkspace, setIsTestWorkspace] = useState(true);
@@ -264,7 +265,13 @@ export function OnboardingFlow() {
         setCheckInNotificationsEnabled(result.ok);
       }
     }
-    navigate(isHealthcare ? "/dashboard" : "/");
+    navigate(
+      isHealthcare
+        ? "/dashboard"
+        : isPatient && wantsMedicationDialysis
+          ? "/care-log"
+          : "/"
+    );
   };
 
   return (
@@ -594,6 +601,21 @@ export function OnboardingFlow() {
                   />
                   Remind me if I haven't logged anything in a while
                 </label>
+                <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">
+                  <Checkbox
+                    checked={wantsMedicationDialysis}
+                    onChange={(e) =>
+                      setWantsMedicationDialysis(e.target.checked)
+                    }
+                  />
+                  I want to log medications or dialysis
+                </label>
+                {wantsMedicationDialysis && (
+                  <p className="text-xs text-fog-500">
+                    You'll land on that log right after setup — it's also always
+                    reachable from Profile.
+                  </p>
+                )}
 
                 <SectionHeading>Sharing</SectionHeading>
                 <label className="flex items-center gap-2 text-sm font-semibold text-navy-700">

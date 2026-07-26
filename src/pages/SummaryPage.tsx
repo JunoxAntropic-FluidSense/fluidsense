@@ -7,12 +7,19 @@ import { Button } from "../components/ui/Button";
 import { ReliabilityPill } from "../components/ui/ReliabilityPill";
 import { Field, Select } from "../components/ui/Field";
 import { NoActivePatientState } from "../components/ui/NoActivePatientState";
+import { DateRangePicker } from "../components/ui/DateRangePicker";
 import { WeatherNote } from "../components/today/WeatherNote";
 import { PERIOD_OPTIONS } from "../lib/period";
-import { formatMl, formatMlPlain, describeUnmeasured } from "../lib/calc";
+import {
+  formatMl,
+  formatMlPlain,
+  describeUnmeasured,
+  eventsInWindow,
+  computeBalance,
+} from "../lib/calc";
 import { isSupabaseConfigured } from "../lib/supabase/client";
 import { sendCareTeamSummary } from "../lib/careTeam/sendSummary";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, subDays, isToday } from "date-fns";
 import { DIALYSIS_MODALITY_LABEL } from "../types";
 import type { SummaryPeriod } from "../types";
 
@@ -22,11 +29,14 @@ export function SummaryPage() {
     patient,
     period,
     setPeriod,
+    customRange,
+    setCustomRange,
     balance,
     reliability,
     windowEvents,
     range,
   } = useFluidData("24h");
+  const allEvents = useStore((s) => s.events);
   const weightEvents = useStore((s) => s.weightEvents);
   const medicationEvents = useStore((s) => s.medicationEvents);
   const dialysisAppointments = useStore((s) => s.dialysisAppointments);
@@ -49,6 +59,21 @@ export function SummaryPage() {
     patientWeights.length >= 2
       ? patientWeights[0].weightKg - patientWeights[1].weightKg
       : undefined;
+
+  const last7Days = useMemo(() => {
+    if (!patient) return [];
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = subDays(today, i);
+      const dayEvents = eventsInWindow(
+        allEvents,
+        patient.id,
+        startOfDay(day),
+        endOfDay(day)
+      );
+      return { date: day, balance: computeBalance(dayEvents) };
+    });
+  }, [allEvents, patient]);
 
   const unmeasuredDescriptions = useMemo(
     () => describeUnmeasured(balance.unmeasuredEvents),
@@ -79,6 +104,10 @@ export function SummaryPage() {
 
   if (!patient) return <NoActivePatientState />;
 
+  const allowanceRemainingMl = patient.allowance
+    ? patient.allowance.dailyMl - balance.totalIntakeMl
+    : 0;
+
   const summaryText = buildSummaryText();
 
   function buildSummaryText() {
@@ -108,6 +137,7 @@ export function SummaryPage() {
             "Fluid allowance:",
             `- clinician-set allowance: ${formatMlPlain(patient.allowance.dailyMl)}`,
             `- recorded intake: ${formatMlPlain(balance.totalIntakeMl)}`,
+            `- remaining based on recorded intake: ${allowanceRemainingMl >= 0 ? "" : "−"}${formatMlPlain(Math.abs(allowanceRemainingMl))}`,
             "",
           ]
         : []),
@@ -200,6 +230,20 @@ export function SummaryPage() {
         </Select>
       </Field>
 
+      {period === "custom" && (
+        <Field label="Custom date range">
+          <DateRangePicker
+            from={customRange?.start}
+            to={customRange?.end}
+            onChange={(r) =>
+              setCustomRange(
+                r.from && r.to ? { start: r.from, end: r.to } : undefined
+              )
+            }
+          />
+        </Field>
+      )}
+
       <WeatherNote />
 
       <Card className="p-5">
@@ -255,6 +299,29 @@ export function SummaryPage() {
       </Card>
 
       <Card className="p-5">
+        <CardHeading>Last 7 days</CardHeading>
+        <p className="text-sm text-fog-600 mb-2">
+          Recorded net balance per calendar day (total intake minus total
+          numerical output) — not related to the period selected above.
+        </p>
+        <ul className="divide-y divide-navy-900/5">
+          {last7Days.map(({ date, balance: dayBalance }) => (
+            <li
+              key={date.toISOString()}
+              className="flex items-center justify-between py-2"
+            >
+              <span className="text-sm text-navy-800">
+                {isToday(date) ? "Today" : format(date, "EEE d MMM")}
+              </span>
+              <span className="font-bold text-navy-900">
+                {formatMl(dayBalance.recordedBalanceMl)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="p-5">
         <CardHeading>Unmeasured events ({balance.unmeasuredCount})</CardHeading>
         {unmeasuredDescriptions.length === 0 ? (
           <p className="text-sm text-fog-600">
@@ -295,6 +362,11 @@ export function SummaryPage() {
           <Row
             label="Recorded intake"
             value={formatMlPlain(balance.totalIntakeMl)}
+          />
+          <Row
+            label="Remaining based on recorded intake"
+            value={`${allowanceRemainingMl >= 0 ? "" : "−"}${formatMlPlain(Math.abs(allowanceRemainingMl))}`}
+            strong
           />
           <p className="text-xs text-fog-500 mt-2">
             Set by {patient.allowance.setByName}, not calculated by the app.

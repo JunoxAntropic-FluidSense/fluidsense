@@ -40,7 +40,7 @@
 // since it may simply not have pushed yet).
 
 import { supabase, isSupabaseConfigured } from "./client";
-import { useStore } from "../../store/useStore";
+import { useStore, newQuickButtons } from "../../store/useStore";
 import type { PatientProfile, FluidEvent } from "../../types";
 
 type StoreSnapshot = ReturnType<typeof useStore.getState>;
@@ -119,14 +119,26 @@ function fromProfileRow(
   return {
     // Fields with no server column yet (favouriteFluidIds, containers,
     // quickButtons, reminders, careTeamContacts, etc.) fall back to whatever
-    // this device already has locally for that id, or a sensible empty
-    // default for a patient this device has never seen before.
+    // this device already has locally for that id, or a sensible default for
+    // a patient this device has never seen before. quickButtons specifically
+    // can't default to an empty array — completeOnboarding() always gives a
+    // freshly-created patient the standard set (newQuickButtons()), and a
+    // patient restored via pull (a fresh device, or local storage cleared)
+    // should land in the same usable state, not a Quick Add grid with
+    // nothing in it.
     ...(existing ?? {
       favouriteFluidIds: [],
       containers: [],
-      quickButtons: [],
+      quickButtons: newQuickButtons(),
       reminders: [],
     }),
+    // Self-heal a patient that already merged in with an empty array before
+    // this fallback existed — an onboarded patient should never actually
+    // have zero quick buttons, so treat empty the same as "unset".
+    quickButtons:
+      existing?.quickButtons && existing.quickButtons.length > 0
+        ? existing.quickButtons
+        : newQuickButtons(),
     id: row.id,
     displayName: row.display_name,
     careSetting: row.care_setting,

@@ -211,7 +211,7 @@ const emptyLiveSnapshot: LiveSnapshot = {
   activePatientId: "",
 };
 
-function newQuickButtons(sex?: Sex) {
+export function newQuickButtons(sex?: Sex) {
   return [
     {
       id: uuid(),
