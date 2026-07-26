@@ -37,7 +37,7 @@ function FluidSenseLogo() {
   return (
     <a
       href="#top"
-      className="relative z-20 flex items-center gap-2 px-2 py-1 text-sm font-bold text-navy-900 dark:text-white"
+      className="relative z-20 flex items-center gap-2 px-2 py-1 text-sm font-bold text-navy-900"
     >
       <Drop size={22} weight="fill" className="text-intake-500" />
       FluidSense
@@ -86,7 +86,7 @@ export function LandingPage() {
   }
 
   return (
-    <div id="top" className="bg-white dark:bg-black">
+    <div id="top" className="bg-fog-50">
       {/* ---------- Navbar (Aceternity resizable-navbar) ---------- */}
       <Navbar>
         <NavBody>
@@ -118,7 +118,7 @@ export function LandingPage() {
                 key={item.link}
                 href={item.link}
                 onClick={() => setMobileOpen(false)}
-                className="w-full text-navy-800 dark:text-white font-semibold"
+                className="w-full text-navy-800 font-semibold"
               >
                 {item.name}
               </a>
@@ -144,22 +144,18 @@ export function LandingPage() {
       {/* ---------- Hero (HeroHighlight + BackgroundBeams) ---------- */}
       <HeroHighlight containerClassName="!h-auto pt-32 pb-24">
         <div className="relative max-w-4xl mx-auto text-center px-6">
-          <span className="inline-flex items-center gap-2 rounded-full bg-intake-50 dark:bg-intake-950/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-intake-600 dark:text-intake-300 mb-6">
+          <span className="inline-flex items-center gap-2 rounded-full bg-intake-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-intake-600 mb-6">
             <Waveform size={14} weight="bold" /> Voice-first fluid tracking
           </span>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-navy-900 dark:text-white leading-tight tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-navy-900 leading-tight tracking-tight">
             Say what you drank.
             <br />
-            Know what's{" "}
-            <Highlight className="text-navy-900 dark:text-white">
-              real
-            </Highlight>
-            .
+            Know what's <Highlight className="text-navy-900">real</Highlight>.
           </h1>
           <div className="mt-6 max-w-2xl mx-auto">
             <TextGenerateEffect
               words="FluidSense logs intake and output the moment you speak it, then holds every entry to one honest line: measured, estimated, or unknown."
-              className="text-lg text-navy-700 dark:text-fog-300 font-medium"
+              className="text-lg text-navy-700 font-medium"
               duration={0.4}
             />
           </div>
@@ -179,7 +175,7 @@ export function LandingPage() {
               See how it works ↓
             </NavbarButton>
           </div>
-          <p className="mt-5 text-xs text-fog-500 dark:text-fog-400">
+          <p className="mt-5 text-xs text-fog-500">
             No card required · Works fully offline · Built for patients, carers,
             and care teams
           </p>
@@ -203,53 +199,53 @@ export function LandingPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-intake-500 mb-3">
             How it works
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900 dark:text-white">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900">
             Three steps. Nothing saved without your say-so.
           </h2>
-          <p className="mt-3 text-navy-600 dark:text-fog-400">
+          <p className="mt-3 text-navy-600">
             Every voice entry ends at a confirmation screen you can edit or
             cancel — never wired to save automatically, no matter how confident
             the transcript sounds.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="rounded-2xl border border-navy-900/10 dark:border-white/10 p-6">
+          <div className="rounded-2xl border border-navy-900/10 p-6">
             <div className="flex items-center gap-2 mb-4 text-intake-500">
               <Microphone size={20} weight="fill" />
               <span className="text-xs font-mono font-bold">01 — SPEAK IT</span>
             </div>
-            <h3 className="font-bold text-lg text-navy-900 dark:text-white">
+            <h3 className="font-bold text-lg text-navy-900">
               Talk naturally, mid-task
             </h3>
-            <p className="mt-2 text-sm text-navy-600 dark:text-fog-400">
+            <p className="mt-2 text-sm text-navy-600">
               "I drank about half a mug of tea, and passed 300 mL of urine" —
               spoken numbers and container fractions understood as-is.
             </p>
           </div>
-          <div className="rounded-2xl border border-navy-900/10 dark:border-white/10 p-6">
+          <div className="rounded-2xl border border-navy-900/10 p-6">
             <div className="flex items-center gap-2 mb-4 text-amber-500">
               <ShieldCheck size={20} weight="fill" />
               <span className="text-xs font-mono font-bold">
                 02 — CONFIRM IT
               </span>
             </div>
-            <h3 className="font-bold text-lg text-navy-900 dark:text-white">
+            <h3 className="font-bold text-lg text-navy-900">
               Review before anything saves
             </h3>
-            <p className="mt-2 text-sm text-navy-600 dark:text-fog-400">
+            <p className="mt-2 text-sm text-navy-600">
               Each detected entry shows its own status and amount, editable
               independently — nothing writes until you tap confirm.
             </p>
           </div>
-          <div className="rounded-2xl border border-navy-900/10 dark:border-white/10 p-6">
+          <div className="rounded-2xl border border-navy-900/10 p-6">
             <div className="flex items-center gap-2 mb-4 text-output-500">
               <Drop size={20} weight="fill" />
               <span className="text-xs font-mono font-bold">03 — SEE IT</span>
             </div>
-            <h3 className="font-bold text-lg text-navy-900 dark:text-white">
+            <h3 className="font-bold text-lg text-navy-900">
               A balance that shows its own gaps
             </h3>
-            <p className="mt-2 text-sm text-navy-600 dark:text-fog-400">
+            <p className="mt-2 text-sm text-navy-600">
               Totals ship with a reliability read on the record itself — built
               from guesses, and it says so.
             </p>
@@ -258,16 +254,16 @@ export function LandingPage() {
       </section>
 
       {/* ---------- The four statuses (BentoGrid) ---------- */}
-      <section id="honesty" className="py-24 bg-fog-50 dark:bg-neutral-950">
+      <section id="honesty" className="py-24 bg-fog-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="max-w-xl mb-14">
             <p className="text-xs font-bold uppercase tracking-widest text-intake-500 mb-3">
               The core idea
             </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900 dark:text-white">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900">
               Four statuses. Never one blurred number.
             </h2>
-            <p className="mt-3 text-navy-600 dark:text-fog-400">
+            <p className="mt-3 text-navy-600">
               Most tools reduce every entry to a single confident figure.
               FluidSense keeps the distinction visible everywhere it appears.
             </p>
@@ -306,7 +302,7 @@ export function LandingPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-intake-500 mb-3">
             One record, every role
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900 dark:text-white">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-navy-900">
             Patients, carers, and care teams — looking at the same truth.
           </h2>
         </div>
@@ -331,14 +327,10 @@ export function LandingPage() {
           ].map((a) => (
             <div
               key={a.role}
-              className="rounded-2xl border border-navy-900/10 dark:border-white/10 p-6 hover:bg-intake-50 dark:hover:bg-intake-950/20 transition-colors"
+              className="rounded-2xl border border-navy-900/10 p-6 hover:bg-intake-50 transition-colors"
             >
-              <h3 className="font-bold text-navy-900 dark:text-white">
-                {a.role}
-              </h3>
-              <p className="mt-2 text-sm text-navy-600 dark:text-fog-400">
-                {a.copy}
-              </p>
+              <h3 className="font-bold text-navy-900">{a.role}</h3>
+              <p className="mt-2 text-sm text-navy-600">{a.copy}</p>
             </div>
           ))}
         </div>
@@ -374,20 +366,20 @@ export function LandingPage() {
       </section>
 
       <footer className="max-w-6xl mx-auto px-6 pb-10">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-navy-900/10 dark:border-white/10 pt-6 text-xs text-fog-500">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-navy-900/10 pt-6 text-xs text-fog-500">
           <span>
             FluidSense is a prototype. It is not a certified clinical device.
           </span>
           <div className="flex gap-5">
             <a
               onClick={() => navigate("/privacy")}
-              className="cursor-pointer hover:text-navy-700 dark:hover:text-fog-300"
+              className="cursor-pointer hover:text-navy-700"
             >
               Privacy
             </a>
             <a
               onClick={() => navigate("/terms")}
-              className="cursor-pointer hover:text-navy-700 dark:hover:text-fog-300"
+              className="cursor-pointer hover:text-navy-700"
             >
               Terms
             </a>

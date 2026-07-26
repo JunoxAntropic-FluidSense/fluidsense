@@ -41,47 +41,21 @@ export const HeroHighlight = ({
   return (
     <div
       className={cn(
-        "group relative flex h-[40rem] w-full items-center justify-center bg-white dark:bg-black",
+        "group relative flex h-[40rem] w-full items-center justify-center bg-fog-50",
         containerClassName
       )}
       onMouseMove={handleMouseMove}
     >
       <div
-        className="pointer-events-none absolute inset-0 dark:hidden"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage: dotPatterns.light.default,
         }}
       />
-      <div
-        className="pointer-events-none absolute inset-0 hidden dark:block"
-        style={{
-          backgroundImage: dotPatterns.dark.default,
-        }}
-      />
       <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 dark:hidden"
+        className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100"
         style={{
           backgroundImage: dotPatterns.light.hover,
-          WebkitMaskImage: useMotionTemplate`
-            radial-gradient(
-              200px circle at ${mouseX}px ${mouseY}px,
-              black 0%,
-              transparent 100%
-            )
-          `,
-          maskImage: useMotionTemplate`
-            radial-gradient(
-              200px circle at ${mouseX}px ${mouseY}px,
-              black 0%,
-              transparent 100%
-            )
-          `,
-        }}
-      />
-      <motion.div
-        className="pointer-events-none absolute inset-0 hidden opacity-0 transition duration-300 group-hover:opacity-100 dark:block"
-        style={{
-          backgroundImage: dotPatterns.dark.hover,
           WebkitMaskImage: useMotionTemplate`
             radial-gradient(
               200px circle at ${mouseX}px ${mouseY}px,
@@ -130,7 +104,7 @@ export const Highlight = ({
         display: "inline",
       }}
       className={cn(
-        `relative inline-block rounded-lg bg-gradient-to-r from-sky-300 to-blue-400 px-1 pb-1 dark:from-sky-600 dark:to-blue-700`,
+        `relative inline-block rounded-lg bg-gradient-to-r from-intake-200 to-intake-400 px-1 pb-1`,
         className
       )}
     >
