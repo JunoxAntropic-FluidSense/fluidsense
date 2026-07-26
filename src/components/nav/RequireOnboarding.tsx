@@ -25,10 +25,10 @@ export function RequireOnboarding() {
       return null;
     }
     if (!onboardingCompleted) {
-      return <Navigate to="/welcome" replace />;
+      return <Navigate to="/landing" replace />;
     }
     if (authStatus !== "signed-in") {
-      return <Navigate to="/welcome" replace />;
+      return <Navigate to="/landing" replace />;
     }
   }
 
