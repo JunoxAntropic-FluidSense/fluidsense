@@ -4,7 +4,7 @@ import { useStore } from "../../store/useStore";
 import { Card, CardHeading } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Field, Input } from "../ui/Field";
-import { redeemOrganisationInvite } from "../../lib/supabase/organisations";
+import { redeemPatientClinicInvite } from "../../lib/supabase/organisations";
 import { supabase } from "../../lib/supabase/client";
 
 function PatientQrCode({ value }: { value: string }) {
@@ -72,22 +72,20 @@ export function PatientClinicSharingCard() {
     if (!clinicCode.trim()) return;
     setLinkError(null);
     setLinking(true);
-    const result = await redeemOrganisationInvite(clinicCode.trim());
+    const result = await redeemPatientClinicInvite(
+      clinicCode.trim(),
+      patient.id
+    );
     setLinking(false);
     if (result.error || !result.organisationId) {
       setLinkError(result.error?.message ?? "Couldn't verify clinic code.");
       return;
     }
 
+    // The RPC already set profiles.organisation_id server-side — mirror it
+    // locally so the UI reflects "linked" immediately, without waiting on
+    // the next patientSync pull.
     updatePatient(patient.id, { organisationId: result.organisationId });
-
-    // Server-side profile sync
-    if (supabase && authUserId) {
-      await supabase
-        .from("profiles")
-        .update({ organisation_id: result.organisationId })
-        .eq("id", patient.id);
-    }
     setClinicCode("");
   };
 

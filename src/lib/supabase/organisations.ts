@@ -74,6 +74,30 @@ export async function redeemOrganisationInvite(
   };
 }
 
+/**
+ * Redeems a clinic invite code on behalf of a patient/carer's own profile —
+ * distinct from redeemOrganisationInvite, which is staff-only (it inserts
+ * into organisation_members, whose role column can't hold a patient/carer
+ * role at all). This just validates the code and sets organisation_id on a
+ * profile the caller owns (see 0005_patient_clinic_invite.sql).
+ */
+export async function redeemPatientClinicInvite(
+  code: string,
+  profileId: string
+): Promise<RedeemInviteResult> {
+  if (!supabase) {
+    return { organisationId: null, error: NOT_CONFIGURED_ERROR };
+  }
+  const { data, error } = await supabase.rpc("redeem_patient_clinic_invite", {
+    p_code: code,
+    p_profile_id: profileId,
+  });
+  return {
+    organisationId: error ? null : (data as string),
+    error: normalizeError(error),
+  };
+}
+
 export interface CreateInviteResult {
   code: string | null;
   error: NormalizedOrgError | null;
