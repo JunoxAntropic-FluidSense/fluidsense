@@ -229,15 +229,15 @@ export function LandingPage() {
           <div className="opening__main">
             <span className="label flex items-center gap-2">
               <span className="dot" aria-hidden="true"></span>
-              Voice-First Clinical Tracking
+              For Heart, Kidney &amp; Liver Patients
             </span>
             <h1 className="opening__title">
               Every fluid tracked. Nothing <em>guessed</em>.
             </h1>
             <p className="opening__lead">
-              Log a drink or a urine output by voice in seconds. FluidSense
-              records it instantly and always tells you whether that number was
-              measured, estimated, or never recorded at all.
+              Heart, kidney, and liver conditions mean fluid intake has to be
+              watched closely. FluidSense lets a patient log a drink or a
+              bathroom trip by voice, and their care team sees it right away.
             </p>
             <div className="opening__cta">
               <button onClick={goToSignIn} className="btn">
@@ -303,13 +303,15 @@ export function LandingPage() {
       <section className="spread" id="who">
         <header className="spread__head">
           <h2 className="spread__title scroll-animate">
-            One record, read the same way
-            <span className="accent"> by everyone who sees it.</span>
+            The goal is fewer
+            <span className="accent"> trips back to hospital.</span>
           </h2>
           <p className="spread__sub scroll-animate">
-            Patient mode and healthcare mode share one data model. A clinician
-            reviewing a chart sees the exact same measured, estimated, or
-            unmeasured status a patient logged at home.
+            A missed pattern in how much someone's been drinking is often what
+            lands a heart, kidney, or liver patient back in hospital. When a
+            patient logs fluids at home, their care team sees the same record
+            right away, including whether each number was measured, estimated,
+            or never recorded.
           </p>
         </header>
 
@@ -364,8 +366,8 @@ export function LandingPage() {
                     size={18}
                     className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                   />
-                  Never tells you what your numbers mean medically — that's for
-                  your care team.
+                  Never tells you what your numbers mean medically. That's for
+                  your care team to say.
                 </li>
               </ul>
             </div>
@@ -441,10 +443,9 @@ export function LandingPage() {
           </h2>
           <div className="royal__body scroll-animate">
             <p className="lead">
-              One shared timeline connects the ward round to the kitchen table.
-              Every balance total comes with a reliability readout, so
-              clinicians know how complete the picture is — not just what the
-              number says.
+              A patient logs fluids from home. Their care team sees the same
+              record instantly, and knows exactly which numbers were measured,
+              which were estimated, and which weren't recorded at all.
             </p>
             <div className="royal__cta">
               <button onClick={goToSignIn} className="btn btn-on-royal">
@@ -494,7 +495,7 @@ export function LandingPage() {
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                No account needed to try it — tap Explore demo to see the real
+                No account needed to try it. Tap Explore demo to see the real
                 interface with fictional data.
               </li>
               <li className="flex items-start gap-2">
@@ -510,16 +511,16 @@ export function LandingPage() {
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                You're in control of your data — back up or restore your own
-                records any time, with or without a care team.
+                You control your own data. Back up or restore your records any
+                time, with or without a care team.
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle
                   size={18}
                   className="text-[var(--color-indigo)] shrink-0 mt-0.5"
                 />
-                Every check-in, check-out, and edit is timestamped — a full
-                audit trail for the team.
+                Every check-in, check-out, and edit is timestamped, so the team
+                has a full audit trail.
               </li>
             </ul>
           </article>
@@ -548,7 +549,7 @@ export function LandingPage() {
         <header className="workshop__head">
           <h2 className="scroll-animate">See it before you sign in.</h2>
           <p className="lead scroll-animate">
-            Three real screens from the actual product — not mockups.
+            Three real screens from the actual product. Not mockups.
           </p>
         </header>
 
@@ -610,8 +611,8 @@ export function LandingPage() {
             <div className="product-card__body">
               <h3 className="product-card__title">Epic EHR Integration</h3>
               <p className="body-sm muted max-w-[32ch] mt-1">
-                Pulls real patient data from Epic's public FHIR sandbox —
-                vitals, medications, and encounters, alongside recorded fluids.
+                Pulls real vitals, medications, and encounters from Epic's
+                public FHIR sandbox, alongside recorded fluids.
               </p>
             </div>
           </article>
@@ -630,8 +631,8 @@ export function LandingPage() {
               <span className="colophon__prototype-badge">Prototype</span>
             </div>
             <p className="colophon__brand-desc">
-              Voice-first fluid intake and output tracking. Built to keep care
-              teams in sync, from the ward round to the kitchen table.
+              Voice-first fluid intake and output tracking for patients, carers,
+              and clinical teams.
             </p>
           </div>
 
