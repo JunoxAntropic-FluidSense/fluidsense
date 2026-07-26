@@ -189,14 +189,17 @@ export function OnboardingFlow() {
   // uses for the identical race.
   if (!isProfileLoaded) return null;
 
-  // Patient/carer accounts always get a profile from completeOnboarding —
-  // onboardingCompleted true with zero patients means a previous
-  // account's stale local state (same browser, different login), not a
-  // real "done" state. Let this run again rather than bouncing to "/"
-  // and back here forever (TodayPage redirects here on the same check).
-  // Healthcare accounts don't get a patient profile at all — a workspace
-  // (organisationId) is their equivalent "this is real, not stale" signal,
-  // not patient count, which is always zero for them regardless.
+  // onboardingCompleted alone isn't enough: TodayPage redirects here
+  // whenever a patient-mode account has no active patient (see its own
+  // comment), which is also true for a genuinely broken/incomplete account
+  // (onboardingCompleted true, zero real patients — e.g. a profile that
+  // never got created or never synced). If this guard redirected away on
+  // onboardingCompleted alone, an account like that would bounce straight
+  // back to "/", which bounces straight back here — an infinite loop that
+  // renders as a permanently blank Today page. Only redirect away once
+  // there's real evidence onboarding actually produced something: a
+  // patient profile (patient/carer mode) or a workspace (healthcare mode,
+  // which never gets a patient profile of its own).
   const hasCompletedForMode =
     currentMode === "healthcare" ? hasOrganisation : hasAnyPatient;
   if (onboardingCompleted && hasCompletedForMode) {
